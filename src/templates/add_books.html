@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
+    <script>
+        function checkLengthAndSubmit() {
+            const input = document.getElementById('scanned_code');
+            if (input.value.length === 29) { // add more security to ensure that book being added is a real ticket book. 
+                document.getElementById('scanForm').submit();
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Add Books Page</h1>
+
+    <form method="POST" id="scanForm" class="scan-box">
+        <label for="scanned_code"><strong>Scan Book:</strong></label><br>
+        <input type="text"
+               name="scanned_code"
+               id="scanned_code"
+               placeholder="Scan book or activated ticket..."
+               autofocus
+               required
+               oninput="checkLengthAndSubmit()">
+        <!-- Submit button is hidden since auto-submit is now enabled -->
+        <button type="submit" style="display:none;">Submit</button>
+
+        {% if status_message %}
+        <div class="status-message">{{ status_message }}</div>
+        {% endif %}
+    </form>
+
+    <h2>Books Scanned</h2>
+    <table>
+        <thead>
+            <tr>  
+                <th>Book ID</th>
+                <th>Game Number</th>
+                <th>Ticket Amount</th>
+                <th>At Ticket Number</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for book in {{books}} %}
+            <tr class="complete">
+                <td>{{ book['BookID'] }}</td>
+                <td>{{ book['GameNumber'] }}</td>
+                <td>{{ book['BookAmount'] }}</td>
+                <td>{{ book['IsAtTicketNumber']}}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

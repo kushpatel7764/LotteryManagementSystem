@@ -90,13 +90,6 @@ def is_input_from_scanner(input):
           return True
      else:
           return False
-     
-def get_ticket_num(input):
-     """
-     From scanner input: get ticket number
-     """
-     tick_num = input[10:13]
-     return tick_num
 
 def get_clean_date_string():
     """
@@ -115,4 +108,5 @@ def get_clean_date_string():
     current_datestamp.strftime("%Y-%m-%d")
     return str(current_datestamp)
 
-print(get_clean_date_string())
+
+    
