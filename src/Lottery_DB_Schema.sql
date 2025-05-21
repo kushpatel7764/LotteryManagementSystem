@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS TicketScan (
 CREATE TABLE IF NOT EXISTS Books (
     BookID INTEGER PRIMARY KEY,
     GameNumber INTEGER NOT NULL,
-    Max_ticket_amount INTEGER,
+    BookAmount INTEGER,
+    isAtTicketNumber INTEGER, 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -30,7 +31,7 @@ CREATE TABLE IF NOT EXISTS TicketTimeline (
     TicketPrice INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    PRIMARY KEY (TicketNumber, BookID)
+    PRIMARY KEY (TicketNumber, BookID, updated_at)
 );
 
 CREATE TABLE IF NOT EXISTS DailySaleReport (

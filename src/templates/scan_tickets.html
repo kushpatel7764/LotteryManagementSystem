@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scan Tickets Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
+    <script>
+        function checkLengthAndSubmit() {
+            const input = document.getElementById('scanned_code');
+            if (input.value.length === 29) {
+                document.getElementById('scanForm').submit();
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Scan Tickets Page</h1>
+
+    <form method="POST" id="scanForm" class="scan-box">
+        <label for="scanned_code"><strong>Scan Ticket:</strong></label><br>
+        <input type="text"
+               name="scanned_code"
+               id="scanned_code"
+               placeholder="Scan ticket..."
+               autofocus
+               required
+               oninput="checkLengthAndSubmit()">
+        <!-- Submit button is hidden since auto-submit is now enabled -->
+        <button type="submit" style="display:none;">Submit</button>
+
+        {% if status_message %}
+        <div class="status-message">{{ status_message }}</div>
+        {% endif %}
+    </form>
+
+    <h2>Activated Tickets</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Book ID</th>
+                <th>Total Quantity</th>
+                <th>Sold Quantity</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for ticket in tickets %}
+            {% set complete = ticket['sold_quantity'] >= ticket['total_quantity'] %}
+            <tr class="{{ 'complete' if complete else 'incomplete' }}">
+                <td>{{ ticket['book_id'] }}</td>
+                <td>{{ ticket['total_quantity'] }}</td>
+                <td>{{ ticket['sold_quantity'] }}</td>
+                <td>{{ 'SOLD OUT' if complete else 'In Progress' }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
