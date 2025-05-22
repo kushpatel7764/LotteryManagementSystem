@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS TicketTimeline (
 );
 
 CREATE TABLE IF NOT EXISTS DailySaleReport (
-    SaleDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP PRIMARY KEY,
+    SaleDate DATE DEFAULT CURRENT_DATE PRIMARY KEY,
     InstantTicketSold INTEGER,
     OnlineTicketSold INTEGER,
     InstantTicketCashed INTEGER,
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS DailySaleReport (
 );
 
 CREATE TABLE IF NOT EXISTS SalesLog (
-    SaleDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    SaleDate DATE DEFAULT CURRENT_DATE,
     ActiveBookID VARCHAR(255),
     prev_TicketNum INTEGER,
     current_TicketNum INTEGER,

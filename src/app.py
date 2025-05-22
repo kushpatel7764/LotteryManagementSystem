@@ -21,8 +21,8 @@ def home():
     Database.initialize_database(db_path)
     return render_template('index.html')
 
-@app.route('/add_books', methods=["GET", "POST"])
-def add_books():
+@app.route('/books_managment', methods=["GET", "POST"])
+def books_managment():
     if request.method == 'POST':
         scanned_code = request.form['scanned_code']
         scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
@@ -32,18 +32,18 @@ def add_books():
             "BookAmount": scanned_info.get_book_amount(),
             "isAtTicketNumber": scanned_info.get_ticket_num(),
         }
-        ticket_info = {
-            "TicketNumber": scanned_info.get_ticket_num(),
-            "BookID": scanned_info.get_book_id(),
-            "TicketName" : "N/A",
-            "TicketPrice": scanned_info.get_ticket_price()
-        }
+        # ticket_info = {
+        #     "TicketNumber": scanned_info.get_ticket_num(),
+        #     "BookID": scanned_info.get_book_id(),
+        #     "TicketName" : "N/A",
+        #     "TicketPrice": scanned_info.get_ticket_price()
+        # } 
         Database.insert_book_to_Books_table(database_path=db_path, book_info=book_info)
-        Database.insert_ticket_to_TicketTimeline_table(database_path=db_path, ticket_info=ticket_info)
+        # Database.insert_ticket_to_TicketTimeline_table(database_path=db_path, ticket_info=ticket_info)
     
     books = DatabaseQueries.get_books(db=db_path)
 
-    return render_template('add_books.html', books=books)
+    return render_template('books_managment.html', books=books)
 
 @app.route('/activate_book')
 def activate_book():

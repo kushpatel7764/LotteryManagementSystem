@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add Books</title>
+    <title>Books Managment</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
     <script>
         function checkLengthAndSubmit() {
@@ -14,14 +14,13 @@
     </script>
 </head>
 <body>
-    <h1>Add Books Page</h1>
-
+    <h1>Books Managment</h1>
     <form method="POST" id="scanForm" class="scan-box">
-        <label for="scanned_code"><strong>Scan Book:</strong></label><br>
+        <label for="scanned_code"><strong>Add Book:</strong></label><br>
         <input type="text"
                name="scanned_code"
                id="scanned_code"
-               placeholder="Scan book or activated ticket..."
+               placeholder="Scan book or ticket to add to the system"
                autofocus
                required
                oninput="checkLengthAndSubmit()">
@@ -33,7 +32,24 @@
         {% endif %}
     </form>
 
-    <h2>Books Scanned</h2>
+    <form method="POST" id="scanForm" class="scan-box">
+        <label for="scanned_code"><strong>Activate Book:</strong></label><br>
+        <input type="text"
+               name="scanned_code"
+               id="scanned_code"
+               placeholder="Scan book or ticket to activate it"
+               autofocus
+               required
+               oninput="checkLengthAndSubmit()">
+        <!-- Submit button is hidden since auto-submit is now enabled -->
+        <button type="submit" style="display:none;">Submit</button>
+
+        {% if status_message %}
+        <div class="status-message">{{ status_message }}</div>
+        {% endif %}
+    </form>
+
+    <h2>Books</h2>
     <table>
         <thead>
             <tr>  
