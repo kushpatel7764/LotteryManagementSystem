@@ -17,6 +17,8 @@ def scan_tickets():
 
 @app.route('/')
 def home():
+    # While loading the home page initalize the database. 
+    Database.initialize_database(db_path)
     return render_template('index.html')
 
 @app.route('/add_books', methods=["GET", "POST"])

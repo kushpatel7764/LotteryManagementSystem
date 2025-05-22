@@ -56,14 +56,10 @@ th, td {
 }
 
 th {
-    background-color: #f3f4f6;
-}
-
-tr.incomplete {
-    background-color: #fff9c4; /* light yellow */
+    background-color: rgb(230, 230, 230);
 }
 
 tr.complete {
-    background-color: #c8e6c9; /* light green */
+    background-color: rgb(243, 244, 246); 
     font-weight: bold;
 }

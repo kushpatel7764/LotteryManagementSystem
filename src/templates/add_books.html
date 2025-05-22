@@ -44,12 +44,12 @@
             </tr>
         </thead>
         <tbody>
-        {% for book in {{books}} %}
+        {% for book in books %}
             <tr class="complete">
                 <td>{{ book['BookID'] }}</td>
                 <td>{{ book['GameNumber'] }}</td>
                 <td>{{ book['BookAmount'] }}</td>
-                <td>{{ book['IsAtTicketNumber']}}</td>
+                <td>{{ book['isAtTicketNumber']}}</td>
             </tr>
         {% endfor %}
         </tbody>
