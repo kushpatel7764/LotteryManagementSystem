@@ -13,12 +13,10 @@ class ScannedCodeManagement:
     def get_book_id(self): 
         """
         From "self.scanned_code": 35600949981000515070000000091
-        book id is: 0094998
-        shown book id is: 094998
-        There is a different shown book id because in "input" the number have an zero because the shown book id starts. This 
-        looks important so I am keeping the zero for book id but will not display this extra zero to the user.
+        book id is: 094998
+        The zero between Gamenumber and BookID is being neglected. 
         """
-        book_id = self.scanned_code[3:10]
+        book_id = self.scanned_code[4:10]
         return book_id
         
         

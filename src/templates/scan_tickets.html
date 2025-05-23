@@ -37,20 +37,21 @@
     <table>
         <thead>
             <tr>
+                <th>Game #</th>
                 <th>Book ID</th>
-                <th>Total Quantity</th>
-                <th>Sold Quantity</th>
-                <th>Status</th>
+                <th>Open</th>
+                <th>Close</th>
+                <th>Sold</th>
             </tr>
         </thead>
         <tbody>
-        {% for ticket in tickets %}
-            {% set complete = ticket['sold_quantity'] >= ticket['total_quantity'] %}
-            <tr class="{{ 'complete' if complete else 'incomplete' }}">
-                <td>{{ ticket['book_id'] }}</td>
-                <td>{{ ticket['total_quantity'] }}</td>
-                <td>{{ ticket['sold_quantity'] }}</td>
-                <td>{{ 'SOLD OUT' if complete else 'In Progress' }}</td>
+        {% for book in activated_books %}
+            <tr class="complete">
+                <td>{{ book['ActivationID'] }}</td>
+                <td>{{ book['ActiveBookID'] }}</td>
+                <td>{{ book['0'] }}</td>
+                <td>{{ book['1'] }}</td>
+                <td>{{ book['2'] }}</td>
             </tr>
         {% endfor %}
         </tbody>

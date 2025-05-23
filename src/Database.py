@@ -34,18 +34,17 @@ def add_book(conn, cursor, book_info):
             - isAtTicketNumber
     """
     cursor.execute("""
-        INSERT INTO Books (BookID, GameNumber, BookAmount, isAtTicketNumber)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO Books (BookID, GameNumber, BookAmount)
+        VALUES (?, ?, ?)
     """, (
         book_info["BookID"],
         book_info["GameNumber"],
-        book_info["BookAmount"],
-        book_info["isAtTicketNumber"]
+        book_info["BookAmount"]
     ))
 
     conn.commit()
 
-def insert_book_to_Books_table(database_path, book_info):
+def insert_book_info_to_Books_table(database_path, book_info):
     
     initialize_database(database_path)
     conn = sqlite3.connect(database_path)
@@ -95,3 +94,41 @@ def insert_ticket_to_TicketTimeline_table(database_path, ticket_info):
 
     print("book data successfully inserted!")
     conn.close()
+    
+    
+def add_activate_book_info_to_Activated_Book(conn, cursor, activated_book_info):
+    """
+    Inserts a book into the ActivatedBooks table.
+
+    Parameters:
+        activated_book_info (dict): A dictionary with keys:
+            - ActivationID
+            - ActiveBookID
+            - Is_Sold
+            - isAtTicketNumber
+    """
+    cursor.execute("""
+        INSERT INTO ActivatedBooks (ActivationID, ActiveBookID, Is_Sold, isAtTicketNumber)
+        VALUES (?, ?, ?, ?)
+    """, (
+        activated_book_info["ActivationID"],
+        activated_book_info["ActiveBookID"],
+        activated_book_info["Is_Sold"],
+        activated_book_info["isAtTicketNumber"]
+    ))
+
+    conn.commit()
+    
+def insert_book_to_ActivatedBook_table(database_path, active_book_info):
+    
+    initialize_database(database_path)
+    conn = sqlite3.connect(database_path)
+    cursor = conn.cursor()
+    try:
+        add_activate_book_info_to_Activated_Book(conn, cursor, active_book_info)
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+    
+    print("book activated successfully!")
+    conn.close()
+    
