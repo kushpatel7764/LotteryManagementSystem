@@ -7,7 +7,10 @@
     <script>
         function checkLengthAndSubmit() {
             const input = document.getElementById('scanned_code');
-            if (input.value.length === 29) {
+            
+            const isValid = /^\d{29}$/.test(input.value);
+
+            if (isValid) {
                 document.getElementById('scanForm').submit();
             }
         }

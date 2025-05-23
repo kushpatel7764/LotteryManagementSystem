@@ -8,7 +8,10 @@
         function checkLengthAndSubmitAddBook() {
             const func_route = "/books_managment"
             const input = document.getElementById('add_book_code');
-            if (input.value.length === 29) { // add more security to ensure that book being added is a real ticket book. 
+
+            const isValid = /^\d{29}$/.test(input.value);
+
+            if (isValid) { // add more security to ensure that book being added is a real ticket book. 
                 const form = document.getElementById('AddBookForm');
                 form.action = func_route;
                 form.submit();
@@ -17,7 +20,10 @@
         function checkLengthAndSubmitActivateBook() {
             const func_route = "/activate_book"
             const input = document.getElementById('activate_book_code');
-            if (input.value.length === 29) { // add more security to ensure that book being added is a real ticket book. 
+
+            const isValid = /^\d{29}$/.test(input.value);
+
+            if (isValid) { // add more security to ensure that book being added is a real ticket book. 
                 const form = document.getElementById('ActivateBookForm');
                 form.action = func_route;
                 form.submit();
