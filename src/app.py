@@ -24,14 +24,17 @@ def home():
 
 @app.route('/books_managment', methods=["GET", "POST"])
 def books_managment():
+    status_message_add_book = ""
+    
     if request.method == 'POST':
         scanned_code = request.form['add_book_code']
         add_book_procedure(scanned_code)
+        status_message_add_book = "Book added to the database."
     
     # Books info for the books table to display on screen 
     books = DatabaseQueries.get_books(db=db_path)
 
-    return render_template('books_managment.html', books=books)
+    return render_template('books_managment.html', books=books, status_message_add_book=status_message_add_book)
 
 def add_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
@@ -52,14 +55,17 @@ def add_book_procedure(scanned_code):
 
 @app.route('/activate_book', methods=["GET", "POST"])
 def activate_book():
+    status_message_activate_book = "" # Displays the message on website
+    
     if request.method == 'POST':
         scanned_code = request.form['activate_book_code']
         activate_book_procedure(scanned_code)
+        status_message_activate_book = f"Book ({scanned_code}) has been activated!"
         
     # Books info for the books table to display on screen 
     books = DatabaseQueries.get_books(db=db_path)
 
-    return render_template('books_managment.html', books=books)
+    return render_template('books_managment.html', books=books, status_message_activate_book=status_message_activate_book)
 
 def activate_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
