@@ -59,8 +59,7 @@ def activate_book():
     
     if request.method == 'POST':
         scanned_code = request.form['activate_book_code']
-        activate_book_procedure(scanned_code)
-        status_message_activate_book = f"Book ({scanned_code}) has been activated!"
+        status_message_activate_book = activate_book_procedure(scanned_code)
         
     # Books info for the books table to display on screen 
     books = DatabaseQueries.get_books(db=db_path)
@@ -81,7 +80,9 @@ def activate_book_procedure(scanned_code):
     if DatabaseQueries.get_book(db=db_path, book_id=activate_book_id) and not(DatabaseQueries.get_activated_book(db=db_path, activated_book_id=activate_book_id)):
         # Active the book
         Database.insert_book_to_ActivatedBook_table(database_path=db_path, active_book_info=activate_book_info)
-    
+        return f"Book ({activate_book_id}) has been activated!"
+    else:
+        return f"Error: Book does not already exist in data base or has already been activated!"
     
     
 
