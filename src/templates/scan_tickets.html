@@ -47,9 +47,9 @@
         <tbody>
         {% for book in activated_books %}
             <tr class="complete">
-                <td>{{ book['ActivationID'] }}</td>
+                <td>{{ book['GameNumber'] }}</td>
                 <td>{{ book['ActiveBookID'] }}</td>
-                <td>{{ book['0'] }}</td>
+                <td>{{ book['isAtTicketNumber'] }}</td>
                 <td>{{ book['1'] }}</td>
                 <td>{{ book['2'] }}</td>
             </tr>

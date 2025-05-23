@@ -13,7 +13,7 @@ db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')
 
 @app.route('/scan_tickets.html', methods=["GET", "POST"])
 def scan_tickets():
-    activate_books = DatabaseQueries.get_activated_books(db=db_path)
+    activate_books = DatabaseQueries.get_scan_ticket_page_table(db_path=db_path)
     return render_template('scan_tickets.html', activated_books=activate_books)
 
 @app.route('/')

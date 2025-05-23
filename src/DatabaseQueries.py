@@ -38,11 +38,11 @@ def get_book(db, book_id):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
-    book_id_exist = cursor.fetchone() is not None
+    book = cursor.fetchone() is not None
     conn.close()
     
-    if book_id_exist:
-        return book_id_exist
+    if book:
+        return book
     else:
         return False
     
@@ -57,6 +57,33 @@ def get_activated_book(db, activated_book_id):
         return activated_book_id_exist
     else:
         return False    
-
-
     
+
+
+def get_scan_ticket_page_table(db_path):
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT ActivatedBooks.ActiveBookID, Books.GameNumber, ActivatedBooks.isAtTicketNumber FROM ActivatedBooks Join Books ON ActiveBookID = BookID;"
+        )
+        result_table = cursor.fetchall()
+        result_row_list = []
+        for table in result_table:
+            result_row_list.append(
+                {
+                    "ActiveBookID": table[0],
+                    "GameNumber": table[1],
+                    "isAtTicketNumber": table[2],
+                }
+            )
+        
+        return result_row_list
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+
+    finally:
+        conn.close()
