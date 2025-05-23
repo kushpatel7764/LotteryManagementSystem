@@ -24,7 +24,7 @@ def home():
 @app.route('/books_managment', methods=["GET", "POST"])
 def books_managment():
     if request.method == 'POST':
-        scanned_code = request.form['scanned_code']
+        scanned_code = request.form['add_book_code']
         scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
         book_info = {
             "BookID": scanned_info.get_book_id(),
@@ -41,13 +41,21 @@ def books_managment():
         Database.insert_book_to_Books_table(database_path=db_path, book_info=book_info)
         # Database.insert_ticket_to_TicketTimeline_table(database_path=db_path, ticket_info=ticket_info)
     
+    # Books info for the books table to display on screen 
     books = DatabaseQueries.get_books(db=db_path)
 
     return render_template('books_managment.html', books=books)
 
-@app.route('/activate_book')
+@app.route('/activate_book', methods=["GET", "POST"])
 def activate_book():
-    return "Book activated successfully. <a href='/'>Return Home</a>"
+    if request.method == 'POST':
+        scanned_code = request.form['activate_book_code']
+        scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
+    
+    # Books info for the books table to display on screen 
+    books = DatabaseQueries.get_books(db=db_path)
+
+    return render_template('books_managment.html', books=books)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -5,25 +5,37 @@
     <title>Books Managment</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
     <script>
-        function checkLengthAndSubmit() {
-            const input = document.getElementById('scanned_code');
+        function checkLengthAndSubmitAddBook() {
+            const func_route = "/books_managment"
+            const input = document.getElementById('add_book_code');
             if (input.value.length === 29) { // add more security to ensure that book being added is a real ticket book. 
-                document.getElementById('scanForm').submit();
+                const form = document.getElementById('AddBookForm');
+                form.action = func_route;
+                form.submit();
+            }
+        }
+        function checkLengthAndSubmitActivateBook() {
+            const func_route = "/activate_book"
+            const input = document.getElementById('activate_book_code');
+            if (input.value.length === 29) { // add more security to ensure that book being added is a real ticket book. 
+                const form = document.getElementById('ActivateBookForm');
+                form.action = func_route;
+                form.submit();
             }
         }
     </script>
 </head>
 <body>
     <h1>Books Managment</h1>
-    <form method="POST" id="scanForm" class="scan-box">
-        <label for="scanned_code"><strong>Add Book:</strong></label><br>
+    <form method="POST" id="AddBookForm" class="scan-box">
+        <label for="add_book_code"><strong>Add Book:</strong></label><br>
         <input type="text"
-               name="scanned_code"
-               id="scanned_code"
+               name="add_book_code"
+               id="add_book_code"
                placeholder="Scan book or ticket to add to the system"
                autofocus
                required
-               oninput="checkLengthAndSubmit()">
+               oninput="checkLengthAndSubmitAddBook()">
         <!-- Submit button is hidden since auto-submit is now enabled -->
         <button type="submit" style="display:none;">Submit</button>
 
@@ -32,15 +44,15 @@
         {% endif %}
     </form>
 
-    <form method="POST" id="scanForm" class="scan-box">
-        <label for="scanned_code"><strong>Activate Book:</strong></label><br>
+    <form method="POST" id="ActivateBookForm" class="scan-box">
+        <label for="activate_book_code"><strong>Activate Book:</strong></label><br>
         <input type="text"
-               name="scanned_code"
-               id="scanned_code"
+               name="activate_book_code"
+               id="activate_book_code"
                placeholder="Scan book or ticket to activate it"
                autofocus
                required
-               oninput="checkLengthAndSubmit()">
+               oninput="checkLengthAndSubmitActivateBook()">
         <!-- Submit button is hidden since auto-submit is now enabled -->
         <button type="submit" style="display:none;">Submit</button>
 
