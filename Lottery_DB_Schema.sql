@@ -1,9 +1,14 @@
-CREATE TABLE IF NOT EXISTS TicketScan (
-    ScanID VARCHAR(255) PRIMARY KEY, 
+CREATE TABLE IF NOT EXISTS TicketTimeLine (
+    ScanID VARCHAR(255), 
     BookID VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-    TicketNumber INTEGER
+    TicketNumber INTEGER,
+    TicketName TEXT,
+    TicketPrice INTEGER,
+    created_date DATE DEFAULT CURRENT_DATE,
+    created_time TIME DEFAULT CURRENT_TIME,
+    updated_date DATE DEFAULT CURRENT_DATE,
+    updated_time TIME DEFAULT CURRENT_TIME, 
+    PRIMARY KEY(ScanID, updated_date)
 );
 
 CREATE TABLE IF NOT EXISTS Books (
@@ -19,18 +24,9 @@ CREATE TABLE IF NOT EXISTS ActivatedBooks (
     ActiveBookID VARCHAR(255) NOT NULL,
     Is_Sold BOOLEAN,
     isAtTicketNumber INTEGER,
+    countingTicketNumber INTEGER DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS TicketTimeline (
-    TicketNumber INTEGER,
-    BookID VARCHAR(255),
-    TicketName TEXT,
-    TicketPrice INTEGER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (TicketNumber, BookID, updated_at)
 );
 
 CREATE TABLE IF NOT EXISTS DailySaleReport (

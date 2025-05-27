@@ -6,12 +6,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
     <script>
         function checkLengthAndSubmit() {
+            const func_route = "/scan_tickets"
             const input = document.getElementById('scanned_code');
             
             const isValid = /^\d{29}$/.test(input.value);
 
             if (isValid) {
-                document.getElementById('scanForm').submit();
+                const form = document.getElementById('scanForm');
+                form.action = func_route;
+                form.submit();
             }
         }
     </script>
@@ -53,7 +56,7 @@
                 <td>{{ book['GameNumber'] }}</td>
                 <td>{{ book['ActiveBookID'] }}</td>
                 <td>{{ book['isAtTicketNumber'] }}</td>
-                <td>{{ book['1'] }}</td>
+                <td>{{ book['countingTicketNumber'] }}</td>
                 <td>{{ book['2'] }}</td>
             </tr>
         {% endfor %}

@@ -64,17 +64,19 @@ def add_ticket_to_timeline(conn, cursor, ticket_info):
 
     Parameters:
         ticket_info (dict): A dictionary with keys:
-            - TicketNumber
+            - ScanID
             - BookID
+            - TicketNumber
             - TicketName
             - TicketPrice
     """
     cursor.execute("""
-        INSERT INTO TicketTimeline (TicketNumber, BookID, TicketName, TicketPrice)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO TicketTimeline (ScanID, BookID, TicketNumber, TicketName, TicketPrice)
+        VALUES (?, ?, ?, ?, ?)
     """, (
-        ticket_info["TicketNumber"],
+        ticket_info["ScanID"],
         ticket_info["BookID"],
+        ticket_info["TicketNumber"],
         ticket_info["TicketName"],
         ticket_info["TicketPrice"]
     ))
@@ -92,7 +94,7 @@ def insert_ticket_to_TicketTimeline_table(database_path, ticket_info):
     except sqlite3.Error as e:
         print(f"Database error: {e}")
 
-    print("book data successfully inserted!")
+    print("Ticket data successfully inserted!")
     conn.close()
     
     
@@ -131,4 +133,29 @@ def insert_book_to_ActivatedBook_table(database_path, active_book_info):
     
     print("book activated successfully!")
     conn.close()
+
+def update_counting_ticket_number_for_book_id_query(cursor, conn, book_id, new_ticket_number): 
+    # SQL query to update the countingTicketNumber
+    update_query = '''
+    UPDATE ActivatedBooks
+    SET countingTicketNumber = ?
+    WHERE ActiveBookID = ?;
+    '''
+    # Execute the update query
+    cursor.execute(update_query, (new_ticket_number, book_id))
+
+    # Commit changes and close the connection
+    conn.commit()
     
+def update_counting_ticket_number(database_path, book_id, new_ticket_number):
+    
+    initialize_database(database_path)
+    conn = sqlite3.connect(database_path)
+    cursor = conn.cursor()
+    try:
+        update_counting_ticket_number_for_book_id_query(cursor, conn, book_id, new_ticket_number)
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+    
+    conn.close()
+

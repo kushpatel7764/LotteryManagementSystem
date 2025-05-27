@@ -11,10 +11,31 @@ app = Flask(__name__)
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')
 
-@app.route('/scan_tickets.html', methods=["GET", "POST"])
+@app.route('/scan_tickets', methods=["GET", "POST"])
 def scan_tickets():
+    
     activate_books = DatabaseQueries.get_scan_ticket_page_table(db_path=db_path)
-    return render_template('scan_tickets.html', activated_books=activate_books)
+    
+    if request.method == "POST":
+        all_active_book_ids = DatabaseQueries.get_all_active_book_ids(db=db_path)
+        scanned_code = request.form['scanned_code']
+        scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
+        scanned_book_id = scanned_info.get_book_id()
+        if scanned_book_id in all_active_book_ids:
+            print("Activated Book")
+            ticket_info = {
+                "ScanID": scanned_code,
+                "BookID": scanned_info.get_book_id(),
+                "TicketNumber": scanned_info.get_ticket_num(),
+                "TicketName": "N/A",
+                "TicketPrice": scanned_info.get_ticket_price()
+            }
+            Database.insert_ticket_to_TicketTimeline_table(db_path, ticket_info)
+            Database.update_counting_ticket_number(db_path, ticket_info['BookID'], ticket_info['TicketNumber'])
+        else:
+            print("UnActivated Book")
+    
+    return render_template('scan_tickets.html', activated_books=activate_books, add_to_close_number=None)
 
 @app.route('/')
 def home():
@@ -43,14 +64,7 @@ def add_book_procedure(scanned_code):
         "GameNumber": scanned_info.get_game_num(),
         "BookAmount": scanned_info.get_book_amount()
     }
-    # ticket_info = {
-    #     "TicketNumber": scanned_info.get_ticket_num(),
-    #     "BookID": scanned_info.get_book_id(),
-    #     "TicketName" : "N/A",
-    #     "TicketPrice": scanned_info.get_ticket_price()
-    # } 
     Database.insert_book_info_to_Books_table(database_path=db_path, book_info=book_info)
-    # Database.insert_ticket_to_TicketTimeline_table(database_path=db_path, ticket_info=ticket_info)
     
 
 @app.route('/activate_book', methods=["GET", "POST"])

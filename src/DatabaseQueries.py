@@ -30,7 +30,8 @@ def get_activated_books(db):
             "ActivationID": book[0],
             "ActiveBookID": book[1],
             "Is_Sold": book[2],
-            "isAtTicketNumber": book[3]
+            "isAtTicketNumber": book[3],
+            "countingTicketNumber": book[4]
         })
     return activated_books_list
 
@@ -56,9 +57,18 @@ def get_activated_book(db, activated_book_id):
     if activated_book_id_exist:
         return activated_book_id_exist
     else:
-        return False    
-    
+        return False
 
+def get_all_active_book_ids(db):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+    cursor.execute("SELECT ActiveBookID FROM ActivatedBooks")
+    # Fetch all results
+    active_book_ids = cursor.fetchall()
+    # Optionally, flatten the result if you just want a list of IDs
+    active_book_ids = [row[0] for row in active_book_ids]
+    conn.close()
+    return active_book_ids
 
 def get_scan_ticket_page_table(db_path):
     try:
@@ -66,7 +76,7 @@ def get_scan_ticket_page_table(db_path):
         cursor = conn.cursor()
 
         cursor.execute(
-            "SELECT ActivatedBooks.ActiveBookID, Books.GameNumber, ActivatedBooks.isAtTicketNumber FROM ActivatedBooks Join Books ON ActiveBookID = BookID;"
+            "SELECT ActivatedBooks.ActiveBookID, Books.GameNumber, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber FROM ActivatedBooks Join Books ON ActiveBookID = BookID;"
         )
         result_table = cursor.fetchall()
         result_row_list = []
@@ -76,6 +86,7 @@ def get_scan_ticket_page_table(db_path):
                     "ActiveBookID": table[0],
                     "GameNumber": table[1],
                     "isAtTicketNumber": table[2],
+                    "countingTicketNumber": table[3]
                 }
             )
         
