@@ -58,6 +58,15 @@ def get_activated_book(db, activated_book_id):
         return activated_book_id_exist
     else:
         return False
+    
+def get_activated_book_isAtTicketNumber(db, activated_book_id):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+    cursor.execute("SELECT isAtTicketNumber FROM ActivatedBooks WHERE ActiveBookID = ? LIMIT 1;", (activated_book_id,))
+    activated_book_isAtTicketNumber = cursor.fetchone()
+    conn.close()
+    
+    return activated_book_isAtTicketNumber
 
 def get_all_active_book_ids(db):
     conn = sqlite3.connect(db)
@@ -76,7 +85,7 @@ def get_scan_ticket_page_table(db_path):
         cursor = conn.cursor()
 
         cursor.execute(
-            "SELECT ActivatedBooks.ActiveBookID, Books.GameNumber, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber FROM ActivatedBooks Join Books ON ActiveBookID = BookID;"
+            "SELECT ActivatedBooks.ActiveBookID, Books.GameNumber, ActivatedBooks.Is_Sold, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber FROM ActivatedBooks Join Books ON ActiveBookID = BookID;"
         )
         result_table = cursor.fetchall()
         result_row_list = []
@@ -85,8 +94,9 @@ def get_scan_ticket_page_table(db_path):
                 {
                     "ActiveBookID": table[0],
                     "GameNumber": table[1],
-                    "isAtTicketNumber": table[2],
-                    "countingTicketNumber": table[3]
+                    'Is_Sold': table[2],
+                    "isAtTicketNumber": table[3],
+                    "countingTicketNumber": table[4]
                 }
             )
         

@@ -56,11 +56,50 @@
                 <td>{{ book['GameNumber'] }}</td>
                 <td>{{ book['ActiveBookID'] }}</td>
                 <td>{{ book['isAtTicketNumber'] }}</td>
-                <td>{{ book['countingTicketNumber'] }}</td>
-                <td>{{ book['2'] }}</td>
+                <td>
+                    {% if book['countingTicketNumber'] is not none %}
+                        {{ book['countingTicketNumber'] }}
+                    {% else %}
+                    <!-- if no input for close column then show a button sold out button -->
+                        <form method="POST" action="/book_sold_out">
+                            <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
+                            <button type="submit" id="SoldOutButton">Book Sold Out</button>
+                        </form>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
+                        {{ (book['countingTicketNumber'] - book['isAtTicketNumber']) | abs }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+
+    <h2>Daily Totals</h2>
+    <form method="POST" action="/submit_daily_totals" class="daily-totals-form">
+        <label for="instant_sold">Instant Tickets Sold:</label>
+        <input type="number" name="instant_sold" id="instant_sold" required><br><br>
+
+        <label for="online_sold">Online Tickets Sold:</label>
+        <input type="number" name="online_sold" id="online_sold" required><br><br>
+
+        <label for="instant_cashed">Instant Tickets Cashed:</label>
+        <input type="number" name="instant_cashed" id="instant_cashed" required><br><br>
+
+        <label for="online_cashed">Online Tickets Cashed:</label>
+        <input type="number" name="online_cashed" id="online_cashed" required><br><br>
+
+        <label for="cash_due">Cash Due:</label>
+        <input type="number" name="cash_due" id="cash_due" required><br><br>
+
+        <label for="total_due">Total Due:</label>
+        <input type="number" name="total_due" id="total_due" required><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
 </body>
 </html>

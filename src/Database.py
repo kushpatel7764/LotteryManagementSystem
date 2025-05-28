@@ -158,4 +158,55 @@ def update_counting_ticket_number(database_path, book_id, new_ticket_number):
         print(f"Database error: {e}")
     
     conn.close()
+    
+def book_is_sold(cursor, conn, book_id):
+    cursor.execute("""
+        UPDATE ActivatedBooks
+        SET Is_Sold = True
+        WHERE book_id = ?
+    """, (book_id,))
+    
+    conn.commit()
+    
+def update_is_sold_for_book(database_path, book_id):
+    
+    initialize_database(database_path)
+    conn = sqlite3.connect(database_path)
+    cursor = conn.cursor()
+    try:
+        book_is_sold(cursor, conn, book_id)
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+    
+    conn.close()
+    
+def add_sales_log (cursor, conn, scanned_ticket_info):
+    
+    """
+    ActiveBookID VARCHAR(255),
+    prev_TicketNum INTEGER,
+    current_TicketNum INTEGER,
+    Ticket_Sold_Quantity INTEGER,
+    Ticket_Name TEXT,
+    Ticket_GameNumber VARCHAR(255),
+    """
+    cursor.execute("""
+                   INSERT INTO SalesLog (ActiveBookID, prev_TicketNum, current_TicketNum, Ticket_Sold_Quantity, Ticket_Name, Ticket_GameNumber)
+                   VALUES (?, ?, ?, ?, ?, ?)
+                   """, (scanned_ticket_info["ActiveBookID"], scanned_ticket_info["prev_TicketNum"], scanned_ticket_info["current_TicketNum"], scanned_ticket_info["Ticket_Sold_Quantity"], scanned_ticket_info["Ticket_Name"],
+                        scanned_ticket_info["Ticket_GameNumber"]))
+    
+    conn.commit()
+    
+def insert_sales_log (database_path, scanned_ticket_info):
+    
+    initialize_database(database_path)
+    conn = sqlite3.connect(database_path)
+    cursor = conn.cursor()
+    try:
+        add_sales_log(cursor, conn, scanned_ticket_info)
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+    
+    conn.close()
 

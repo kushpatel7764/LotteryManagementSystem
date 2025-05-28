@@ -32,6 +32,11 @@ button {
     cursor: pointer;
 }
 
+.SoldOutButton{
+    padding: 5px 10px;
+    margin-left: 5px;
+}
+
 button:hover {
     background-color: #4338ca;
 }

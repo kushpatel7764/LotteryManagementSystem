@@ -13,14 +13,19 @@ db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')
 
 @app.route('/scan_tickets', methods=["GET", "POST"])
 def scan_tickets():
-    
+    # Get all the active books
     activate_books = DatabaseQueries.get_scan_ticket_page_table(db_path=db_path)
     
     if request.method == "POST":
+        # Get book ids for all the active books 
         all_active_book_ids = DatabaseQueries.get_all_active_book_ids(db=db_path)
+        
+        # Get relevant information from the scanned code
         scanned_code = request.form['scanned_code']
         scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
         scanned_book_id = scanned_info.get_book_id()
+        
+        # If the book id from scanned code is present in the active books then it is valid.
         if scanned_book_id in all_active_book_ids:
             print("Activated Book")
             ticket_info = {
@@ -30,12 +35,38 @@ def scan_tickets():
                 "TicketName": "N/A",
                 "TicketPrice": scanned_info.get_ticket_price()
             }
+            # Insert this ticket in TicketTimeline
             Database.insert_ticket_to_TicketTimeline_table(db_path, ticket_info)
+            # Add the closing number 
             Database.update_counting_ticket_number(db_path, ticket_info['BookID'], ticket_info['TicketNumber'])
+            # Add a sales log for this scan
+            activate_book_isAtTicketNumber = DatabaseQueries.get_activated_book_isAtTicketNumber(db_path, ticket_info["BookID"])
+            # ---- Calulateing sold (999 will change this)
+            sold = abs(activate_book_isAtTicketNumber[0] - int(ticket_info["TicketNumber"]))
+            scanned_info = {
+                "ActiveBookID": ticket_info['BookID'],
+                "prev_TicketNum": activate_book_isAtTicketNumber[0], # index 4 is the isAtTicketNumber
+                "current_TicketNum": ticket_info["TicketNumber"],
+                "Ticket_Sold_Quantity": sold,
+                "Ticket_Name": "N/A",
+                "Ticket_GameNumber": scanned_info.get_game_num(),
+            }
+            Database.insert_sales_log(db_path, scanned_info)
+            
         else:
             print("UnActivated Book")
     
     return render_template('scan_tickets.html', activated_books=activate_books, add_to_close_number=None)
+
+@app.route("/book_sold_out", methods=["POST"])
+def book_sold_out():
+    book_id = request.form.get("book_id")
+    # Tell Database book is sold out - sets it to be removed from activated tickets
+    Database.update_is_sold_for_book(db_path, book_id)
+    # Update the closing number for book
+    Database.update_counting_ticket_number(db_path, book_id, -1)
+    return redirect(url_for("scan_tickets"))  # or your page name
+
 
 @app.route('/')
 def home():
