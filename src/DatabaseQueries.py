@@ -136,3 +136,33 @@ def get_scan_ticket_page_table(db_path):
 
     finally:
         conn.close()
+        
+def get_all_instant_tickets_sold_quantity(db, Date):
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+
+        query = """
+            SELECT ActiveBookID, Ticket_Sold_Quantity, Books.TicketPrice 
+            FROM SalesLog 
+            JOIN Books ON ActiveBookID = BookID 
+            WHERE SaleDate = ?;
+        """
+        cursor.execute(query, (Date,))
+        result_table = cursor.fetchall()
+        result_row_list = []
+        for table in result_table:
+            result_row_list.append(
+                {
+                    "ActiveBookID": table[0],
+                    "Ticket_Sold_Quantity": table[1],
+                    "TicketPrice": table[2]
+                }
+            )
+        
+        return result_row_list
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()

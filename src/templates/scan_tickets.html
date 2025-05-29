@@ -17,6 +17,24 @@
                 form.submit();
             }
         }
+        // Wait until the entire page content is loaded
+        document.addEventListener("DOMContentLoaded", function () {
+            function calculateCashDue() {
+                const instantSold = parseFloat(document.getElementById("instant_sold").value) || 0;
+                const instantCashed = parseFloat(document.getElementById("instant_cashed").value) || 0;
+                const onlineCashed = parseFloat(document.getElementById("online_cashed").value) || 0;
+                const onlineSold = parseFloat(document.getElementById("online_sold").value) || 0;
+
+                const cashDue = instantSold - (instantCashed + onlineCashed);
+                const totalDue = onlineSold + cashDue;
+
+                document.getElementById("cash_due").value = cashDue.toFixed(2);
+                document.getElementById("total_due").value = totalDue.toFixed(2);
+            }
+
+            document.getElementById("instant_cashed").addEventListener("input", calculateCashDue);
+            document.getElementById("online_cashed").addEventListener("input", calculateCashDue);
+        });
     </script>
 </head>
 <body>
@@ -81,8 +99,8 @@
 
     <h2>Daily Totals</h2>
     <form method="POST" action="/submit_daily_totals" class="daily-totals-form">
-        <label for="instant_sold">Instant Tickets Sold:</label>
-        <input type="number" name="instant_sold" id="instant_sold" required><br><br>
+        <label for="instant_sold">Instant Tickets Sold:</label> $
+        <input name="instant_sold" id="instant_sold" value="{{instant_tickets_sold_total}}" readonly><br><br>
 
         <label for="online_sold">Online Tickets Sold:</label>
         <input type="number" name="online_sold" id="online_sold" required><br><br>
@@ -94,10 +112,13 @@
         <input type="number" name="online_cashed" id="online_cashed" required><br><br>
 
         <label for="cash_due">Cash Due:</label>
-        <input type="number" name="cash_due" id="cash_due" required><br><br>
+        <input name="cash_due" id="cash_due" readonly><br><br>
+
+        <label for="cash_on_hand">Cash On Hand:</label>
+        <input type="number" name="cash_on_hand" id="cash_on_hand" required><br><br>
 
         <label for="total_due">Total Due:</label>
-        <input type="number" name="total_due" id="total_due" required><br><br>
+        <input name="total_due" id="total_due" readonly><br><br>
 
         <button type="submit">Submit</button>
     </form>

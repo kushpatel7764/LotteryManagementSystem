@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS DailySaleReport (
     InstantTicketCashed INTEGER,
     OnlineTicketCashed INTEGER,
     CashDue INTEGER,
+    CashOnHand INTEGER,
     TotalDue INTEGER
 );
 

@@ -4,6 +4,7 @@ from datetime import datetime
 from ScannedCodeInformationManagement import ScannedCodeManagement
 import Database
 import DatabaseQueries
+import datetime
 
 app = Flask(__name__)
 # Issue with redirect from book_sold_out
@@ -38,13 +39,15 @@ def scan_tickets():
             Database.update_counting_ticket_number(db_path, book_id, TicketNumber)
             # Add sales log
             add_sales_log(book_id, TicketNumber, game_number)
-            
         else:
             print("UnActivated Book")
     # Get all the active books basically. In reality, making a table to show to the user using activated bookids.
     activate_books = DatabaseQueries.get_scan_ticket_page_table(db_path=db_path)
     
-    return render_template('scan_tickets.html', activated_books=activate_books)
+    # Instant ticket sold calculation
+    instant_tickets_sold_total = calculate_instant_tickets_sold()
+    
+    return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total)
 
 @app.route("/book_sold_out", methods=["POST", "GET"])
 def book_sold_out():
@@ -98,6 +101,15 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
         "Ticket_GameNumber": game_number
     }
     Database.insert_sales_log(db_path, sale_log_info)
+ 
+def calculate_instant_tickets_sold(Date=datetime.date.today()):
+    instant_tickets_sold_quantanties = DatabaseQueries.get_all_instant_tickets_sold_quantity(db_path, Date)
+    result = 0
+    for ticket_sold in instant_tickets_sold_quantanties:
+        result += (ticket_sold["Ticket_Sold_Quantity"] * ticket_sold["TicketPrice"])
+    
+    return result
+        
 
 @app.route('/')
 def home():
