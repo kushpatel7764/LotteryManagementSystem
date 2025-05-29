@@ -6,16 +6,14 @@ import Database
 import DatabaseQueries
 
 app = Flask(__name__)
-
+# Issue with redirect from book_sold_out
 # Get database path
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')
 
 @app.route('/scan_tickets', methods=["GET", "POST"])
 def scan_tickets():
-    # Get all the active books
-    activate_books = DatabaseQueries.get_scan_ticket_page_table(db_path=db_path)
-    
+
     if request.method == "POST":
         # Get book ids for all the active books 
         all_active_book_ids = DatabaseQueries.get_all_active_book_ids(db=db_path)
@@ -28,45 +26,78 @@ def scan_tickets():
         # If the book id from scanned code is present in the active books then it is valid.
         if scanned_book_id in all_active_book_ids:
             print("Activated Book")
-            ticket_info = {
-                "ScanID": scanned_code,
-                "BookID": scanned_info.get_book_id(),
-                "TicketNumber": scanned_info.get_ticket_num(),
-                "TicketName": "N/A",
-                "TicketPrice": scanned_info.get_ticket_price()
-            }
-            # Insert this ticket in TicketTimeline
-            Database.insert_ticket_to_TicketTimeline_table(db_path, ticket_info)
+            # Insert ticket
+            scanID = scanned_code
+            book_id = scanned_info.get_book_id()
+            TicketNumber = scanned_info.get_ticket_num()
+            TicketName = "N/A"
+            TicketPrice = scanned_info.get_ticket_price()
+            game_number = scanned_info.get_game_num()
+            insert_ticket(scanID, book_id, TicketNumber, TicketName, TicketPrice)
             # Add the closing number 
-            Database.update_counting_ticket_number(db_path, ticket_info['BookID'], ticket_info['TicketNumber'])
-            # Add a sales log for this scan
-            activate_book_isAtTicketNumber = DatabaseQueries.get_activated_book_isAtTicketNumber(db_path, ticket_info["BookID"])
-            # ---- Calulateing sold (999 will change this)
-            sold = abs(activate_book_isAtTicketNumber[0] - int(ticket_info["TicketNumber"]))
-            scanned_info = {
-                "ActiveBookID": ticket_info['BookID'],
-                "prev_TicketNum": activate_book_isAtTicketNumber[0], # index 4 is the isAtTicketNumber
-                "current_TicketNum": ticket_info["TicketNumber"],
-                "Ticket_Sold_Quantity": sold,
-                "Ticket_Name": "N/A",
-                "Ticket_GameNumber": scanned_info.get_game_num(),
-            }
-            Database.insert_sales_log(db_path, scanned_info)
+            Database.update_counting_ticket_number(db_path, book_id, TicketNumber)
+            # Add sales log
+            add_sales_log(book_id, TicketNumber, game_number)
             
         else:
             print("UnActivated Book")
+    # Get all the active books basically. In reality, making a table to show to the user using activated bookids.
+    activate_books = DatabaseQueries.get_scan_ticket_page_table(db_path=db_path)
     
-    return render_template('scan_tickets.html', activated_books=activate_books, add_to_close_number=None)
+    return render_template('scan_tickets.html', activated_books=activate_books)
 
-@app.route("/book_sold_out", methods=["POST"])
+@app.route("/book_sold_out", methods=["POST", "GET"])
 def book_sold_out():
     book_id = request.form.get("book_id")
     # Tell Database book is sold out - sets it to be removed from activated tickets
     Database.update_is_sold_for_book(db_path, book_id)
     # Update the closing number for book
     Database.update_counting_ticket_number(db_path, book_id, -1)
+    # Insert to TicketTimeline
+    book = DatabaseQueries.get_book(db_path, book_id)
+    game_number = book[1]
+    book_amount = book[2]
+    TicketPrice = book[3]
+    TicketNumber = -1
+    TicketName = "N/A"
+    scanID = f"{game_number}{book_id}998{TicketPrice}{book_amount}" # -----TicketNumber 998 in scannID means -1.
+    insert_ticket(scanID, book_id, TicketNumber, TicketName, TicketPrice)
+    # Add a sales log
+    add_sales_log(book_id, TicketNumber, game_number)
     return redirect(url_for("scan_tickets"))  # or your page name
 
+def insert_ticket(scanID, BookID, TicketNumber, TicketName, TicketPrice):
+    ticket_info = {
+        "ScanID": scanID,
+        "BookID": BookID,
+        "TicketNumber": TicketNumber,
+        "TicketName": TicketName,
+        "TicketPrice": TicketPrice
+    }
+    # Insert this ticket in TicketTimeline
+    Database.insert_ticket_to_TicketTimeline_table(db_path, ticket_info)
+    
+
+def add_sales_log(book_id, lastest_ticket_number, game_number):
+    """
+    Args:
+        book_id (STRING)
+        lastest_ticket_number (STRING)
+        game_number (STRING)
+    """
+    # Add a sales log for this scan
+    activate_book_isAtTicketNumber = DatabaseQueries.get_activated_book_isAtTicketNumber(db_path, book_id)
+    # ---- Calulateing sold (999 will change this)
+    sold = abs(activate_book_isAtTicketNumber[0] - int(lastest_ticket_number))
+    sale_log_info = {
+        "ActiveBookID": book_id,
+        "prev_TicketNum": activate_book_isAtTicketNumber[0], # index 4 is the isAtTicketNumber
+        "current_TicketNum": lastest_ticket_number,
+        "Ticket_Sold_Quantity": sold,
+        "Ticket_Name": "N/A",
+        "Ticket_GameNumber": game_number
+    }
+    Database.insert_sales_log(db_path, sale_log_info)
 
 @app.route('/')
 def home():
@@ -93,7 +124,8 @@ def add_book_procedure(scanned_code):
     book_info = {
         "BookID": scanned_info.get_book_id(),
         "GameNumber": scanned_info.get_game_num(),
-        "BookAmount": scanned_info.get_book_amount()
+        "BookAmount": scanned_info.get_book_amount(),
+        "TicketPrice": scanned_info.get_ticket_price()
     }
     Database.insert_book_info_to_Books_table(database_path=db_path, book_info=book_info)
     
@@ -122,7 +154,7 @@ def activate_book_procedure(scanned_code):
     # The book being activated must already be registered in the system. 
     # So check to make sure that the book being instered is prensent in the system and is not already activated. 
     activate_book_id = activate_book_info["ActiveBookID"]
-    if DatabaseQueries.get_book(db=db_path, book_id=activate_book_id) and not(DatabaseQueries.get_activated_book(db=db_path, activated_book_id=activate_book_id)):
+    if DatabaseQueries.is_book(db=db_path, book_id=activate_book_id) and not(DatabaseQueries.is_activated_book(db=db_path, activated_book_id=activate_book_id)):
         # Active the book
         Database.insert_book_to_ActivatedBook_table(database_path=db_path, active_book_info=activate_book_info)
         return f"Book ({activate_book_id}) has been activated!"

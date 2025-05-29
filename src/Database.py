@@ -32,14 +32,16 @@ def add_book(conn, cursor, book_info):
             - GameNumber
             - BookAmount
             - isAtTicketNumber
+            - TicketPrice
     """
     cursor.execute("""
-        INSERT INTO Books (BookID, GameNumber, BookAmount)
-        VALUES (?, ?, ?)
+        INSERT INTO Books (BookID, GameNumber, BookAmount, TicketPrice)
+        VALUES (?, ?, ?, ?)
     """, (
         book_info["BookID"],
         book_info["GameNumber"],
-        book_info["BookAmount"]
+        book_info["BookAmount"],
+        book_info["TicketPrice"]
     ))
 
     conn.commit()
@@ -53,7 +55,7 @@ def insert_book_info_to_Books_table(database_path, book_info):
     try:
         add_book(conn, cursor, book_info)
     except sqlite3.Error as e:
-        print(f"Database error: {e}")
+        print(f"Error adding book to the database: {e}")
 
     print("book data successfully inserted!")
     conn.close()
@@ -92,7 +94,7 @@ def insert_ticket_to_TicketTimeline_table(database_path, ticket_info):
     try:
         add_ticket_to_timeline(conn, cursor, ticket_info)
     except sqlite3.Error as e:
-        print(f"Database error: {e}")
+        print(f"Error inserting ticket to TicketTimeLine: {e}")
 
     print("Ticket data successfully inserted!")
     conn.close()
@@ -129,7 +131,7 @@ def insert_book_to_ActivatedBook_table(database_path, active_book_info):
     try:
         add_activate_book_info_to_Activated_Book(conn, cursor, active_book_info)
     except sqlite3.Error as e:
-        print(f"Database error: {e}")
+        print(f"Error Activating the book: {e}")
     
     print("book activated successfully!")
     conn.close()
@@ -155,7 +157,7 @@ def update_counting_ticket_number(database_path, book_id, new_ticket_number):
     try:
         update_counting_ticket_number_for_book_id_query(cursor, conn, book_id, new_ticket_number)
     except sqlite3.Error as e:
-        print(f"Database error: {e}")
+        print(f"Error updating counting_ticket_number: {e}")
     
     conn.close()
     
@@ -163,7 +165,7 @@ def book_is_sold(cursor, conn, book_id):
     cursor.execute("""
         UPDATE ActivatedBooks
         SET Is_Sold = True
-        WHERE book_id = ?
+        WHERE ActiveBookID = ?
     """, (book_id,))
     
     conn.commit()
@@ -176,7 +178,7 @@ def update_is_sold_for_book(database_path, book_id):
     try:
         book_is_sold(cursor, conn, book_id)
     except sqlite3.Error as e:
-        print(f"Database error: {e}")
+        print(f"Error updating is_sold: {e}")
     
     conn.close()
     
@@ -206,7 +208,7 @@ def insert_sales_log (database_path, scanned_ticket_info):
     try:
         add_sales_log(cursor, conn, scanned_ticket_info)
     except sqlite3.Error as e:
-        print(f"Database error: {e}")
+        print(f"SalesLog error: {e}")
     
     conn.close()
 

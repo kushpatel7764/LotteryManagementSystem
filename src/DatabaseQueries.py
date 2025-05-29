@@ -12,8 +12,9 @@ def get_books(db):
             "BookID": book[0],
             "GameNumber": book[1],
             "BookAmount": book[2],
-            "created_at": book[3],
-            "updated_at": book[4]
+            "TicketPrice": book[3],
+            "created_at": book[4],
+            "updated_at": book[5]
         })
 
     return books_list
@@ -35,7 +36,7 @@ def get_activated_books(db):
         })
     return activated_books_list
 
-def get_book(db, book_id):
+def is_book(db, book_id):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
@@ -47,7 +48,7 @@ def get_book(db, book_id):
     else:
         return False
     
-def get_activated_book(db, activated_book_id):
+def is_activated_book(db, activated_book_id):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM ActivatedBooks WHERE ActiveBookID = ? LIMIT 1;", (activated_book_id,))
@@ -67,6 +68,33 @@ def get_activated_book_isAtTicketNumber(db, activated_book_id):
     conn.close()
     
     return activated_book_isAtTicketNumber
+
+def get_activated_book(db, activated_book_id):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM ActivatedBooks WHERE ActiveBookID = ? LIMIT 1;", (activated_book_id,))
+    activated_book = cursor.fetchone()
+    conn.close()
+    
+    return activated_book
+
+def get_book(db, book_id):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
+    book = cursor.fetchone()
+    conn.close()
+    
+    return book
+
+def get_ticket_with_bookid(db, book_id):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM TicketTimeLine WHERE BookID = ? LIMIT 1;", (book_id,))
+    book = cursor.fetchone()
+    conn.close()
+    
+    return book
 
 def get_all_active_book_ids(db):
     conn = sqlite3.connect(db)
