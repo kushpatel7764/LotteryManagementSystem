@@ -11,10 +11,11 @@ def get_books(db):
         books_list.append({
             "BookID": book[0],
             "GameNumber": book[1],
-            "BookAmount": book[2],
-            "TicketPrice": book[3],
-            "created_at": book[4],
-            "updated_at": book[5]
+            "Is_Sold": book[2],
+            "BookAmount": book[3],
+            "TicketPrice": book[4],
+            "created_at": book[5],
+            "updated_at": book[6]
         })
 
     return books_list
@@ -30,7 +31,6 @@ def get_activated_books(db):
         activated_books_list.append({
             "ActivationID": book[0],
             "ActiveBookID": book[1],
-            "Is_Sold": book[2],
             "isAtTicketNumber": book[3],
             "countingTicketNumber": book[4]
         })
@@ -113,7 +113,7 @@ def get_scan_ticket_page_table(db_path):
         cursor = conn.cursor()
 
         cursor.execute(
-            "SELECT ActivatedBooks.ActiveBookID, Books.GameNumber, ActivatedBooks.Is_Sold, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber FROM ActivatedBooks Join Books ON ActiveBookID = BookID;"
+            "SELECT ActivatedBooks.ActiveBookID, Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber FROM ActivatedBooks Join Books ON ActiveBookID = BookID;"
         )
         result_table = cursor.fetchall()
         result_row_list = []

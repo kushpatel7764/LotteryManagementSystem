@@ -67,6 +67,7 @@ def book_sold_out():
     insert_ticket(scanID, book_id, TicketNumber, TicketName, TicketPrice)
     # Add a sales log
     add_sales_log(book_id, TicketNumber, game_number)
+    
     return redirect(url_for("scan_tickets"))  # or your page name
 
 def insert_ticket(scanID, BookID, TicketNumber, TicketName, TicketPrice):
@@ -109,7 +110,28 @@ def calculate_instant_tickets_sold(Date=datetime.date.today()):
         result += (ticket_sold["Ticket_Sold_Quantity"] * ticket_sold["TicketPrice"])
     
     return result
-        
+
+@app.route("/submit", methods=["GET", "POST"])
+def submit():
+    # Get form values
+    daily_totals = {
+        "instant_sold": request.form.get('instant_sold'),
+        "online_sold": request.form.get('online_sold'),
+        "instant_cashed": request.form.get('instant_cashed'),
+        "online_cashed":request.form.get('online_cashed'),
+        "cash_due": request.form.get('cash_due'),
+        "cash_on_hand": request.form.get('cash_on_hand'),
+        "total_due": request.form.get('total_due')
+    }
+    # Insert the daily_totals in the Daily_Report Database.
+    submit_daily_totals(daily_totals)
+    
+def submit_daily_totals(daily_totals):
+    Database.insert_daily_totals(db_path, daily_totals)
+    return redirect(url_for("submit"))
+
+def unactivate_is_sold_tickets():
+    pass
 
 @app.route('/')
 def home():
@@ -136,6 +158,7 @@ def add_book_procedure(scanned_code):
     book_info = {
         "BookID": scanned_info.get_book_id(),
         "GameNumber": scanned_info.get_game_num(),
+        "Is_Sold": False,
         "BookAmount": scanned_info.get_book_amount(),
         "TicketPrice": scanned_info.get_ticket_price()
     }
@@ -160,7 +183,6 @@ def activate_book_procedure(scanned_code):
     activate_book_info = {
         "ActivationID": scanned_code,
         "ActiveBookID": scanned_info.get_book_id(),
-        "Is_Sold": False,
         "isAtTicketNumber": scanned_info.get_ticket_num()
     }
     # The book being activated must already be registered in the system. 

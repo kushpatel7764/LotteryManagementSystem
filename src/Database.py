@@ -35,11 +35,12 @@ def add_book(conn, cursor, book_info):
             - TicketPrice
     """
     cursor.execute("""
-        INSERT INTO Books (BookID, GameNumber, BookAmount, TicketPrice)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO Books (BookID, GameNumber, Is_Sold, BookAmount, TicketPrice)
+        VALUES (?, ?, ?, ?, ?)
     """, (
         book_info["BookID"],
         book_info["GameNumber"],
+        book_info["Is_Sold"], 
         book_info["BookAmount"],
         book_info["TicketPrice"]
     ))
@@ -112,12 +113,11 @@ def add_activate_book_info_to_Activated_Book(conn, cursor, activated_book_info):
             - isAtTicketNumber
     """
     cursor.execute("""
-        INSERT INTO ActivatedBooks (ActivationID, ActiveBookID, Is_Sold, isAtTicketNumber)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO ActivatedBooks (ActivationID, ActiveBookID, isAtTicketNumber)
+        VALUES (?, ?, ?)
     """, (
         activated_book_info["ActivationID"],
         activated_book_info["ActiveBookID"],
-        activated_book_info["Is_Sold"],
         activated_book_info["isAtTicketNumber"]
     ))
 
@@ -163,9 +163,9 @@ def update_counting_ticket_number(database_path, book_id, new_ticket_number):
     
 def book_is_sold(cursor, conn, book_id):
     cursor.execute("""
-        UPDATE ActivatedBooks
+        UPDATE Books
         SET Is_Sold = True
-        WHERE ActiveBookID = ?
+        WHERE BookID = ?
     """, (book_id,))
     
     conn.commit()
@@ -211,4 +211,37 @@ def insert_sales_log (database_path, scanned_ticket_info):
         print(f"SalesLog error: {e}")
     
     conn.close()
+    
+def add_daily_totals(cursor, conn, daily_totals):
+    cursor.execute('''
+        INSERT INTO daily_totals (
+            instant_sold,
+            online_sold,
+            instant_cashed,
+            online_cashed,
+            cash_due,
+            cash_on_hand,
+            total_due
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        daily_totals['instant_sold'],
+        daily_totals['online_sold'],
+        daily_totals['instant_cashed'],
+        daily_totals['online_cashed'],
+        daily_totals['cash_due'],
+        daily_totals['cash_on_hand'],
+        daily_totals["total_due"],
+    ))
 
+    conn.commit()
+
+def insert_daily_totals(db_path, daily_totals):
+    initialize_database(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        add_daily_totals(cursor, conn, daily_totals)
+    except sqlite3.Error as e:
+         print(f"Daily total insertion error: {e}")
+        
+    conn.close()
