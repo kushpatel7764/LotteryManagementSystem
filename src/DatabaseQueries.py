@@ -167,7 +167,7 @@ def get_all_instant_tickets_sold_quantity(db, Date):
     finally:
         conn.close()
     
-def get_all_sold_books(db):
+def get_all_sold_books(db, Date):
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -178,7 +178,7 @@ def get_all_sold_books(db):
             JOIN Books ON ActiveBookID = BookID 
             WHERE SaleDate = ?;
         """
-        cursor.execute(query)
+        cursor.execute(query, (Date,))
         result_table = cursor.fetchall()
         result_row_list = []
         for table in result_table:
@@ -200,10 +200,10 @@ def get_table_for_invoice(db, Date):
         cursor = conn.cursor()
         
         query = """
-            SELECT SalesLog.TicketName, SalesLog.Ticket_GameNumber, SalesLog.ActiveBookID, Books.TicketPrice, SalesLog.prev_TicketNum, SalesLog.current_TicketNum, SalesLog.Ticket_Sold_Quantity
+            SELECT SalesLog.Ticket_Name, SalesLog.Ticket_GameNumber, SalesLog.ActiveBookID, Books.TicketPrice, SalesLog.prev_TicketNum, SalesLog.current_TicketNum, SalesLog.Ticket_Sold_Quantity
             FROM SalesLog
             Join Books ON ActiveBookID = BookID
-            Where Date = ?;
+            Where SaleDate = ?;
         """
         cursor.execute(query, (Date,))
         result_table = cursor.fetchall()

@@ -114,7 +114,7 @@ def calculate_instant_tickets_sold(Date=datetime.date.today()):
     return result
 
 @app.route("/submit", methods=["GET", "POST"])
-def submit():
+def submit(Date=datetime.date.today()):
     # Get form values
     daily_totals = {
         "instant_sold": request.form.get('instant_sold'),
@@ -129,7 +129,7 @@ def submit():
     # Create a Invoice
     create_daily_invoice()
     # Remove sold out books from ActivatedBooks table
-    sold_out_books = DatabaseQueries.get_all_sold_books(db_path)
+    sold_out_books = DatabaseQueries.get_all_sold_books(db_path, Date)
     for book in sold_out_books:
         Database.deactivate_book(db_path, book["BookID"])
     # Update Database 
