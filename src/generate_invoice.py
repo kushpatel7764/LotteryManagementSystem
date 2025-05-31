@@ -3,7 +3,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from datetime import datetime
 
-def generate_lottery_invoice_pdf(filename, store_info, ticket_list, invoice_number, payment_method, tax=0.0):
+def generate_lottery_invoice_pdf(filename, store_info, invoice_log, invoice_number, payment_method, tax=0.0):
     c = canvas.Canvas(filename, pagesize=LETTER)
     width, height = LETTER
 
@@ -40,15 +40,14 @@ def generate_lottery_invoice_pdf(filename, store_info, ticket_list, invoice_numb
     # Table Rows
     c.setFont("Helvetica", 10)
     subtotal = 0.0
-    for ticket in ticket_list:
-        name, game_no, qty, unit_price = ticket
-        total_price = qty * unit_price
-        subtotal += total_price
-        c.drawString(50, y, name)
-        c.drawString(175, y, str(game_no))
-        c.drawString(245, y, str(qty))
-        c.drawString(310, y, f"${unit_price:.2f}")
-        c.drawString(400, y, f"${total_price:.2f}")
+    for log in invoice_log:
+        c.drawString(50, y, invoice_log["TicketName"])
+        c.drawString(180, y, invoice_log["Ticket_GameNumber"])
+        c.drawString(275, y, invoice_log("ActiveBookID"))
+        c.drawString(345, y, f"${invoice_log["TicketPrice"]:.2f}")
+        c.drawString(400, y, invoice_log["Open"])
+        c.drawString(450, y, invoice_log["Close"])
+        c.drawString(500, y, invoice_log["Sold"])
         y -= 18
 
     # Payment Summary

@@ -5,6 +5,7 @@ from ScannedCodeInformationManagement import ScannedCodeManagement
 import Database
 import DatabaseQueries
 import datetime
+import generate_invoice
 
 app = Flask(__name__)
 # Feature: Mulitple Scans for a day
@@ -139,8 +140,16 @@ def submit():
     
     return redirect(url_for("scan_tickets"))
     
-def create_daily_invoice():
-    pass
+def create_daily_invoice(Date=datetime.date.today(), store_name="Scuttlebutts Liquors", address="407 Main St, Fairhaven, MA 02719", phone="(508) 999-5253", email="N/a", fileName="invoice_lottery.pdf"):
+    invoiceLog = DatabaseQueries.get_table_for_invoice(db_path, Date)
+    store_info = {
+        "Business Name": store_name,
+        "Address": address,
+        "Phone": phone,
+        "Email": email
+    }
+    generate_invoice.generate_lottery_invoice_pdf(fileName, store_info, invoiceLog, invoice_number="INV-2025-0001", payment_method="Cash", tax=0.0)
+    
 
 @app.route('/')
 def home():
