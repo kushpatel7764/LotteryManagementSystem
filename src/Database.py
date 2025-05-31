@@ -214,21 +214,19 @@ def insert_sales_log (database_path, scanned_ticket_info):
     
 def add_daily_totals(cursor, conn, daily_totals):
     cursor.execute('''
-        INSERT INTO daily_totals (
-            instant_sold,
-            online_sold,
-            instant_cashed,
-            online_cashed,
-            cash_due,
-            cash_on_hand,
-            total_due
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO DailySaleReport (
+            InstantTicketSold,
+            OnlineTicketSold,
+            InstantTicketCashed,
+            OnlineTicketCashed,
+            CashOnHand,
+            TotalDue
+        ) VALUES (?, ?, ?, ?, ?, ?)
     ''', (
         daily_totals['instant_sold'],
         daily_totals['online_sold'],
         daily_totals['instant_cashed'],
         daily_totals['online_cashed'],
-        daily_totals['cash_due'],
         daily_totals['cash_on_hand'],
         daily_totals["total_due"],
     ))
@@ -242,6 +240,67 @@ def insert_daily_totals(db_path, daily_totals):
     try:
         add_daily_totals(cursor, conn, daily_totals)
     except sqlite3.Error as e:
-         print(f"Daily total insertion error: {e}")
+        print(f"Daily total insertion error: {e}")
         
+    conn.close()
+    
+def deactivate_book_with_book_id(cursor, conn, book_id):
+    cursor.execute("DELETE FROM ActivatedBooks WHERE ActiveBookID = ?;", (book_id,))
+    conn.commit()
+    
+def deactivate_book(db_path, book_id):
+    initialize_database(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        deactivate_book_with_book_id(cursor, conn, book_id)
+    except sqlite3.Error as e:
+        print(f"Error deactivating book: {e}")
+    
+    conn.close()
+    
+def update_isAtTicketNumber_query(cursor, conn):
+    # Update each row: set isAtTicketNumber = countingTicketNumber
+    cursor.execute('''
+        UPDATE ActivatedBooks
+        SET isAtTicketNumber = countingTicketNumber
+    ''')
+
+    # Commit changes and close connection
+    conn.commit()
+    
+def clear_countingTicketNumber_query(cursor, conn):
+    # Update each row: set isAtTicketNumber = countingTicketNumber
+    cursor.execute('''
+        UPDATE ActivatedBooks
+        SET countingTicketNumber = NULL
+    ''')
+
+    # Commit changes and close connection
+    conn.commit()
+    
+def update_isAtTicketNumber(db_path):
+    # Connect to your database
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    try:
+        update_isAtTicketNumber_query(cursor, conn)
+    except sqlite3.Error as e:
+        conn.rollback()
+        print(f"Error updating isAtTicketNumber: {e}")
+
+    conn.close()
+    
+def clear_countingTicketNumber(db_path):
+    # Connect to your database
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    try:
+        clear_countingTicketNumber_query(cursor, conn)
+    except sqlite3.Error as e:
+        conn.rollback()
+        print(f"Error updating isAtTicketNumber: {e}")
+
     conn.close()

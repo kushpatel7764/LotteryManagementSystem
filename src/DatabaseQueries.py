@@ -166,3 +166,29 @@ def get_all_instant_tickets_sold_quantity(db, Date):
         return None
     finally:
         conn.close()
+    
+def get_all_sold_books(db):
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+        
+        query = """
+            SELECT BookID 
+            FROM Books
+            WHERE Is_Sold = True;
+        """
+        cursor.execute(query)
+        result_table = cursor.fetchall()
+        result_row_list = []
+        for table in result_table:
+            result_row_list.append(
+                {
+                    "BookID": table[0]
+                }
+            )
+        return result_row_list
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()

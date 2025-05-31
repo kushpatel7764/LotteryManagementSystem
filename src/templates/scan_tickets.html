@@ -25,13 +25,11 @@
                 const onlineCashed = parseFloat(document.getElementById("online_cashed").value) || 0;
                 const onlineSold = parseFloat(document.getElementById("online_sold").value) || 0;
 
-                const cashDue = instantSold - (instantCashed + onlineCashed);
-                const totalDue = onlineSold + cashDue;
+                const totalDue = (instantSold + onlineSold) - (instantCashed + onlineCashed);
 
-                document.getElementById("cash_due").value = cashDue.toFixed(2);
                 document.getElementById("total_due").value = totalDue.toFixed(2);
             }
-
+            document.getElementById("online_sold").addEventListener("input", calculateCashDue);
             document.getElementById("instant_cashed").addEventListener("input", calculateCashDue);
             document.getElementById("online_cashed").addEventListener("input", calculateCashDue);
         });
@@ -110,9 +108,6 @@
 
         <label for="online_cashed">Online Tickets Cashed:</label>
         <input type="number" name="online_cashed" id="online_cashed" required><br><br>
-
-        <label for="cash_due">Cash Due:</label>
-        <input name="cash_due" id="cash_due" readonly><br><br>
 
         <label for="cash_on_hand">Cash On Hand:</label>
         <input type="number" name="cash_on_hand" id="cash_on_hand" required><br><br>

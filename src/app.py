@@ -7,7 +7,8 @@ import DatabaseQueries
 import datetime
 
 app = Flask(__name__)
-# Issue with redirect from book_sold_out
+# Feature: Mulitple Scans for a day
+# Bug: Instant Ticket sale not refersing for same day after submitting.
 # Get database path
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')
@@ -45,7 +46,7 @@ def scan_tickets():
     activate_books = DatabaseQueries.get_scan_ticket_page_table(db_path=db_path)
     
     # Instant ticket sold calculation
-    instant_tickets_sold_total = calculate_instant_tickets_sold()
+    instant_tickets_sold_total = calculate_instant_tickets_sold() # Not refresing after submit
     
     return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total)
 
@@ -119,18 +120,26 @@ def submit():
         "online_sold": request.form.get('online_sold'),
         "instant_cashed": request.form.get('instant_cashed'),
         "online_cashed":request.form.get('online_cashed'),
-        "cash_due": request.form.get('cash_due'),
         "cash_on_hand": request.form.get('cash_on_hand'),
         "total_due": request.form.get('total_due')
     }
     # Insert the daily_totals in the Daily_Report Database.
-    submit_daily_totals(daily_totals)
-    
-def submit_daily_totals(daily_totals):
     Database.insert_daily_totals(db_path, daily_totals)
-    return redirect(url_for("submit"))
-
-def unactivate_is_sold_tickets():
+    # Remove sold out books from ActivatedBooks table
+    sold_out_books = DatabaseQueries.get_all_sold_books(db_path)
+    for book in sold_out_books:
+        Database.deactivate_book(db_path, book["BookID"])
+    # Create a Invoice
+    create_daily_invoice()
+    # Update Database 
+    # isAtTicketNumber in ActiviatedBooks needs to be set to current numbers from today's scans.
+    # countingTicketNumber needs to be set to None since nothing is being counted after submit.
+    Database.update_isAtTicketNumber(db_path)
+    Database.clear_countingTicketNumber(db_path)
+    
+    return redirect(url_for("scan_tickets"))
+    
+def create_daily_invoice():
     pass
 
 @app.route('/')
