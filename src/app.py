@@ -125,12 +125,12 @@ def submit():
     }
     # Insert the daily_totals in the Daily_Report Database.
     Database.insert_daily_totals(db_path, daily_totals)
+    # Create a Invoice
+    create_daily_invoice()
     # Remove sold out books from ActivatedBooks table
     sold_out_books = DatabaseQueries.get_all_sold_books(db_path)
     for book in sold_out_books:
         Database.deactivate_book(db_path, book["BookID"])
-    # Create a Invoice
-    create_daily_invoice()
     # Update Database 
     # isAtTicketNumber in ActiviatedBooks needs to be set to current numbers from today's scans.
     # countingTicketNumber needs to be set to None since nothing is being counted after submit.
