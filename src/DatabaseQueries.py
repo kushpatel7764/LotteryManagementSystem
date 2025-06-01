@@ -143,7 +143,7 @@ def get_all_instant_tickets_sold_quantity(db, Date):
         cursor = conn.cursor()
 
         query = """
-            SELECT ActiveBookID, Ticket_Sold_Quantity, Books.TicketPrice 
+            SELECT SalesLog.ActiveBookID, SalesLog.Ticket_Sold_Quantity, Books.TicketPrice 
             FROM SalesLog 
             JOIN Books ON ActiveBookID = BookID 
             WHERE SaleDate = ?;
@@ -176,7 +176,7 @@ def get_all_sold_books(db, Date):
             SELECT ActiveBookID, Ticket_Sold_Quantity, Books.TicketPrice 
             FROM SalesLog 
             JOIN Books ON ActiveBookID = BookID 
-            WHERE SaleDate = ?;
+            WHERE SaleDate = ? and Is_Sold = True;
         """
         cursor.execute(query, (Date,))
         result_table = cursor.fetchall()

@@ -47,7 +47,7 @@ def scan_tickets():
     activate_books = DatabaseQueries.get_scan_ticket_page_table(db_path=db_path)
     
     # Instant ticket sold calculation
-    instant_tickets_sold_total = calculate_instant_tickets_sold() # Not refresing after submit
+    instant_tickets_sold_total = calculate_instant_tickets_sold() 
     
     return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total)
 
