@@ -226,3 +226,31 @@ def get_table_for_invoice(db, Date):
         return None
     finally:
         conn.close()
+        
+def get_daily_report(db, Date):
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+        
+        query = """
+            SELECT *
+            FROM DailySaleReport
+            Where SaleDate = ?;
+        """
+        cursor.execute(query, (Date,))
+        result_table = cursor.fetchone()
+        result_row = {
+            "InstantTicketSold": result_table[1],
+            "OnlineTicketSold": result_table[2],
+            "InstantTicketCashed": result_table[3],
+            "OnlineTicketCashed": result_table[4],
+            "CashOnHand": result_table[5],
+            "TotalDue": result_table[6]
+        }
+            
+        return result_row
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()

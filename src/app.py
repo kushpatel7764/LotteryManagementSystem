@@ -148,7 +148,9 @@ def create_daily_invoice(Date=datetime.date.today(), store_name="Scuttlebutts Li
         "Phone": phone,
         "Email": email
     }
-    generate_invoice.generate_lottery_invoice_pdf(fileName, store_info, invoiceLog, invoice_number="INV-2025-0001", payment_method="Cash", tax=0.0)
+    daily_report = DatabaseQueries.get_daily_report(db_path, Date)
+    invoice_number="Invoice001"
+    generate_invoice.generate_lottery_invoice_pdf(fileName, store_info, invoiceLog, invoice_number, daily_report)
     
 
 @app.route('/')

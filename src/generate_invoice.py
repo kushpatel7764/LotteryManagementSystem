@@ -3,7 +3,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from datetime import datetime
 
-def generate_lottery_invoice_pdf(filename, store_info, invoice_log, invoice_number, payment_method, tax=0.0):
+def generate_lottery_invoice_pdf(filename, store_info, invoice_log, invoice_number, daily_report):
     c = canvas.Canvas(filename, pagesize=LETTER)
     width, height = LETTER
 
@@ -50,28 +50,26 @@ def generate_lottery_invoice_pdf(filename, store_info, invoice_log, invoice_numb
         c.drawString(500, y, str(log["Sold"]))
         y -= 18
 
-    # Payment Summary
-    tax_amount = subtotal * tax
-    total = subtotal + tax_amount
+    # daily Summary
     y -= 20
     c.setFont("Helvetica-Bold", 10)
     c.drawString(50, y, "Instant Sold:")
-    c.drawString(140, y, f"${subtotal:.2f}")
+    c.drawString(140, y, str(daily_report["InstantTicketSold"]))
     y -= 15
     c.drawString(50, y, "Instant Cashed:")
-    c.drawString(140, y, f"${tax_amount:.2f}")
+    c.drawString(140, y, str(daily_report["InstantTicketCashed"]))
     y -= 15
     c.drawString(50, y, "Online Sold:")
-    c.drawString(140, y, f"${total:.2f}")
+    c.drawString(140, y, str(daily_report["OnlineTicketSold"]))
     y -= 15
     c.drawString(50, y, "Online Cashed:")
-    c.drawString(140, y, payment_method)
+    c.drawString(140, y, str(daily_report["OnlineTicketCashed"]))
     y -= 15
     c.drawString(50, y, "Cash On Hand:")
-    c.drawString(140, y, payment_method)
+    c.drawString(140, y, str(daily_report["CashOnHand"]))
     y -= 15
     c.drawString(50, y, "Total Due:")
-    c.drawString(140, y, payment_method)
+    c.drawString(140, y, str(daily_report["TotalDue"]))
 
     # Footer
     y -= 40

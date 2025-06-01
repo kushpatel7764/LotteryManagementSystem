@@ -97,8 +97,8 @@
 
     <h2>Daily Totals</h2>
     <form method="POST" action="/submit" class="daily-totals-form">
-        <label for="instant_sold">Instant Tickets Sold:</label>
-        <input name="instant_sold" id="instant_sold" value="${{instant_tickets_sold_total}}" readonly><br><br>
+        <label for="instant_sold">Instant Tickets Sold:</label> $
+        <input name="instant_sold" id="instant_sold" value="{{instant_tickets_sold_total}}" readonly><br><br>
 
         <label for="online_sold">Online Tickets Sold:</label>
         <input type="number" name="online_sold" id="online_sold" required><br><br>
