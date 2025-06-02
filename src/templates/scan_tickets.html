@@ -36,8 +36,13 @@
     </script>
 </head>
 <body>
-    
-    <h1>Scan Tickets Page</h1>
+    <div class="header-bar">
+        <h1>Scan Tickets Page</h1>
+        <div id="Navigation_Buttons">
+            <button onclick="window.location.href='/books_managment'">Books Management</button>
+            <button onclick="window.location.href='/'">Home</button>
+        </div>
+    </div>
 
     <form method="POST" id="scanForm" class="scan-box">
         <label for="scanned_code"><strong>Scan Ticket:</strong></label><br>
