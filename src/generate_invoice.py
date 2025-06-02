@@ -39,7 +39,6 @@ def generate_lottery_invoice_pdf(filename, store_info, invoice_log, invoice_numb
 
     # Table Rows
     c.setFont("Helvetica", 10)
-    subtotal = 0.0
     for log in invoice_log:
         c.drawString(50, y, log["TicketName"])
         c.drawString(180, y, log["Ticket_GameNumber"])
@@ -74,8 +73,6 @@ def generate_lottery_invoice_pdf(filename, store_info, invoice_log, invoice_numb
     # Footer
     y -= 40
     c.setFont("Helvetica-Oblique", 9)
-    c.drawString(50, y, "Note: All lottery ticket sales are final. No refunds or exchanges.")
-    y -= 15
-    c.drawString(50, y, "Thank you for your purchase and good luck! 🍀")
+    c.drawString(50, y, "Note: Thank you for your business! Please contact us for any questions or concerns.")
 
     c.save()
