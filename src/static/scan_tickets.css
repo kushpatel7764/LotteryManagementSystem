@@ -1,3 +1,15 @@
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+#Navigation_Buttons {
+    display: flex;
+    gap: 10px;
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f9fafb;

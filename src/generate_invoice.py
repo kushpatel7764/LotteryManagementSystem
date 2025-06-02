@@ -43,7 +43,7 @@ def generate_lottery_invoice_pdf(filename, store_info, invoice_log, invoice_numb
         c.drawString(50, y, log["TicketName"])
         c.drawString(180, y, log["Ticket_GameNumber"])
         c.drawString(275, y, log["ActiveBookID"])
-        c.drawString(345, y, f"${log["TicketPrice"]:.2f}")
+        c.drawString(345, y, f"${log['TicketPrice']:.2f}")
         c.drawString(400, y, str(log["Open"]))
         c.drawString(450, y, str(log["Close"]))
         c.drawString(500, y, str(log["Sold"]))
@@ -53,22 +53,22 @@ def generate_lottery_invoice_pdf(filename, store_info, invoice_log, invoice_numb
     y -= 20
     c.setFont("Helvetica-Bold", 10)
     c.drawString(50, y, "Instant Sold:")
-    c.drawString(140, y, f"${str(daily_report["InstantTicketSold"])}")
+    c.drawString(140, y, f"${str(daily_report['InstantTicketSold'])}")
     y -= 15
     c.drawString(50, y, "Instant Cashed:")
-    c.drawString(140, y, f"${str(daily_report["InstantTicketCashed"])}")
+    c.drawString(140, y, f"${str(daily_report['InstantTicketCashed'])}")
     y -= 15
     c.drawString(50, y, "Online Sold:")
-    c.drawString(140, y, f"${str(daily_report["OnlineTicketSold"])}")
+    c.drawString(140, y, f"${str(daily_report['OnlineTicketSold'])}")
     y -= 15
     c.drawString(50, y, "Online Cashed:")
-    c.drawString(140, y, f"${str(daily_report["OnlineTicketCashed"])}")
+    c.drawString(140, y, f"${str(daily_report['OnlineTicketCashed'])}")
     y -= 15
     c.drawString(50, y, "Cash On Hand:")
-    c.drawString(140, y, f"${str(daily_report["CashOnHand"])}")
+    c.drawString(140, y, f"${str(daily_report['CashOnHand'])}")
     y -= 15
     c.drawString(50, y, "Total Due:")
-    c.drawString(140, y, f"${str(daily_report["TotalDue"])}")
+    c.drawString(140, y, f"${str(daily_report['TotalDue'])}")
 
     # Footer
     y -= 40
