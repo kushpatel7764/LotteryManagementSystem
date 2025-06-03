@@ -8,8 +8,12 @@ import datetime
 import generate_invoice
 
 app = Flask(__name__)
+# Feature: Name lookup table
 # Feature: Mulitple Scans for a day
-# Bug: Instant Ticket sale not refersing for same day after submitting.
+# Feature: Edit lottery, recreate invoice report?
+# Feature: Error UI for user
+# Issue UTC time database
+
 # Get database path
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')
