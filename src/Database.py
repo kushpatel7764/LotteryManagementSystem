@@ -304,3 +304,25 @@ def clear_countingTicketNumber(db_path):
         print(f"Error updating isAtTicketNumber: {e}")
 
     conn.close()
+    
+def add_Ticket_name(cursor, conn, ticket_name, ticket_gamenumber):
+    cursor.execute("""
+        INSERT INTO TicketNameLookup (GameNumber, TicketName)
+        VALUES (?, ?)
+    """, (
+        ticket_gamenumber,
+        ticket_name
+    ))
+
+    conn.commit()
+    
+def insert_Ticket_name(db_path, ticket_name, ticket_gamenumber):
+    initialize_database(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        add_Ticket_name(cursor, conn, ticket_name, ticket_gamenumber)
+    except sqlite3.Error as e:
+        print(f"Ticket Name insertion error: {e}")
+        
+    conn.close()

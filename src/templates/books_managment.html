@@ -76,7 +76,8 @@
     <h2>Books</h2>
     <table>
         <thead>
-            <tr>  
+            <tr>
+                <th>Game Name</th>  
                 <th>Book ID</th>
                 <th>Game Number</th>
                 <th>Ticket Amount</th>
@@ -86,6 +87,7 @@
         <tbody>
         {% for book in books %}
             <tr class="complete">
+                <td>{{ book['TicketName'] }}</td>
                 <td>{{ book['BookID'] }}</td>
                 <td>{{ book['GameNumber'] }}</td>
                 <td>{{ book['BookAmount'] }}</td>

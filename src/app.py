@@ -6,6 +6,7 @@ import Database
 import DatabaseQueries
 import datetime
 import generate_invoice
+import game_number_lookup_table
 
 app = Flask(__name__)
 # Feature: Name lookup table
@@ -37,9 +38,9 @@ def scan_tickets():
             scanID = scanned_code
             book_id = scanned_info.get_book_id()
             TicketNumber = scanned_info.get_ticket_num()
-            TicketName = "N/A"
             TicketPrice = scanned_info.get_ticket_price()
             game_number = scanned_info.get_game_num()
+            TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
             insert_ticket(scanID, book_id, TicketNumber, TicketName, TicketPrice)
             # Add the closing number 
             Database.update_counting_ticket_number(db_path, book_id, TicketNumber)
@@ -68,7 +69,7 @@ def book_sold_out():
     book_amount = book[2]
     TicketPrice = book[3]
     TicketNumber = -1
-    TicketName = "N/A"
+    TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
     scanID = f"{game_number}{book_id}998{TicketPrice}{book_amount}" # -----TicketNumber 998 in scannID means -1.
     insert_ticket(scanID, book_id, TicketNumber, TicketName, TicketPrice)
     # Add a sales log
@@ -104,7 +105,7 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
         "prev_TicketNum": activate_book_isAtTicketNumber[0], # index 4 is the isAtTicketNumber
         "current_TicketNum": lastest_ticket_number,
         "Ticket_Sold_Quantity": sold,
-        "Ticket_Name": "N/A",
+        "Ticket_Name": DatabaseQueries.get_ticket_name(db_path, game_number),
         "Ticket_GameNumber": game_number
     }
     Database.insert_sales_log(db_path, sale_log_info)
@@ -161,6 +162,7 @@ def create_daily_invoice(Date=datetime.date.today(), store_name="Scuttlebutts Li
 def home():
     # While loading the home page initalize the database. 
     Database.initialize_database(db_path)
+    game_number_lookup_table.insert_new_ticket_name_to_lookup_table(db_path)
     return render_template('index.html')
 
 @app.route('/books_managment', methods=["GET", "POST"])
@@ -174,14 +176,19 @@ def books_managment():
     
     # Books info for the books table to display on screen 
     books = DatabaseQueries.get_books(db=db_path)
+    
+    for book in books:
+        game_number = book["GameNumber"]
+        book["TicketName"] = DatabaseQueries.get_ticket_name(db_path, game_number)
 
     return render_template('books_managment.html', books=books, status_message_add_book=status_message_add_book)
 
 def add_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
+    game_number = scanned_info.get_game_num()
     book_info = {
         "BookID": scanned_info.get_book_id(),
-        "GameNumber": scanned_info.get_game_num(),
+        "GameNumber": game_number,
         "Is_Sold": False,
         "BookAmount": scanned_info.get_book_amount(),
         "TicketPrice": scanned_info.get_ticket_price()
@@ -199,6 +206,10 @@ def activate_book():
         
     # Books info for the books table to display on screen 
     books = DatabaseQueries.get_books(db=db_path)
+    
+    for book in books:
+        game_number = book["GameNumber"]
+        book["TicketName"] = DatabaseQueries.get_ticket_name(db_path, game_number)
 
     return render_template('books_managment.html', books=books, status_message_activate_book=status_message_activate_book)
 

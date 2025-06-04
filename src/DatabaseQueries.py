@@ -113,18 +113,24 @@ def get_scan_ticket_page_table(db_path):
         cursor = conn.cursor()
 
         cursor.execute(
-            "SELECT ActivatedBooks.ActiveBookID, Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber FROM ActivatedBooks Join Books ON ActiveBookID = BookID;"
+            """
+            SELECT TicketNameLookup.TicketName, ActivatedBooks.ActiveBookID, Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber 
+            FROM ActivatedBooks 
+            Join Books ON ActiveBookID = BookID
+            Left Join TicketNameLookup ON Books.GameNumber = TicketNameLookup.GameNumber;
+            """
         )
         result_table = cursor.fetchall()
         result_row_list = []
         for table in result_table:
             result_row_list.append(
                 {
-                    "ActiveBookID": table[0],
-                    "GameNumber": table[1],
-                    'Is_Sold': table[2],
-                    "isAtTicketNumber": table[3],
-                    "countingTicketNumber": table[4]
+                    "TicketName": table[0],
+                    "ActiveBookID": table[1],
+                    "GameNumber": table[2],
+                    'Is_Sold': table[3],
+                    "isAtTicketNumber": table[4],
+                    "countingTicketNumber": table[5]
                 }
             )
         
@@ -203,7 +209,8 @@ def get_table_for_invoice(db, Date):
             SELECT SalesLog.Ticket_Name, SalesLog.Ticket_GameNumber, SalesLog.ActiveBookID, Books.TicketPrice, SalesLog.prev_TicketNum, SalesLog.current_TicketNum, SalesLog.Ticket_Sold_Quantity
             FROM SalesLog
             Join Books ON ActiveBookID = BookID
-            Where SaleDate = ?;
+            Where SaleDate = ?
+            ORDER BY Books.TicketPrice DESC;
         """
         cursor.execute(query, (Date,))
         result_table = cursor.fetchall()
@@ -249,6 +256,46 @@ def get_daily_report(db, Date):
         }
             
         return result_row
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
+
+def get_gm_from_lookup(db):
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+        
+        query = """
+            SELECT GameNumber
+            FROM TicketNameLookup;
+        """
+        cursor.execute(query)
+        result_table = cursor.fetchall()
+        return result_table
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
+
+def get_ticket_name(db, game_number):
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+        
+        query = """
+            SELECT TicketName
+            FROM TicketNameLookup
+            Where GameNumber = ?;
+        """
+        cursor.execute(query, (game_number,))
+        result = cursor.fetchone()
+        if result is not None:
+            return result[0]
+        else:
+            return "N/A"
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return None

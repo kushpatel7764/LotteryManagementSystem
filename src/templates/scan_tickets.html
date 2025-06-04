@@ -65,6 +65,7 @@
     <table>
         <thead>
             <tr>
+                <th>Game Name</th>
                 <th>Game #</th>
                 <th>Book ID</th>
                 <th>Open</th>
@@ -75,6 +76,7 @@
         <tbody>
         {% for book in activated_books %}
             <tr class="complete">
+                <td>{{ book["TicketName"] }}
                 <td>{{ book['GameNumber'] }}</td>
                 <td>{{ book['ActiveBookID'] }}</td>
                 <td>{{ book['isAtTicketNumber'] }}</td>

@@ -27,27 +27,30 @@ def generate_lottery_invoice_pdf(filename, store_info, invoice_log, invoice_numb
     y -= 30
     c.setFont("Helvetica-Bold", 10)
     c.drawString(50, y, "Ticket Name")
-    c.drawString(180, y, "Game No.")
-    c.drawString(275, y, "Book ID")
-    c.drawString(345, y, "Price")
-    c.drawString(400, y, "Open")
-    c.drawString(450, y, "Close")
-    c.drawString(500, y, "Sold")
+    c.drawString(225, y, "Game No.")
+    c.drawString(295, y, "Book ID")
+    c.drawString(365, y, "Price")
+    c.drawString(420, y, "Open")
+    c.drawString(470, y, "Close")
+    c.drawString(520, y, "Sold")
     y -= 10
     c.line(50, y, 550, y)
     y -= 15
 
     # Table Rows
     c.setFont("Helvetica", 10)
-    for log in invoice_log:
-        c.drawString(50, y, log["TicketName"])
-        c.drawString(180, y, log["Ticket_GameNumber"])
-        c.drawString(275, y, log["ActiveBookID"])
-        c.drawString(345, y, f"${log['TicketPrice']:.2f}")
-        c.drawString(400, y, str(log["Open"]))
-        c.drawString(450, y, str(log["Close"]))
-        c.drawString(500, y, str(log["Sold"]))
-        y -= 18
+    if invoice_log is not None:
+        for log in invoice_log:
+            c.drawString(50, y, log["TicketName"])
+            c.drawString(225, y, log["Ticket_GameNumber"])
+            c.drawString(295, y, log["ActiveBookID"])
+            c.drawString(365, y, f"${log['TicketPrice']:.2f}")
+            c.drawString(420, y, str(log["Open"]))
+            c.drawString(470, y, str(log["Close"]))
+            c.drawString(520, y, str(log["Sold"]))
+            y -= 18
+    else:
+        print("Error: Invoice log is None")
 
     # daily Summary
     y -= 20

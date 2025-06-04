@@ -50,3 +50,8 @@ CREATE TABLE IF NOT EXISTS SalesLog (
     Ticket_GameNumber VARCHAR(255),
     PRIMARY KEY(SaleDate, ActiveBookID)
 );
+
+CREATE TABLE IF NOT EXISTS TicketNameLookup (
+    GameNumber VARCHAR(255) PRIMARY KEY,
+    TicketName VARCHAR(255) DEFAULT "N/A" 
+);
