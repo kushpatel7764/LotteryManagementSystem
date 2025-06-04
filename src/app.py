@@ -9,8 +9,7 @@ import generate_invoice
 import game_number_lookup_table
 
 app = Flask(__name__)
-# Feature: Name lookup table
-# Feature: Mulitple Scans for a day
+# Feature: Mulitple Scans for a day - Checkout TicketTimeLine: same day same scan (do i update time?), DailyReport: Add ID, SalesLog: Add ID Idea: Scan Sessions (may Daily and Sales new IDs can act as session)
 # Feature: Edit lottery, recreate invoice report?
 # Feature: Error UI for user
 # Issue UTC time database

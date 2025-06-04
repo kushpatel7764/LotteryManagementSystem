@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import datetime
 
 # Connect to database
 def setup_database_schema_with_sql_file(cursor, conn, sql_filename):
@@ -85,6 +86,14 @@ def add_ticket_to_timeline(conn, cursor, ticket_info):
     ))
 
     conn.commit()
+
+def set_updated_time_in_timeline(conn, cursor, scanID, updated_time):
+    cursor.execute("""
+                UPDATE TicketTimeline
+                SET updated_time = ?
+                WHERE scanID = ?;
+                   """, (updated_time, scanID))
+    conn.commit()
     
 def insert_ticket_to_TicketTimeline_table(database_path, ticket_info):
     
@@ -94,6 +103,11 @@ def insert_ticket_to_TicketTimeline_table(database_path, ticket_info):
 
     try:
         add_ticket_to_timeline(conn, cursor, ticket_info)
+    except sqlite3.IntegrityError: 
+        if "UNIQUE constraint failed" in str(e):
+            set_updated_time_in_timeline(conn, cursor, ticket_info["ScanID"], datetime.datetime.now().time().strftime("%H:%M:%S"))
+        else:
+            print("Integrity error:", e)
     except sqlite3.Error as e:
         print(f"Error inserting ticket to TicketTimeLine: {e}")
 
