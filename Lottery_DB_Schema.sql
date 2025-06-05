@@ -42,12 +42,12 @@ CREATE TABLE IF NOT EXISTS SaleReport (
     OnlineTicketSold INTEGER NOT NULL DEFAULT 0,
     InstantTicketCashed INTEGER NOT NULL DEFAULT 0,
     OnlineTicketCashed INTEGER NOT NULL DEFAULT 0,
-    CashOnHand INTEGER NOT NULL DEFAULT 0,,
+    CashOnHand INTEGER NOT NULL DEFAULT 0,
     TotalDue INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS SalesLog (
-    LogID Text PRIMARY KEY,
+    ReportID Text NOT NULL,
     LogDate DATE DEFAULT CURRENT_DATE,
     LogTime TIME DEFAULT CURRENT_TIME,
     ActiveBookID Text NOT NULL,
@@ -56,7 +56,8 @@ CREATE TABLE IF NOT EXISTS SalesLog (
     Ticket_Sold_Quantity INTEGER NOT NULL,
     Ticket_Name TEXT,
     Ticket_GameNumber TEXT,
-    FOREIGN KEY (ActiveBookID) REFERENCES ActivatedBooks(ActiveBookID)
+    PRIMARY KEY (ReportID, LogDate)
+    FOREIGN KEY (ReportID) REFERENCES SaleReport(ReportID)
 );
 
 -- Lookup table for ticket names
