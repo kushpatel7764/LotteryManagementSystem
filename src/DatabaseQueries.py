@@ -241,7 +241,7 @@ def get_daily_report(db, Date):
         
         query = """
             SELECT *
-            FROM DailySaleReport
+            FROM SaleReport
             Where SaleDate = ?;
         """
         cursor.execute(query, (Date,))
