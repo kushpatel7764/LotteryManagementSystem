@@ -228,14 +228,15 @@ def insert_sales_log (database_path, scanned_ticket_info):
     
 def add_daily_totals(cursor, conn, daily_totals):
     cursor.execute('''
-        INSERT INTO DailySaleReport (
+        INSERT INTO SaleReport (
+            ReportID,
             InstantTicketSold,
             OnlineTicketSold,
             InstantTicketCashed,
             OnlineTicketCashed,
             CashOnHand,
             TotalDue
-        ) VALUES (?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
     ''', (
         daily_totals['instant_sold'],
         daily_totals['online_sold'],
@@ -258,40 +259,33 @@ def insert_daily_totals(db_path, daily_totals):
         
     conn.close()
     
-def deactivate_book_with_book_id(cursor, conn, book_id):
-    cursor.execute("DELETE FROM ActivatedBooks WHERE ActiveBookID = ?;", (book_id,))
-    conn.commit()
+def update_pending_sales_log_report_id(db_path, report_id):
+    initialize_database(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        UPDATE SalesLog
+        SET ReportID = ?
+        WHERE ReportID = 'Pending';
+        """, (report_id,))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error updating pending sales log: {e}")
+        
+    conn.close()
     
 def deactivate_book(db_path, book_id):
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     try:
-        deactivate_book_with_book_id(cursor, conn, book_id)
+        cursor.execute("DELETE FROM ActivatedBooks WHERE ActiveBookID = ?;", (book_id,))
+        conn.commit()
     except sqlite3.Error as e:
         print(f"Error deactivating book: {e}")
     
     conn.close()
-    
-def update_isAtTicketNumber_query(cursor, conn):
-    # Update each row: set isAtTicketNumber = countingTicketNumber
-    cursor.execute('''
-        UPDATE ActivatedBooks
-        SET isAtTicketNumber = countingTicketNumber
-    ''')
-
-    # Commit changes and close connection
-    conn.commit()
-    
-def clear_countingTicketNumber_query(cursor, conn):
-    # Update each row: set isAtTicketNumber = countingTicketNumber
-    cursor.execute('''
-        UPDATE ActivatedBooks
-        SET countingTicketNumber = NULL
-    ''')
-
-    # Commit changes and close connection
-    conn.commit()
     
 def update_isAtTicketNumber(db_path):
     # Connect to your database
@@ -299,7 +293,14 @@ def update_isAtTicketNumber(db_path):
     cursor = conn.cursor()
 
     try:
-        update_isAtTicketNumber_query(cursor, conn)
+        # Update each row: set isAtTicketNumber = countingTicketNumber
+        cursor.execute('''
+            UPDATE ActivatedBooks
+            SET isAtTicketNumber = countingTicketNumber
+        ''')
+
+        # Commit changes and close connection
+        conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
         print(f"Error updating isAtTicketNumber: {e}")
@@ -312,30 +313,31 @@ def clear_countingTicketNumber(db_path):
     cursor = conn.cursor()
 
     try:
-        clear_countingTicketNumber_query(cursor, conn)
+        # Update each row: set isAtTicketNumber = countingTicketNumber
+        cursor.execute('''
+            UPDATE ActivatedBooks
+            SET countingTicketNumber = NULL
+        ''')
+
+        # Commit changes and close connection
+        conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
         print(f"Error updating isAtTicketNumber: {e}")
 
     conn.close()
     
-def add_Ticket_name(cursor, conn, ticket_name, ticket_gamenumber):
-    cursor.execute("""
-        INSERT INTO TicketNameLookup (GameNumber, TicketName)
-        VALUES (?, ?)
-    """, (
-        ticket_gamenumber,
-        ticket_name
-    ))
-
-    conn.commit()
-    
 def insert_Ticket_name(db_path, ticket_name, ticket_gamenumber):
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     try:
-        add_Ticket_name(cursor, conn, ticket_name, ticket_gamenumber)
+        cursor.execute("""
+            INSERT INTO TicketNameLookup (GameNumber, TicketName)
+            VALUES (?, ?)
+        """, (ticket_gamenumber,ticket_name))
+
+        conn.commit()
     except sqlite3.Error as e:
         print(f"Ticket Name insertion error: {e}")
         

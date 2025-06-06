@@ -12,7 +12,8 @@ app = Flask(__name__)
 # Feature: Mulitple Scans for a day - DailyReport: Add ID, SalesLog: Add ID, Idea: Scan Sessions (may Daily and Sales new IDs can act as session)
 # Feature: Edit lottery, recreate invoice report?
 # Feature: Error UI for user
-# Issue UTC time database
+# Issue UTC time database 
+# Issue 999
 
 # Get database path
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,7 +33,6 @@ def scan_tickets():
         
         # If the book id from scanned code is present in the active books then it is valid.
         if scanned_book_id in all_active_book_ids:
-            print("Activated Book")
             # Insert ticket
             scanID = scanned_code
             book_id = scanned_info.get_book_id()
@@ -51,7 +51,7 @@ def scan_tickets():
     activate_books = DatabaseQueries.get_scan_ticket_page_table(db_path=db_path)
     
     # Instant ticket sold calculation
-    instant_tickets_sold_total = calculate_instant_tickets_sold() 
+    instant_tickets_sold_total = calculate_instant_tickets_sold(ReportID="Pending") 
     
     return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total)
 
@@ -109,8 +109,8 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
     }
     Database.insert_sales_log(db_path, sale_log_info)
  
-def calculate_instant_tickets_sold(Date=datetime.date.today()):
-    instant_tickets_sold_quantanties = DatabaseQueries.get_all_instant_tickets_sold_quantity(db_path, Date)
+def calculate_instant_tickets_sold(ReportID):
+    instant_tickets_sold_quantanties = DatabaseQueries.get_all_instant_tickets_sold_quantity(db_path, ReportID)
     result = 0
     for ticket_sold in instant_tickets_sold_quantanties:
         result += (ticket_sold["Ticket_Sold_Quantity"] * ticket_sold["TicketPrice"])
@@ -118,9 +118,11 @@ def calculate_instant_tickets_sold(Date=datetime.date.today()):
     return result
 
 @app.route("/submit", methods=["GET", "POST"])
-def submit(Date=datetime.date.today()):
+def submit():
+    next_ReportID = DatabaseQueries.next_report_ID(db_path) # STRING 
     # Get form values
     daily_totals = {
+        "ReportID": next_ReportID,
         "instant_sold": request.form.get('instant_sold'),
         "online_sold": request.form.get('online_sold'),
         "instant_cashed": request.form.get('instant_cashed'),
@@ -130,10 +132,12 @@ def submit(Date=datetime.date.today()):
     }
     # Insert the daily_totals in the Daily_Report Database.
     Database.insert_daily_totals(db_path, daily_totals)
+    # Update "Pending" SalesLog ReportID
+    Database.update_pending_sales_log_report_id(db_path, next_ReportID)
     # Create a Invoice
-    create_daily_invoice()
-    # Remove sold out books from ActivatedBooks table
-    sold_out_books = DatabaseQueries.get_all_sold_books(db_path, Date)
+    create_daily_invoice(next_ReportID)
+    # Remove sold out books from current ActivatedBooks table using there book ids
+    sold_out_books = DatabaseQueries.get_all_sold_books(db_path, next_ReportID)
     for book in sold_out_books:
         Database.deactivate_book(db_path, book["BookID"])
     # Update Database 
@@ -144,15 +148,15 @@ def submit(Date=datetime.date.today()):
     
     return redirect(url_for("scan_tickets"))
     
-def create_daily_invoice(Date=datetime.date.today(), store_name="Scuttlebutts Liquors", address="407 Main St, Fairhaven, MA 02719", phone="(508) 999-5253", email="N/a", fileName="invoice_lottery.pdf"):
-    invoiceLog = DatabaseQueries.get_table_for_invoice(db_path, Date)
+def create_daily_invoice(ReportID, store_name="Scuttlebutts Liquors", address="407 Main St, Fairhaven, MA 02719", phone="(508) 999-5253", email="N/a", fileName="invoice_lottery.pdf"):
+    invoiceLog = DatabaseQueries.get_table_for_invoice(db_path, ReportID)
     store_info = {
         "Business Name": store_name,
         "Address": address,
         "Phone": phone,
         "Email": email
     }
-    daily_report = DatabaseQueries.get_daily_report(db_path, Date)
+    daily_report = DatabaseQueries.get_daily_report(db_path, ReportID)
     invoice_number="Invoice001"
     generate_invoice.generate_lottery_invoice_pdf(fileName, store_info, invoiceLog, invoice_number, daily_report)
     

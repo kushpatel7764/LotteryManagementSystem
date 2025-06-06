@@ -143,7 +143,7 @@ def get_scan_ticket_page_table(db_path):
     finally:
         conn.close()
         
-def get_all_instant_tickets_sold_quantity(db, Date):
+def get_all_instant_tickets_sold_quantity(db, ReportID):
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -152,9 +152,9 @@ def get_all_instant_tickets_sold_quantity(db, Date):
             SELECT SalesLog.ActiveBookID, SalesLog.Ticket_Sold_Quantity, Books.TicketPrice 
             FROM SalesLog 
             JOIN Books ON ActiveBookID = BookID 
-            WHERE SaleDate = ?;
+            WHERE SalesLog.ReportID = ?;
         """
-        cursor.execute(query, (Date,))
+        cursor.execute(query, (ReportID, ))
         result_table = cursor.fetchall()
         result_row_list = []
         for table in result_table:
@@ -173,7 +173,7 @@ def get_all_instant_tickets_sold_quantity(db, Date):
     finally:
         conn.close()
     
-def get_all_sold_books(db, Date):
+def get_all_sold_books(db, ReportID):
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -182,9 +182,9 @@ def get_all_sold_books(db, Date):
             SELECT ActiveBookID, Ticket_Sold_Quantity, Books.TicketPrice 
             FROM SalesLog 
             JOIN Books ON ActiveBookID = BookID 
-            WHERE SaleDate = ? and Is_Sold = True;
+            WHERE ReportID = ? and Is_Sold = True;
         """
-        cursor.execute(query, (Date,))
+        cursor.execute(query, (ReportID,))
         result_table = cursor.fetchall()
         result_row_list = []
         for table in result_table:
@@ -200,7 +200,7 @@ def get_all_sold_books(db, Date):
     finally:
         conn.close()
         
-def get_table_for_invoice(db, Date):
+def get_table_for_invoice(db, ReportID):
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -209,10 +209,10 @@ def get_table_for_invoice(db, Date):
             SELECT SalesLog.Ticket_Name, SalesLog.Ticket_GameNumber, SalesLog.ActiveBookID, Books.TicketPrice, SalesLog.prev_TicketNum, SalesLog.current_TicketNum, SalesLog.Ticket_Sold_Quantity
             FROM SalesLog
             Join Books ON ActiveBookID = BookID
-            Where SaleDate = ?
+            Where ReportID = ?
             ORDER BY Books.TicketPrice DESC;
         """
-        cursor.execute(query, (Date,))
+        cursor.execute(query, (ReportID,))
         result_table = cursor.fetchall()
         result_row_list = []
         for table in result_table:
@@ -234,7 +234,8 @@ def get_table_for_invoice(db, Date):
     finally:
         conn.close()
         
-def get_daily_report(db, Date):
+def get_daily_report(db, ReportID):
+    # Not really daily report but a session report
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -242,9 +243,9 @@ def get_daily_report(db, Date):
         query = """
             SELECT *
             FROM SaleReport
-            Where SaleDate = ?;
+            Where ReportID = ?;
         """
-        cursor.execute(query, (Date,))
+        cursor.execute(query, (ReportID,))
         result_table = cursor.fetchone()
         result_row = {
             "InstantTicketSold": result_table[1],
@@ -296,6 +297,25 @@ def get_ticket_name(db, game_number):
             return result[0]
         else:
             return "N/A"
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
+        
+def next_report_ID(db):
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT ReportID FROM SaleReport ORDER BY ReportID DESC LIMIT 1")
+        row = cursor.fetchone()
+
+        if row:
+            report_id = str(int(row) + 1)
+        else:
+            report_id = "1"
+        return report_id
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return None
