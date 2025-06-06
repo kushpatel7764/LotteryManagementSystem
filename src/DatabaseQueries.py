@@ -248,12 +248,15 @@ def get_daily_report(db, ReportID):
         cursor.execute(query, (ReportID,))
         result_table = cursor.fetchone()
         result_row = {
-            "InstantTicketSold": result_table[1],
-            "OnlineTicketSold": result_table[2],
-            "InstantTicketCashed": result_table[3],
-            "OnlineTicketCashed": result_table[4],
-            "CashOnHand": result_table[5],
-            "TotalDue": result_table[6]
+            "ReportID": result_table[0], 
+            "ReportDate": result_table[1],
+            "ReportTime": result_table[2], 
+            "InstantTicketSold": result_table[3],
+            "OnlineTicketSold": result_table[4],
+            "InstantTicketCashed": result_table[5],
+            "OnlineTicketCashed": result_table[6],
+            "CashOnHand": result_table[7],
+            "TotalDue": result_table[8]
         }
             
         return result_row
@@ -312,7 +315,7 @@ def next_report_ID(db):
         row = cursor.fetchone()
 
         if row:
-            report_id = str(int(row) + 1)
+            report_id = str(int(row[0]) + 1)
         else:
             report_id = "1"
         return report_id

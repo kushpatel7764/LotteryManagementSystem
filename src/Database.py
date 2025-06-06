@@ -103,9 +103,10 @@ def insert_ticket_to_TicketTimeline_table(database_path, ticket_info):
 
     try:
         add_ticket_to_timeline(conn, cursor, ticket_info)
-    except sqlite3.IntegrityError: 
+    except sqlite3.IntegrityError as e: 
         if "UNIQUE constraint failed" in str(e):
-            set_updated_time_in_timeline(conn, cursor, ticket_info["ScanID"], datetime.datetime.now().time().strftime("%H:%M:%S"))
+            # the updated_time attribute should now be updated to new utc time.
+            set_updated_time_in_timeline(conn, cursor, ticket_info["ScanID"], datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S"))
         else:
             print("Integrity error:", e)
     except sqlite3.Error as e:
@@ -238,6 +239,7 @@ def add_daily_totals(cursor, conn, daily_totals):
             TotalDue
         ) VALUES (?, ?, ?, ?, ?, ?, ?)
     ''', (
+        daily_totals['ReportID'],
         daily_totals['instant_sold'],
         daily_totals['online_sold'],
         daily_totals['instant_cashed'],
