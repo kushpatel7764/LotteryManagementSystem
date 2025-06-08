@@ -119,6 +119,12 @@ def calculate_instant_tickets_sold(ReportID):
 
 @app.route("/submit", methods=["GET", "POST"])
 def submit():
+    if DatabaseQueries.can_Submit(db_path):
+        do_submit_procedure()
+    
+    return redirect(url_for("scan_tickets"))
+
+def do_submit_procedure():
     next_ReportID = DatabaseQueries.next_report_ID(db_path) # STRING 
     # Get form values
     daily_totals = {
@@ -130,6 +136,7 @@ def submit():
         "cash_on_hand": request.form.get('cash_on_hand'),
         "total_due": request.form.get('total_due')
     }
+    
     # Insert the daily_totals in the Daily_Report Database.
     Database.insert_daily_totals(db_path, daily_totals)
     # Update "Pending" SalesLog ReportID
@@ -145,9 +152,7 @@ def submit():
     # countingTicketNumber needs to be set to None since nothing is being counted after submit.
     Database.update_isAtTicketNumber(db_path)
     Database.clear_countingTicketNumber(db_path)
-    
-    return redirect(url_for("scan_tickets"))
-    
+
 def create_daily_invoice(ReportID, store_name="Scuttlebutts Liquors", address="407 Main St, Fairhaven, MA 02719", phone="(508) 999-5253", email="N/a", fileName="invoice_lottery.pdf"):
     invoiceLog = DatabaseQueries.get_table_for_invoice(db_path, ReportID)
     store_info = {
@@ -235,6 +240,6 @@ def activate_book_procedure(scanned_code):
     
     
 
-
+    
 if __name__ == '__main__':
     app.run(debug=True)

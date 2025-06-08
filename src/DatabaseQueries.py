@@ -324,3 +324,23 @@ def next_report_ID(db):
         return None
     finally:
         conn.close()
+
+def can_Submit(db):
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT countingTicketNumber FROM ActivatedBooks")
+        rows = cursor.fetchall()
+        
+        if rows:
+            for row in rows:
+                if row[0] is None:
+                    return False
+            return True
+        
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
