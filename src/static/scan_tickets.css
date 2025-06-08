@@ -72,6 +72,10 @@ th, td {
     border: 1px solid #ddd;
 }
 
+td button{
+    background-color: red;
+}
+
 th {
     background-color: rgb(230, 230, 230);
 }
