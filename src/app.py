@@ -1,15 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for
 import os
-from datetime import datetime
 from ScannedCodeInformationManagement import ScannedCodeManagement
 import Database
 import DatabaseQueries
-import datetime
 import generate_invoice
 import game_number_lookup_table
 
 app = Flask(__name__)
-# Feature: Mulitple Scans for a day - DailyReport: Add ID, SalesLog: Add ID, Idea: Scan Sessions (may Daily and Sales new IDs can act as session)
 # Feature: Edit lottery, recreate invoice report?
 # Feature: Error UI for user
 # Issue UTC time database 

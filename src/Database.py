@@ -344,3 +344,18 @@ def insert_Ticket_name(db_path, ticket_name, ticket_gamenumber):
         print(f"Ticket Name insertion error: {e}")
         
     conn.close()
+
+def delete_Book(db_path, book_id):
+    initialize_database(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            DELETE FROM Boooks Where BookID = ?;
+        """, (book_id,))
+
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Book deletion error: {e}")
+        
+    conn.close()
