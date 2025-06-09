@@ -12,7 +12,7 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f9fafb;
+    background-color: rgb(249, 250, 251);
     margin: 40px;
 }
 
@@ -29,14 +29,13 @@ input[type="text"] {
     padding: 10px;
     width: 300px;
     font-size: 16px;
-    border: 1px solid #ccc;
+    border: 1px solid rgb(204, 204, 204);
     border-radius: 6px;
 }
 
 button {
     padding: 10px 20px;
     font-size: 16px;
-    margin-left: 10px;
     background-color: #4f46e5;
     color: white;
     border: none;
@@ -63,7 +62,6 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
 
 th, td {
@@ -71,16 +69,72 @@ th, td {
     padding: 12px;
     border: 1px solid #ddd;
 }
+/*Dropdown CSS*/
+tr .options_Button{
+    box-shadow: none;
+    position: relative;
+    padding: 5px;
+    background-color: rgb(249, 250, 251);
+    border-color: rgb(249, 250, 251);
+    width: 0;
+    height: 0;
+    overflow: visible; /* allow contents to escape bounds */
+}
 
-td button{
-    
+tr .th_OptionsButton{
+    box-shadow: none;
+    border-color: rgb(249, 250, 251);
+    background-color: rgb(249, 250, 251);
+}
+
+.dropbtn {
+  background-color: #4f46e5;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: #4338ca;
+  min-width: 140px;
+  box-shadow: 0px 8px 16px #6f67d1;
+  z-index: 1;
+  border-radius: 8px;
+  padding: 6px 15px;
+  box-sizing: border-box;
+  overflow: hidden; 
+}
+
+.dropdown-content button {
+    padding: none;
+    background: none;
+    border: none;
+    text-align: center;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s ease;
+    outline: none; 
+}
+
+.dropdown-content button:hover {
+  background-color: #5c52cb;
+}
+
+.dropdown-container.show .dropdown-content {
+  display: block;
 }
 
 th {
     background-color: rgb(230, 230, 230);
 }
 
-tr.complete {
+tr.row {
     background-color: rgb(243, 244, 246); 
     font-weight: bold;
 }

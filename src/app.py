@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
 from ScannedCodeInformationManagement import ScannedCodeManagement
 import Database
 import DatabaseQueries
 import generate_invoice
 import game_number_lookup_table
+
 
 app = Flask(__name__)
 # Feature: Edit lottery, recreate invoice report?
@@ -186,7 +187,13 @@ def books_managment():
         game_number = book["GameNumber"]
         book["TicketName"] = DatabaseQueries.get_ticket_name(db_path, game_number)
 
-    return render_template('books_managment.html', books=books, status_message_add_book=status_message_add_book)
+    # Get activated books (just the BookIDs)
+    activated_books = DatabaseQueries.get_activated_books(db_path)  # should return a list of dicts or a list of IDs
+    activated_ids = {book['ActiveBookID'] for book in activated_books}  # Use set for faster lookup
+    
+    status_message_activate_book = request.args.get('status_message_activate_book')
+    
+    return render_template('books_managment.html', books=books, activated_ids=activated_ids, status_message_add_book=status_message_add_book, status_message_activate_book=status_message_activate_book)
 
 def add_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
@@ -200,6 +207,24 @@ def add_book_procedure(scanned_code):
     }
     Database.insert_book_info_to_Books_table(database_path=db_path, book_info=book_info)
     
+@app.route('/delete_book', methods=['POST', 'GET'])
+def delete_book():
+    data = request.get_json()
+    book_id = data.get('bookID')
+    print(f"Deleting: {book_id}")
+    Database.deactivate_book(db_path, book_id)
+    Database.delete_Book(db_path, book_id)
+
+    return jsonify({ "redirect_url": url_for('books_managment') })
+    
+@app.route('/deactivate_book', methods=['POST', 'GET'])
+def deactivate_book():
+    data = request.get_json()
+    book_id = data.get('bookID')
+    print(f"Deactivating: {book_id}")
+    Database.deactivate_book(db_path, book_id)
+    
+    return jsonify({ "redirect_url": url_for('books_managment') })
 
 @app.route('/activate_book', methods=["GET", "POST"])
 def activate_book():
@@ -209,14 +234,7 @@ def activate_book():
         scanned_code = request.form['activate_book_code']
         status_message_activate_book = activate_book_procedure(scanned_code)
         
-    # Books info for the books table to display on screen 
-    books = DatabaseQueries.get_books(db=db_path)
-    
-    for book in books:
-        game_number = book["GameNumber"]
-        book["TicketName"] = DatabaseQueries.get_ticket_name(db_path, game_number)
-
-    return render_template('books_managment.html', books=books, status_message_activate_book=status_message_activate_book)
+    return redirect(url_for("books_managment", status_message_activate_book=status_message_activate_book))
 
 def activate_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code)

@@ -29,6 +29,60 @@
                 form.submit();
             }
         }
+        //DropDown Functions
+        function toggleDropdown(event) {
+        event.stopPropagation(); // Stop the click from closing immediately
+        closeAllDropdowns();     // Close others
+        const dropdown = event.currentTarget.closest(".dropdown-container");
+        dropdown.classList.toggle("show");
+        }
+
+        function closeAllDropdowns() {
+        document.querySelectorAll(".dropdown-container").forEach(el => {
+            el.classList.remove("show");
+        });
+        }
+
+        // Close dropdown if clicked anywhere else
+        document.addEventListener("click", () => {
+        closeAllDropdowns();
+        });
+
+        // Your actual button functions
+        function handleDeactivate(bookID) {
+            fetch('/deactivate_book', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ bookID: bookID })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.redirect_url) {
+                        window.location.href = data.redirect_url;  // Manual redirect
+                }
+            });
+        }
+
+        function handleDelete(bookID) {
+            if (confirm(`Are you sure you want to delete book ${bookID}?`)) {
+                fetch('/delete_book', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ bookID: bookID })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;  // Manual redirect
+                    }
+                });
+            }
+        }
+
     </script>
 </head>
 <body>
@@ -76,23 +130,34 @@
     <h2>Books</h2>
     <table>
         <thead>
-            <tr>
+            <tr class="header">
                 <th>Game Name</th>  
                 <th>Book ID</th>
                 <th>Game Number</th>
                 <th>Ticket Amount</th>
-                <th>Is Sold</th>
+                <th>Sold</th>
+                <th class="th_OptionsButton"></th>
             </tr>
         </thead>
         <tbody>
         {% for book in books %}
-            <tr class="complete">
+            <tr class="row">
                 <td>{{ book['TicketName'] }}</td>
                 <td>{{ book['BookID'] }}</td>
                 <td>{{ book['GameNumber'] }}</td>
                 <td>{{ book['BookAmount'] }}</td>
                 <td>{{ book['Is_Sold'] }}</td>
-                <td><button>...</button></td>
+                <td class="options_Button">
+                    <div class="dropdown-container">
+                        <button class="dropbtn" onclick="toggleDropdown(event)">⋯</button>
+                        <div class="dropdown-content">
+                            {% if book['BookID'] in activated_ids %}
+                                <button onclick="handleDeactivate('{{ book['BookID'] }}')">Deactivate</button> <!-- Should only show up with the given book is already activated-->
+                            {% endif %}
+                            <button onclick="handleDelete('{{ book['BookID'] }}')">Delete</button>
+                        </div>
+                    </div>
+                </td>
             </tr>
         {% endfor %}
         </tbody>

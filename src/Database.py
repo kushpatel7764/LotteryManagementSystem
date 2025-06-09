@@ -351,7 +351,7 @@ def delete_Book(db_path, book_id):
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            DELETE FROM Boooks Where BookID = ?;
+            DELETE FROM Books Where BookID = ?;
         """, (book_id,))
 
         conn.commit()
