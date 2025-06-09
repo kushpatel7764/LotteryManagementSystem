@@ -147,7 +147,7 @@
                 <td>{{ book['GameNumber'] }}</td>
                 <td>{{ book['BookAmount'] }}</td>
                 <td>{{ book['Is_Sold'] }}</td>
-                <td class="options_Button">
+                <td class="options_Button {% if book['BookID'] in activated_ids %}activated{% endif %}">
                     <div class="dropdown-container">
                         <button class="dropbtn" onclick="toggleDropdown(event)">⋯</button>
                         <div class="dropdown-content">

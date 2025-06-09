@@ -87,6 +87,20 @@ tr .th_OptionsButton{
     background-color: rgb(249, 250, 251);
 }
 
+
+td.options_Button.activated .dropbtn {
+    background-color: #10b95f; /* green */
+    color: white;
+}
+
+td.options_Button.activated .dropdown-content{
+    background-color: #10b95f;
+    box-shadow: 0px 8px 16px #10b953;
+    color: white;
+}
+td.options_Button.activated .dropdown-content button:hover{
+    background-color: #48de81;
+}
 .dropbtn {
   background-color: #4f46e5;
   border: none;
