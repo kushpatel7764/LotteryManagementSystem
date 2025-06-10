@@ -75,7 +75,7 @@
         </thead>
         <tbody>
         {% for book in activated_books %}
-            <tr class="complete">
+            <tr class="row {% if book['countingTicketNumber'] is not none %}scanned{% endif %}">
                 <td>{{ book["TicketName"] }}
                 <td>{{ book['GameNumber'] }}</td>
                 <td>{{ book['ActiveBookID'] }}</td>
