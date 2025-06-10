@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS TicketTimeLine (
     ScanID Text, 
+    ReportID Text NOT NULL DEFAULT "Pending",
     BookID Text NOT NULL,
     TicketNumber INTEGER NOT NULL,
     TicketName TEXT,
@@ -8,8 +9,9 @@ CREATE TABLE IF NOT EXISTS TicketTimeLine (
     created_time TIME DEFAULT CURRENT_TIME,
     updated_date DATE DEFAULT CURRENT_DATE,
     updated_time TIME DEFAULT CURRENT_TIME, 
-    PRIMARY KEY(ScanID, updated_date),
+    PRIMARY KEY(ScanID, ReportID),
     FOREIGN KEY (BookID) REFERENCES Books(BookID) ON DELETE CASCADE
+    FOREIGN KEY (ReportID) REFERENCES SalesLog(ReportID) ON DELETE CASCADE
 );
 
 -- All books (unactivated/activated/sold)

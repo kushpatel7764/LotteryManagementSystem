@@ -143,6 +143,18 @@ td.options_Button.activated .dropdown-content button:hover{
 .dropdown-container.show .dropdown-content {
   display: block;
 }
+/*X Button for Scan Tickets Page*/
+.x_button_container{
+    border: none;
+}
+
+.x_button_container button{
+    background-color: red;
+}
+
+.x_button_container button:hover{
+    background-color: rgb(199, 0, 0);
+}
 
 th {
     background-color: rgb(230, 230, 230);

@@ -53,6 +53,26 @@ def scan_tickets():
     
     return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total)
 
+@app.route("/undo_scan", methods=["POST"])
+def undo_scan():
+    book_id = request.form.get("book_id")
+    if book_id:
+        try:
+            # Step 1: Delete ticket
+            Database.delete_TicketTimeLine_by_book_id(db_path, book_id)
+            
+            # Step 2: Delete sales log for that book and TicketTimeLine Log will be deleted automatically
+            Database.delete_sales_log_by_book_id(db_path, book_id)
+
+            # Step 3: Clear the counting ticket number
+            Database.clear_counting_ticket_number(db_path, book_id)
+
+            print("Undo successful.")
+        except Exception as e:
+            print(f"Undo failed: {e}")
+
+    return redirect(url_for("scan_tickets")) 
+
 @app.route("/book_sold_out", methods=["POST", "GET"])
 def book_sold_out():
     book_id = request.form.get("book_id")
@@ -139,6 +159,8 @@ def do_submit_procedure():
     Database.insert_daily_totals(db_path, daily_totals)
     # Update "Pending" SalesLog ReportID
     Database.update_pending_sales_log_report_id(db_path, next_ReportID)
+    # Update "Pending" TicketTimeLine ReportID
+    Database.update_pending_TicketTimeLine_report_id(db_path, next_ReportID)
     # Create a Invoice
     create_daily_invoice(next_ReportID)
     # Remove sold out books from current ActivatedBooks table using there book ids
@@ -149,7 +171,7 @@ def do_submit_procedure():
     # isAtTicketNumber in ActiviatedBooks needs to be set to current numbers from today's scans.
     # countingTicketNumber needs to be set to None since nothing is being counted after submit.
     Database.update_isAtTicketNumber(db_path)
-    Database.clear_countingTicketNumber(db_path)
+    Database.clear_countingTicketNumbers(db_path)
 
 def create_daily_invoice(ReportID, store_name="Scuttlebutts Liquors", address="407 Main St, Fairhaven, MA 02719", phone="(508) 999-5253", email="N/a", fileName="invoice_lottery.pdf"):
     invoiceLog = DatabaseQueries.get_table_for_invoice(db_path, ReportID)

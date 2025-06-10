@@ -98,6 +98,14 @@
                         N/A
                     {% endif %}
                 </td>
+                <td class="x_button_container">
+                    {% if book['countingTicketNumber'] is not none %}
+                        <form method="POST" action="/undo_scan">
+                            <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
+                            <button type="Submit">X</button>
+                        </form>
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
         </tbody>

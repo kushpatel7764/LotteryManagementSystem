@@ -69,6 +69,7 @@ def add_ticket_to_timeline(conn, cursor, ticket_info):
     Parameters:
         ticket_info (dict): A dictionary with keys:
             - ScanID
+            - ReportID
             - BookID
             - TicketNumber
             - TicketName
@@ -151,15 +152,16 @@ def insert_book_to_ActivatedBook_table(database_path, active_book_info):
     print("book activated successfully!")
     conn.close()
 
-def update_counting_ticket_number_for_book_id_query(cursor, conn, book_id, new_ticket_number): 
+def update_counting_ticket_number_for_book_id_query(cursor, conn, book_id, new_ticket_number, date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S")): 
     # SQL query to update the countingTicketNumber
     update_query = '''
     UPDATE ActivatedBooks
-    SET countingTicketNumber = ?
+    SET countingTicketNumber = ?,
+    updated_at = ?
     WHERE ActiveBookID = ?;
     '''
     # Execute the update query
-    cursor.execute(update_query, (new_ticket_number, book_id))
+    cursor.execute(update_query, (new_ticket_number, date, book_id))
 
     # Commit changes and close the connection
     conn.commit()
@@ -176,12 +178,22 @@ def update_counting_ticket_number(database_path, book_id, new_ticket_number):
     
     conn.close()
     
-def book_is_sold(cursor, conn, book_id):
+def delete_TicketTimeLine_by_book_id(db_path, book_id):
+    # Deletes only current Sales Report tickets
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM TicketTimeLine WHERE BookID = ? AND ReportID = 'Pending';", (book_id,))
+    conn.commit()
+    conn.close()
+    
+def book_is_sold(cursor, conn, book_id, date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S")):
     cursor.execute("""
         UPDATE Books
-        SET Is_Sold = True
+        SET Is_Sold = True,
+        updated_at = ?
         WHERE BookID = ?
-    """, (book_id,))
+    """, (date, book_id))
     
     conn.commit()
     
@@ -225,6 +237,14 @@ def insert_sales_log (database_path, scanned_ticket_info):
     except sqlite3.Error as e:
         print(f"SalesLog error: {e}")
     
+    conn.close()
+    
+def delete_sales_log_by_book_id(db_path, book_id):
+    # Deletes only current Sales log
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM SalesLog WHERE ActiveBookID = ? AND ReportID = 'Pending';", (book_id,))
+    conn.commit()
     conn.close()
     
 def add_daily_totals(cursor, conn, daily_totals):
@@ -277,6 +297,22 @@ def update_pending_sales_log_report_id(db_path, report_id):
         
     conn.close()
     
+def update_pending_TicketTimeLine_report_id(db_path, report_id):
+    initialize_database(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        UPDATE TicketTimeLine
+        SET ReportID = ?
+        WHERE ReportID = 'Pending';
+        """, (report_id,))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error updating pending sales log: {e}")
+        
+    conn.close()
+    
 def deactivate_book(db_path, book_id):
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
@@ -309,7 +345,7 @@ def update_isAtTicketNumber(db_path):
 
     conn.close()
     
-def clear_countingTicketNumber(db_path):
+def clear_countingTicketNumbers(db_path):
     # Connect to your database
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -327,6 +363,13 @@ def clear_countingTicketNumber(db_path):
         conn.rollback()
         print(f"Error updating isAtTicketNumber: {e}")
 
+    conn.close()
+    
+def clear_counting_ticket_number(db_path, book_id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE ActivatedBooks SET countingTicketNumber = NULL WHERE ActiveBookID = ?", (book_id,))
+    conn.commit()
     conn.close()
     
 def insert_Ticket_name(db_path, ticket_name, ticket_gamenumber):
