@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sales Log for {{ report_id }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
+</head>
+<body>
+    <div class="header-bar">
+        <h1>Sales Logs for Report ID: {{ report_id }}</h1>
+        <div id="Navigation_Buttons">
+            <button onclick="window.location.href='/edit_reports'">← Back to Reports</button>
+        </div>
+    </div>
+
+    <h2>Sales Log Entries</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Game Name</th>
+                <th>Game #</th>
+                <th>Book ID</th>
+                <th>Open</th>
+                <th>Close</th>
+                <th>Sold</th>
+                <!-- Add more columns as needed -->
+            </tr>
+        </thead>
+        <tbody>
+        {% for log in sales_logs %}
+            <tr>
+                <td>{{ log["Game Name"] }}</td>
+                <td>{{ log["Game #"] }}</td>
+                <td>{{ log["ActiveBookID"] }}</td>
+                <td>{{ log["Open"] }}</td>
+                <td>{{ log["Close"] }}</td>
+                <td>{{ log["Sold"] }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5" style="text-align:center;">No sales logs found for this report.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -158,7 +158,7 @@ def update_counting_ticket_number_for_book_id_query(cursor, conn, book_id, new_t
     UPDATE ActivatedBooks
     SET countingTicketNumber = ?,
     updated_at = ?
-    WHERE ActiveBookID = ?;
+    WHERE ActiveBookID = ? AND countingTicketNumber is NULL;
     '''
     # Execute the update query
     cursor.execute(update_query, (new_ticket_number, date, book_id))

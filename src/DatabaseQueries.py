@@ -266,6 +266,70 @@ def get_daily_report(db, ReportID):
     finally:
         conn.close()
 
+def get_all_sales_reports(db):
+     # Not really daily report but a session report
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+        
+        query = """
+            SELECT *
+            FROM SaleReport;
+        """
+        cursor.execute(query)
+        result_table = cursor.fetchall()
+        result_row = []
+        for row in result_table:
+            result_row.append({
+                "ReportID": row[0], 
+                "ReportDate": row[1],
+                "ReportTime": row[2], 
+                "InstantTicketSold": row[3],
+                "OnlineTicketSold": row[4],
+                "InstantTicketCashed": row[5],
+                "OnlineTicketCashed": row[6],
+                "CashOnHand": row[7],
+                "TotalDue": row[8]
+            })
+            
+        return result_row
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
+    
+def get_sales_log(db, ReportID):
+     # Not really daily report but a session report
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+        
+        query = """
+            SELECT *
+            FROM SalesLog
+            Where ReportID = ?;
+        """
+        cursor.execute(query, (ReportID,))
+        result_table = cursor.fetchall()
+        result_rows = []
+        for row in result_table:
+            result_rows.append({
+                "ActiveBookID": row[3],
+                "Open": row[4],
+                "Close": row[5],
+                "Sold": row[6],
+                "Game Name": row[7],
+                "Game #": row[8]
+            })
+            
+        return result_rows
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
+
 def get_gm_from_lookup(db):
     try:
         conn = sqlite3.connect(db)

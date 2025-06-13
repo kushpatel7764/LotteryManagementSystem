@@ -5,13 +5,15 @@ import Database
 import DatabaseQueries
 import generate_invoice
 import game_number_lookup_table
+from utc_to_local_time import convert_utc_to_local
+from datetime import datetime
 
 
 app = Flask(__name__)
 # Feature: Edit lottery, recreate invoice report?
 # Feature: Error UI for user
-# Issue UTC time database 
-# Issue 999
+# Issue: Sold should take into account that a ticket was found today
+# Issue: 999
 
 # Get database path
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -116,7 +118,7 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
     # Add a sales log for this scan
     activate_book_isAtTicketNumber = DatabaseQueries.get_activated_book_isAtTicketNumber(db_path, book_id)
     # ---- Calulateing sold (999 will change this)
-    sold = abs(activate_book_isAtTicketNumber[0] - int(lastest_ticket_number))
+    sold = activate_book_isAtTicketNumber[0] - int(lastest_ticket_number)
     sale_log_info = {
         "ActiveBookID": book_id,
         "prev_TicketNum": activate_book_isAtTicketNumber[0], # index 4 is the isAtTicketNumber
@@ -275,8 +277,41 @@ def activate_book_procedure(scanned_code):
     else:
         return f"Error: Book does not already exist in data base or has already been activated!"
     
+@app.route('/edit_reports')
+def edit_reports():
+    sales_reports = DatabaseQueries.get_all_sales_reports(db_path)
     
+    # Convert to local date and time and filter
+    local_reports = []
+    filter_date = request.args.get("date")
+    filter_time = request.args.get("time")
+    
+    # convert sales report date and time from utc to local
+    for report in sales_reports:
+        utc_date = datetime.strptime(report["ReportDate"], "%Y-%m-%d").date()
+        utc_time = datetime.strptime(report["ReportTime"], "%H:%M:%S").time()
+        local_date = convert_utc_to_local(utc_date, 'America/New_York').strftime("%Y-%m-%d")
+        local_time = convert_utc_to_local(utc_time, 'America/New_York').strftime("%I:%M:%S %p")
+        
+         # Filter logic
+        match = True
+        if filter_date and local_date != filter_date:
+            match = False
+        if filter_time and not local_time.startswith(filter_time):
+            match = False
 
+        if match:
+            report["ReportDate"] = local_date
+            report["ReportTime"] = local_time
+            local_reports.append(report)
+    return render_template("edit_reports.html", sales_reports=local_reports)
+
+@app.route("/edit_report/<report_id>")
+def edit_single_report(report_id):
+    # Query the sales logs related to this report ID
+    sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
+    
+    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs)
     
 if __name__ == '__main__':
     app.run(debug=True)

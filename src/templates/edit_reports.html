@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Reports</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
+</head>
+<body>
+    <div class="header-bar">
+        <h1>Edit Reports</h1>
+        <div id="Navigation_Buttons">
+            <button onclick="window.location.href='/'">Home</button>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <form method="GET" action="/edit_reports" class="filter-form">
+        <label for="date">Filter by Date:</label>
+        <input type="date" id="date" name="date" value="{{ request.args.get('date', '') }}">
+
+        <label for="time">Filter by Time:</label>
+        <input type="time" id="time" name="time" value="{{ request.args.get('time', '') }}">
+
+        <button type="submit">Apply Filters</button>
+        <a href="/edit_reports"><button type="button">Clear</button></a>
+    </form>
+
+
+    <h2>All Sales Reports</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Report ID</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for report in sales_reports %}
+            <tr>
+                <td>{{ report['ReportID'] }}</td>
+                <td>{{ report['ReportDate'] }}</td>
+                <td>{{ report['ReportTime'] }}</td>
+                <td>
+                    <form method="GET" action="/edit_report/{{ report['ReportID'] }}">
+                        <button type="submit">Edit</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4" style="text-align:center;">No reports match your filters.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

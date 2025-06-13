@@ -93,7 +93,7 @@
                 </td>
                 <td>
                     {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
-                        {{ (book['countingTicketNumber'] - book['isAtTicketNumber']) | abs }}
+                        {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
                     {% else %}
                         N/A
                     {% endif %}
