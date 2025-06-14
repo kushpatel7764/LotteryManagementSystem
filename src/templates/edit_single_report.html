@@ -63,5 +63,28 @@
         {% endfor %}
         </tbody>
     </table>
+
+    <h2>Report Totals</h2>
+    <form method="POST" action="/submit" class="daily-totals-form">
+        <label for="instant_sold">Instant Tickets Sold:</label> $
+        <input name="instant_sold" id="instant_sold" value="{{sale_report["InstantTicketSold"]}}" readonly><br><br>
+
+        <label for="online_sold">Online Tickets Sold:</label>
+        <input type="number" name="online_sold" id="online_sold" value="{{sale_report["OnlineTicketSold"]}}" readonly><br><br>
+
+        <label for="instant_cashed">Instant Tickets Cashed:</label>
+        <input type="number" name="instant_cashed" id="instant_cashed" value="{{sale_report["InstantTicketCashed"]}}" readonly><br><br>
+
+        <label for="online_cashed">Online Tickets Cashed:</label>
+        <input type="number" name="online_cashed" id="online_cashed" value="{{sale_report["OnlineTicketCashed"]}}" readonly><br><br>
+
+        <label for="cash_on_hand">Cash On Hand:</label>
+        <input type="number" name="cash_on_hand" id="cash_on_hand" value="{{sale_report["CashOnHand"]}}" readonly><br><br>
+
+        <label for="total_due">Total Due:</label>
+        <input name="total_due" id="total_due" value="{{sale_report["TotalDue"]}}" readonly><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
 </body>
 </html>

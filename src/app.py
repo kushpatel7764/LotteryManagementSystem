@@ -276,7 +276,7 @@ def activate_book_procedure(scanned_code):
         return f"Book ({activate_book_id}) has been activated!"
     else:
         return f"Error: Book does not already exist in data base or has already been activated!"
-    
+
 @app.route('/edit_reports')
 def edit_reports():
     sales_reports = DatabaseQueries.get_all_sales_reports(db_path)
@@ -310,8 +310,12 @@ def edit_reports():
 def edit_single_report(report_id):
     # Query the sales logs related to this report ID
     sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
-    
-    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs)
+    sale_report = DatabaseQueries.get_daily_report(db_path, report_id)
+    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report)
     
 if __name__ == '__main__':
     app.run(debug=True)
+    
+# Check if reportID is the one before next report id or not, if it is then it means that it is a current reportID. TODO: Updating isSOLD?
+# If not current reportID then on submit: update that sales log book id and update relative sales logs as well, also redo sales report after this update as well. Update TicketTimeline.
+# If current reportID then: update that sales log book id and update relative sales logs as well, also redo sales report after this update as well. Update TicketTimeline. update isAtTicketNumber if closing number was changed.
