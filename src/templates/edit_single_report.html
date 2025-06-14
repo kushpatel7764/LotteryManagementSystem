@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <title>Sales Log for {{ report_id }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
+    <script>
+        function changeButtonModes(button){
+            const img = button.querySelector('img');
+            
+            if (img.src.includes('Check_Mark.png')){
+                img.src = "{{ url_for('static', filename='Edit_Icon.png') }}";
+                button.style.backgroundColor = "#4f46e5";
+            } else {
+                img.src = "{{ url_for('static', filename='Check_Mark.png') }}";
+                button.style.backgroundColor = "green";
+            }
+            
+            img.style.filter = 'invert(1)';
+        }
+    </script>
 </head>
 <body>
     <div class="header-bar">
@@ -35,6 +50,11 @@
                 <td>{{ log["Open"] }}</td>
                 <td>{{ log["Close"] }}</td>
                 <td>{{ log["Sold"] }}</td>
+                <td class="edit_button_row">
+                    <button class="edit_button" onclick="changeButtonModes(this)">
+                        <img src="{{ url_for('static', filename='Edit_Icon.png') }}" alt="Edit">
+                    </button>
+                </td>
             </tr>
         {% else %}
             <tr>

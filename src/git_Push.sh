@@ -2,4 +2,4 @@
 
 git add . 
 git commit -m "$1"
-git push dailyticket main 
+git push origin main 
