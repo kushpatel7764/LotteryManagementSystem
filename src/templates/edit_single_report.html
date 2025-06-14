@@ -5,13 +5,102 @@
     <title>Sales Log for {{ report_id }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
     <script>
-        function changeButtonModes(button){
+        function getOpenCellByBookId(bookId) {
+            const rows = document.querySelectorAll("tr");
+
+            for (let row of rows) {
+                const cells = row.querySelectorAll("td");
+                if (cells.length < 3) continue;
+
+                const currentBookId = cells[2].textContent.trim();  // Assuming ActiveBookID is in column 3
+                if (currentBookId === bookId) {
+                    const openCell = row.querySelector(".Open");
+                    return openCell;
+                }
+            }
+
+            return null; // Not found
+        }
+
+        function getCloseCellByBookId(bookId) {
+            const rows = document.querySelectorAll("tr");
+
+            for (let row of rows) {
+                const cells = row.querySelectorAll("td");
+                if (cells.length < 3) continue;
+
+                const currentBookId = cells[2].textContent.trim();  // Assuming ActiveBookID is in column 3
+                if (currentBookId === bookId) {
+                    const closeCell = row.querySelector(".Close");
+                    return closeCell;
+                }
+            }
+
+            return null; // Not found
+        }
+
+        function EditMode(button, bookID){
             const img = button.querySelector('img');
-            
+            const allEditButtons = document.getElementsByClassName("edit_button");
+            const openCell = getOpenCellByBookId(bookID);
+            const closeCell = getCloseCellByBookId(bookID);
+            console.log(allEditButtons);
+
             if (img.src.includes('Check_Mark.png')){
                 img.src = "{{ url_for('static', filename='Edit_Icon.png') }}";
                 button.style.backgroundColor = "#4f46e5";
-            } else {
+                openCell.innerHTML = openCell.firstChild.value;
+                closeCell.innerHTML = closeCell.firstChild.value;
+                
+
+            } else {    
+                
+                for (i=0; i<allEditButtons.length; i++){
+                    if (allEditButtons[i].children[0].src.includes('Check_Mark.png')){
+                        return;
+                    }
+                }
+
+                if (!openCell || !closeCell) {
+                    console.log("Book ID not found.");
+                    return;
+                }
+
+                // Optional: Prevent duplicate inputs
+                if (openCell.querySelector("input") || closeCell.querySelector("input")) return;
+                
+                // Save original value if needed
+                const originalOpenValue = openCell.textContent.trim();
+                const originalCloseValue = closeCell.textContent.trim();
+                openCell.innerHTML = '';  // Clear existing text
+                closeCell.innerHTML = ''; 
+
+                // Create input element
+                const Openinput = document.createElement("input");
+                Openinput.type = "number";
+                Openinput.style.width = "60px";   // or any other value like "4em", "40%", etc.
+                Openinput.style.padding = "5px";
+                Openinput.style.fontSize = "15px"; // Optional, adjust text size
+
+                Openinput.value = originalOpenValue;
+                Openinput.classList.add("open-input");  // Optional styling class
+                
+
+                const Closeinput = document.createElement("input");
+                Closeinput.type = "number";
+                Closeinput.style.width = "60px";   // or any other value like "4em", "40%", etc.
+                Closeinput.style.padding = "5px";
+                Closeinput.style.fontSize = "15px"; // Optional, adjust text size
+
+                Closeinput.value = originalCloseValue;
+                Closeinput.classList.add("open-input");  // Optional styling class
+
+                openCell.appendChild(Openinput);
+                closeCell.appendChild(Closeinput);
+                
+                Openinput.focus();
+                Closeinput.focus();
+
                 img.src = "{{ url_for('static', filename='Check_Mark.png') }}";
                 button.style.backgroundColor = "green";
             }
@@ -46,12 +135,12 @@
             <tr>
                 <td>{{ log["Game Name"] }}</td>
                 <td>{{ log["Game #"] }}</td>
-                <td>{{ log["ActiveBookID"] }}</td>
-                <td>{{ log["Open"] }}</td>
-                <td>{{ log["Close"] }}</td>
+                <td class="BookID">{{ log["ActiveBookID"] }}</td>
+                <td class="Open" >{{ log['Open'] }}</td>
+                <td class="Close">{{ log["Close"] }}</td>
                 <td>{{ log["Sold"] }}</td>
                 <td class="edit_button_row">
-                    <button class="edit_button" onclick="changeButtonModes(this)">
+                    <button class="edit_button" onclick="EditMode(this, '{{log['ActiveBookID']}}')">
                         <img src="{{ url_for('static', filename='Edit_Icon.png') }}" alt="Edit">
                     </button>
                 </td>
