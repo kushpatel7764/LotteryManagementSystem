@@ -215,15 +215,15 @@ def add_sales_log (cursor, conn, scanned_ticket_info):
     ActiveBookID VARCHAR(255),
     prev_TicketNum INTEGER,
     current_TicketNum INTEGER,
-    Ticket_Sold_Quantity INTEGER,
+    Ticket_Sold_Quantity INTEGER, (Calculated)
     Ticket_Name TEXT,
     Ticket_GameNumber VARCHAR(255),
     """
     cursor.execute("""
-                   INSERT INTO SalesLog (ActiveBookID, prev_TicketNum, current_TicketNum, Ticket_Sold_Quantity, Ticket_Name, Ticket_GameNumber)
-                   VALUES (?, ?, ?, ?, ?, ?)
-                   """, (scanned_ticket_info["ActiveBookID"], scanned_ticket_info["prev_TicketNum"], scanned_ticket_info["current_TicketNum"], scanned_ticket_info["Ticket_Sold_Quantity"], scanned_ticket_info["Ticket_Name"],
-                        scanned_ticket_info["Ticket_GameNumber"]))
+                   INSERT INTO SalesLog (ActiveBookID, prev_TicketNum, current_TicketNum, Ticket_Name, Ticket_GameNumber)
+                   VALUES (?, ?, ?, ?, ?)
+                   """, (scanned_ticket_info["ActiveBookID"], scanned_ticket_info["prev_TicketNum"], scanned_ticket_info["current_TicketNum"],
+                         scanned_ticket_info["Ticket_Name"], scanned_ticket_info["Ticket_GameNumber"]))
     
     conn.commit()
     
@@ -247,7 +247,55 @@ def delete_sales_log_by_book_id(db_path, book_id):
     conn.commit()
     conn.close()
     
-def add_daily_totals(cursor, conn, daily_totals):
+def update_pending_sales_log_report_id(db_path, report_id):
+    initialize_database(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        UPDATE SalesLog
+        SET ReportID = ?
+        WHERE ReportID = 'Pending';
+        """, (report_id,))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error updating pending sales log: {e}")
+        
+    conn.close()
+    
+def update_sales_log_prev_TicketNum(db_path, prev_TicketNum, report_id, ActiveBookID):
+    initialize_database(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        UPDATE SalesLog
+        SET prev_TicketNum = ?
+        WHERE ReportID = ? AND ActiveBookID = ?;
+        """, (prev_TicketNum, report_id, ActiveBookID))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error updating pending sales log: {e}")
+        
+    conn.close()
+    
+def update_sales_log_current_TicketNum(db_path, current_TicketNum, report_id, ActiveBookID):
+    initialize_database(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        UPDATE SalesLog
+        SET current_TicketNum = ?
+        WHERE ReportID = ? AND ActiveBookID = ?;
+        """,  (current_TicketNum, report_id, ActiveBookID))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error updating sales log: {e}")
+        
+    conn.close()
+    
+def add_daily_totals(cursor, conn, daily_totals): # add_Sale_Report
     cursor.execute('''
         INSERT INTO SaleReport (
             ReportID,
@@ -255,17 +303,15 @@ def add_daily_totals(cursor, conn, daily_totals):
             OnlineTicketSold,
             InstantTicketCashed,
             OnlineTicketCashed,
-            CashOnHand,
-            TotalDue
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            CashOnHand
+        ) VALUES (?, ?, ?, ?, ?, ?)
     ''', (
         daily_totals['ReportID'],
         daily_totals['instant_sold'],
         daily_totals['online_sold'],
         daily_totals['instant_cashed'],
         daily_totals['online_cashed'],
-        daily_totals['cash_on_hand'],
-        daily_totals["total_due"],
+        daily_totals['cash_on_hand']
     ))
 
     conn.commit()
@@ -280,20 +326,20 @@ def insert_daily_totals(db_path, daily_totals):
         print(f"Daily total insertion error: {e}")
         
     conn.close()
-    
-def update_pending_sales_log_report_id(db_path, report_id):
+
+def update_sale_report_instant_sold(db_path, instant_sold, report_id):
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     try:
         cursor.execute("""
-        UPDATE SalesLog
-        SET ReportID = ?
-        WHERE ReportID = 'Pending';
-        """, (report_id,))
+        UPDATE SaleReport
+        SET InstantTicketSold = ?
+        WHERE ReportID = ?;
+        """,  (instant_sold, report_id))
         conn.commit()
     except sqlite3.Error as e:
-        print(f"Error updating pending sales log: {e}")
+        print(f"Error updating sales report instant sold: {e}")
         
     conn.close()
     

@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS SaleReport (
     InstantTicketCashed INTEGER NOT NULL DEFAULT 0,
     OnlineTicketCashed INTEGER NOT NULL DEFAULT 0,
     CashOnHand INTEGER NOT NULL DEFAULT 0,
-    TotalDue INTEGER NOT NULL DEFAULT 0,
+    TotalDue INTEGER GENERATED ALWAYS AS ((InstantTicketSold + OnlineTicketSold) - (InstantTicketCashed + OnlineTicketCashed)) STORED, 
     FOREIGN KEY (ReportID) REFERENCES SaleLog(ReportID)
 );
 
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS SalesLog (
     ActiveBookID Text NOT NULL, -- Book
     prev_TicketNum INTEGER NOT NULL,
     current_TicketNum INTEGER NOT NULL,
-    Ticket_Sold_Quantity INTEGER NOT NULL,
+    Ticket_Sold_Quantity INTEGER GENERATED ALWAYS AS (prev_TicketNum - current_TicketNum) STORED,
     Ticket_Name TEXT,
     Ticket_GameNumber TEXT,
     PRIMARY KEY (ReportID, ActiveBookID)

@@ -44,14 +44,29 @@
             const allEditButtons = document.getElementsByClassName("edit_button");
             const openCell = getOpenCellByBookId(bookID);
             const closeCell = getCloseCellByBookId(bookID);
-            console.log(allEditButtons);
+
 
             if (img.src.includes('Check_Mark.png')){
                 img.src = "{{ url_for('static', filename='Edit_Icon.png') }}";
                 button.style.backgroundColor = "#4f46e5";
                 openCell.innerHTML = openCell.firstChild.value;
                 closeCell.innerHTML = closeCell.firstChild.value;
-                
+                const instant_sold = document.getElementById('instant_sold').value
+
+                // Now send the new values to be updated at this bookID and reportID 
+                fetch('/update_salesLog', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ bookID: bookID, reportID: {{report_id}}, open: openCell.innerHTML, close: closeCell.innerHTML, instant_sold: instant_sold})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;  // Manual redirect
+                    }
+                });
 
             } else {    
                 
@@ -138,7 +153,13 @@
                 <td class="BookID">{{ log["ActiveBookID"] }}</td>
                 <td class="Open" >{{ log['Open'] }}</td>
                 <td class="Close">{{ log["Close"] }}</td>
-                <td>{{ log["Sold"] }}</td>
+                <td>
+                    {% if log['Open'] is not none and log['Close'] is not none %}
+                        {{ (log['Open'] - log['Close']) }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
                 <td class="edit_button_row">
                     <button class="edit_button" onclick="EditMode(this, '{{log['ActiveBookID']}}')">
                         <img src="{{ url_for('static', filename='Edit_Icon.png') }}" alt="Edit">
@@ -154,26 +175,26 @@
     </table>
 
     <h2>Report Totals</h2>
-    <form method="POST" action="/submit" class="daily-totals-form">
+    <form method="POST" action="/update_sale_report/{{report_id}}" class="daily-totals-form">
         <label for="instant_sold">Instant Tickets Sold:</label> $
         <input name="instant_sold" id="instant_sold" value="{{sale_report["InstantTicketSold"]}}" readonly><br><br>
 
         <label for="online_sold">Online Tickets Sold:</label>
-        <input type="number" name="online_sold" id="online_sold" value="{{sale_report["OnlineTicketSold"]}}" readonly><br><br>
+        <input type="number" name="online_sold" id="online_sold" value="{{sale_report["OnlineTicketSold"]}}" ><br><br>
 
         <label for="instant_cashed">Instant Tickets Cashed:</label>
-        <input type="number" name="instant_cashed" id="instant_cashed" value="{{sale_report["InstantTicketCashed"]}}" readonly><br><br>
+        <input type="number" name="instant_cashed" id="instant_cashed" value="{{sale_report["InstantTicketCashed"]}}" ><br><br>
 
         <label for="online_cashed">Online Tickets Cashed:</label>
-        <input type="number" name="online_cashed" id="online_cashed" value="{{sale_report["OnlineTicketCashed"]}}" readonly><br><br>
+        <input type="number" name="online_cashed" id="online_cashed" value="{{sale_report["OnlineTicketCashed"]}}" ><br><br>
 
         <label for="cash_on_hand">Cash On Hand:</label>
-        <input type="number" name="cash_on_hand" id="cash_on_hand" value="{{sale_report["CashOnHand"]}}" readonly><br><br>
+        <input type="number" name="cash_on_hand" id="cash_on_hand" value="{{sale_report["CashOnHand"]}}" ><br><br>
 
         <label for="total_due">Total Due:</label>
         <input name="total_due" id="total_due" value="{{sale_report["TotalDue"]}}" readonly><br><br>
 
-        <button type="submit">Submit</button>
+        <button type="submit">Save</button>
     </form>
 </body>
 </html>

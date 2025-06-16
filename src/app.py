@@ -14,6 +14,7 @@ app = Flask(__name__)
 # Feature: Error UI for user
 # Issue: Sold should take into account that a ticket was found today
 # Issue: 999
+# SQLite version is ≥ 3.31.0
 
 # Get database path
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -118,16 +119,41 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
     # Add a sales log for this scan
     activate_book_isAtTicketNumber = DatabaseQueries.get_activated_book_isAtTicketNumber(db_path, book_id)
     # ---- Calulateing sold (999 will change this)
-    sold = activate_book_isAtTicketNumber[0] - int(lastest_ticket_number)
     sale_log_info = {
         "ActiveBookID": book_id,
         "prev_TicketNum": activate_book_isAtTicketNumber[0], # index 4 is the isAtTicketNumber
         "current_TicketNum": lastest_ticket_number,
-        "Ticket_Sold_Quantity": sold,
         "Ticket_Name": DatabaseQueries.get_ticket_name(db_path, game_number),
         "Ticket_GameNumber": game_number
     }
     Database.insert_sales_log(db_path, sale_log_info)
+    
+@app.route("/update_salesLog", methods=["GET", "POST"])
+def update_sales_log():
+    data = request.get_json()
+    book_id = data.get('bookID')
+    report_id = data.get("reportID")
+    open = data.get("open")
+    close = data.get("close")
+    instant_sold = data.get("instant_sold")
+    
+    Database.update_sales_log_prev_TicketNum(db_path, open, report_id, book_id)
+    Database.update_sales_log_current_TicketNum(db_path, close, report_id, book_id)
+    # A update in sale log means the instant sold should also be updated
+    Database.update_sale_report_instant_sold(db_path, instant_sold, report_id)
+    
+    return jsonify({ "redirect_url": url_for("edit_single_report", report_id=report_id)})
+
+@app.route("update_sale_report/<report_id>", methods=["GET","POST"])
+def update_sale_report(report_id):
+    if request.method == "POST":
+        instant_sold = request.form["instant_sold"]
+        online_sold = request.form["online_sold"]
+        instant_cashed = request.form["instant_cashed"]
+        online_cashed = request.form["online_cashed"]
+        cash_on_hand = request.form["cash_on_hand"]
+
+        
  
 def calculate_instant_tickets_sold(ReportID):
     instant_tickets_sold_quantanties = DatabaseQueries.get_all_instant_tickets_sold_quantity(db_path, ReportID)
@@ -153,8 +179,7 @@ def do_submit_procedure():
         "online_sold": request.form.get('online_sold'),
         "instant_cashed": request.form.get('instant_cashed'),
         "online_cashed":request.form.get('online_cashed'),
-        "cash_on_hand": request.form.get('cash_on_hand'),
-        "total_due": request.form.get('total_due')
+        "cash_on_hand": request.form.get('cash_on_hand')
     }
     
     # Insert the daily_totals in the Daily_Report Database.
@@ -311,7 +336,10 @@ def edit_single_report(report_id):
     # Query the sales logs related to this report ID
     sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
     sale_report = DatabaseQueries.get_daily_report(db_path, report_id)
-    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report)
+    # Instant ticket sold recalculation
+    instant_tickets_sold_total = calculate_instant_tickets_sold(ReportID=report_id) 
+    sale_report["InstantTicketSold"] = instant_tickets_sold_total
+    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report) 
     
 if __name__ == '__main__':
     app.run(debug=True)
