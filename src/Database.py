@@ -294,7 +294,27 @@ def update_sales_log_current_TicketNum(db_path, current_TicketNum, report_id, Ac
         print(f"Error updating sales log: {e}")
         
     conn.close()
-    
+
+def update_sale_report(db_path, instant_sold, online_sold, instant_cashed, online_cashed, cash_on_hand, report_id, date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S")):
+    initialize_database(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE SaleReport
+            SET
+                InstantTicketSold = ?,
+                OnlineTicketSold = ?,
+                InstantTicketCashed = ?,
+                OnlineTicketCashed = ?,
+                CashOnHand = ?,
+                ReportTime = ?
+            WHERE ReportID = ?
+        """, (instant_sold, online_sold, instant_cashed, online_cashed, cash_on_hand, date, report_id))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error updating sale report: {e}")
+
 def add_daily_totals(cursor, conn, daily_totals): # add_Sale_Report
     cursor.execute('''
         INSERT INTO SaleReport (

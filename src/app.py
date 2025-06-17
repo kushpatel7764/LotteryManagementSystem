@@ -144,7 +144,7 @@ def update_sales_log():
     
     return jsonify({ "redirect_url": url_for("edit_single_report", report_id=report_id)})
 
-@app.route("update_sale_report/<report_id>", methods=["GET","POST"])
+@app.route("/update_sale_report/<report_id>", methods=["GET","POST"])
 def update_sale_report(report_id):
     if request.method == "POST":
         instant_sold = request.form["instant_sold"]
@@ -152,8 +152,9 @@ def update_sale_report(report_id):
         instant_cashed = request.form["instant_cashed"]
         online_cashed = request.form["online_cashed"]
         cash_on_hand = request.form["cash_on_hand"]
-
         
+        Database.update_sale_report(db_path, instant_sold, online_sold, instant_cashed, online_cashed, cash_on_hand, report_id)
+    return redirect(url_for("edit_single_report", report_id=report_id))
  
 def calculate_instant_tickets_sold(ReportID):
     instant_tickets_sold_quantanties = DatabaseQueries.get_all_instant_tickets_sold_quantity(db_path, ReportID)
