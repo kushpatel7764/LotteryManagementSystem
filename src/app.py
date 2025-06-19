@@ -139,8 +139,30 @@ def update_sales_log():
     
     Database.update_sales_log_prev_TicketNum(db_path, open, report_id, book_id)
     Database.update_sales_log_current_TicketNum(db_path, close, report_id, book_id)
+
+    previous_reportID = int(report_id) - 1
+    next_reportID =  int(report_id) + 1
+    latest_reportID = int(DatabaseQueries.next_report_ID(db_path)) - 1
+
+    if (not previous_reportID < 1):
+        Database.update_ticketTimeline_ticketnumber(db_path, previous_reportID, book_id, close)
+        Database.update_sales_log_current_TicketNum(db_path, open, previous_reportID, book_id)
+        prev_instant_sold = calculate_instant_tickets_sold(previous_reportID)
+        Database.update_sale_report_instant_sold(db_path, prev_instant_sold, previous_reportID)
+    
+    if (next_reportID <= latest_reportID):
+        Database.update_sales_log_prev_TicketNum(db_path, close, next_reportID, book_id)
+        next_instant_sold = calculate_instant_tickets_sold(next_reportID)
+        Database.update_sale_report_instant_sold(db_path, next_instant_sold, next_reportID)
+
+    if (latest_reportID == report_id):
+        Database.update_isAtTicketNumber_val(db_path, book_id, close)
+
+
+
     # A update in sale log means the instant sold should also be updated
     Database.update_sale_report_instant_sold(db_path, instant_sold, report_id)
+    Database.update_ticketTimeline_ticketnumber(db_path, report_id, book_id, close)
     
     return jsonify({ "redirect_url": url_for("edit_single_report", report_id=report_id)})
 

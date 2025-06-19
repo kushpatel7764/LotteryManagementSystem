@@ -160,11 +160,13 @@
                         N/A
                     {% endif %}
                 </td>
-                <td class="edit_button_row">
-                    <button class="edit_button" onclick="EditMode(this, '{{log['ActiveBookID']}}')">
-                        <img src="{{ url_for('static', filename='Edit_Icon.png') }}" alt="Edit">
-                    </button>
-                </td>
+                {% if log['Open'] != -1 and log['Close'] != -1 %}
+                    <td class="edit_button_row">
+                        <button class="edit_button" onclick="EditMode(this, '{{log['ActiveBookID']}}')">
+                            <img src="{{ url_for('static', filename='Edit_Icon.png') }}" alt="Edit">
+                        </button>
+                    </td>
+                {% endif %}
             </tr>
         {% else %}
             <tr>

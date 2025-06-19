@@ -411,6 +411,28 @@ def update_isAtTicketNumber(db_path):
 
     conn.close()
     
+def update_isAtTicketNumber_val(db_path, bookID, newVal):
+    # Connect to your database
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    try:
+        # Update each row: set isAtTicketNumber = countingTicketNumber
+        cursor.execute('''
+            UPDATE ActivatedBooks
+            SET isAtTicketNumber = ?
+            WHERE ActiveBookID = ?
+        ''',(newVal, bookID))
+
+        # Commit changes and close connection
+        conn.commit()
+    except sqlite3.Error as e:
+        conn.rollback()
+        print(f"Error updating isAtTicketNumber: {e}")
+
+    conn.close()
+    
+
 def clear_countingTicketNumbers(db_path):
     # Connect to your database
     conn = sqlite3.connect(db_path)
@@ -466,5 +488,22 @@ def delete_Book(db_path, book_id):
         conn.commit()
     except sqlite3.Error as e:
         print(f"Book deletion error: {e}")
+        
+    conn.close()
+
+def update_ticketTimeline_ticketnumber(db_path, reportID, bookID, ticketNumber):
+    initialize_database(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE TicketTimeLine
+            SET TicketNumber = ?
+            WHERE ReportID = ? AND BookID = ?;
+        """, (ticketNumber, reportID, bookID))
+
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Ticket Name insertion error: {e}")
         
     conn.close()
