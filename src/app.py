@@ -310,10 +310,14 @@ def activate_book():
 
 def activate_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
+    ticket_num = scanned_info.get_ticket_num()
+    if ticket_num == "999":
+        ticket_num = int(scanned_info.get_book_amount()) - 1
+        
     activate_book_info = {
         "ActivationID": scanned_code,
         "ActiveBookID": scanned_info.get_book_id(),
-        "isAtTicketNumber": scanned_info.get_ticket_num()
+        "isAtTicketNumber": ticket_num
     }
     # The book being activated must already be registered in the system. 
     # So check to make sure that the book being instered is prensent in the system and is not already activated. 

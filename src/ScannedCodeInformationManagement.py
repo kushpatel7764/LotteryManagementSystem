@@ -26,6 +26,9 @@ class ScannedCodeManagement:
         ticket number is: 100
         """
         tick_num = self.scanned_code[10:13]
+        
+        if tick_num == "999":
+            tick_num = int(self.get_book_amount()) - 1
         return tick_num
     
         
