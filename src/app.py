@@ -13,7 +13,7 @@ app = Flask(__name__)
 # Feature: recreate invoice report?
 # Feature: Error UI for user
 # Issue: Sold should take into account that a ticket was found today
-# Issue: 999
+# Issue: undo isSold?
 # SQLite version is ≥ 3.31.0
 
 # Get database path
