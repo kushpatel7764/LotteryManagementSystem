@@ -7,10 +7,10 @@ import generate_invoice
 import game_number_lookup_table
 from utc_to_local_time import convert_utc_to_local
 from datetime import datetime
-
+from config_utils import load_config
 
 app = Flask(__name__)
-# Feature: Edit lottery, recreate invoice report?
+# Feature: recreate invoice report?
 # Feature: Error UI for user
 # Issue: Sold should take into account that a ticket was found today
 # Issue: 999
