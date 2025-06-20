@@ -135,7 +135,6 @@ def update_sales_log():
     report_id = data.get("reportID")
     open = data.get("open")
     close = data.get("close")
-    instant_sold = data.get("instant_sold")
     
     Database.update_sales_log_prev_TicketNum(db_path, open, report_id, book_id)
     Database.update_sales_log_current_TicketNum(db_path, close, report_id, book_id)
@@ -145,7 +144,7 @@ def update_sales_log():
     latest_reportID = int(DatabaseQueries.next_report_ID(db_path)) - 1
 
     if (not previous_reportID < 1):
-        Database.update_ticketTimeline_ticketnumber(db_path, previous_reportID, book_id, close)
+        Database.update_ticketTimeline_ticketnumber(db_path, previous_reportID, book_id, open)
         Database.update_sales_log_current_TicketNum(db_path, open, previous_reportID, book_id)
         prev_instant_sold = calculate_instant_tickets_sold(previous_reportID)
         Database.update_sale_report_instant_sold(db_path, prev_instant_sold, previous_reportID)
@@ -161,6 +160,7 @@ def update_sales_log():
 
 
     # A update in sale log means the instant sold should also be updated
+    instant_sold = calculate_instant_tickets_sold(report_id)
     Database.update_sale_report_instant_sold(db_path, instant_sold, report_id)
     Database.update_ticketTimeline_ticketnumber(db_path, report_id, book_id, close)
     
