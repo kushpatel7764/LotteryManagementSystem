@@ -9,8 +9,9 @@ from utc_to_local_time import convert_utc_to_local
 from datetime import datetime
 from config_utils import load_config
 
+
 app = Flask(__name__)
-# Feature: recreate invoice report?
+# Feature: Edit lottery, recreate invoice report?
 # Feature: Error UI for user
 # Issue: Sold should take into account that a ticket was found today
 # Issue: 999
@@ -288,6 +289,15 @@ def delete_book():
     Database.delete_Book(db_path, book_id)
 
     return jsonify({ "redirect_url": url_for('books_managment') })
+
+@app.route('/settings', methods=["GET","POST"])
+def settings():
+    ticket_order = request.form.get("ticket_order")
+    print(ticket_order)
+    config_file = load_config()
+    config_file["ticket_order"] = ticket_order
+
+    return render_template("settings.html")
     
 @app.route('/deactivate_book', methods=['POST', 'GET'])
 def deactivate_book():
@@ -310,14 +320,11 @@ def activate_book():
 
 def activate_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
-    ticket_num = scanned_info.get_ticket_num()
-    if ticket_num == "999":
-        ticket_num = int(scanned_info.get_book_amount()) - 1
         
     activate_book_info = {
         "ActivationID": scanned_code,
         "ActiveBookID": scanned_info.get_book_id(),
-        "isAtTicketNumber": ticket_num
+        "isAtTicketNumber": scanned_info.get_ticket_num()
     }
     # The book being activated must already be registered in the system. 
     # So check to make sure that the book being instered is prensent in the system and is not already activated. 

@@ -1,3 +1,5 @@
+from config_utils import load_config
+
 class ScannedCodeManagement:
     def __init__(self, scanned_code):
         self.scanned_code = scanned_code
@@ -27,8 +29,13 @@ class ScannedCodeManagement:
         """
         tick_num = self.scanned_code[10:13]
         
-        if tick_num == "999":
-            tick_num = int(self.get_book_amount()) - 1
+        if tick_num == "999" :
+            config_file = load_config()
+            descending = True if config_file["ticket_order"] == "descending" else False
+
+            tick_num = (int(self.get_book_amount()) - 1) if descending else 0
+            
+            
         return tick_num
     
         

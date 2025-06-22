@@ -4,8 +4,20 @@
     <meta charset="UTF-8">
     <title>Lottery Ticket App - Home</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <style>
+        #settings_btn{
+            background-color: rgb(180, 180, 180);
+        
+            margin-top: 20%;
+            padding-left: 50px;
+            padding-right: 50px;
+        }
+
+
+    </style>
 </head>
 <body>
+
     <div class="home-container">
         <h1>Welcome to the Lottery Ticket App</h1>
         <div class="nav-buttons">
@@ -13,6 +25,7 @@
             <a href="{{ url_for('books_managment') }}"><button class="button">Books Managment</button></a>
             <a href="{{ url_for('edit_reports') }}"><button class="button">Edit Reports</button></a>
         </div>
+        <a href="{{ url_for('settings') }}"><button class="button" id="settings_btn">Settings</button></a>
     </div>
 </body>
 </html>

@@ -226,7 +226,7 @@ def add_sales_log (cursor, conn, scanned_ticket_info):
                          scanned_ticket_info["Ticket_Name"], scanned_ticket_info["Ticket_GameNumber"]))
     
     conn.commit()
-    
+
 def insert_sales_log (database_path, scanned_ticket_info):
     
     initialize_database(database_path)

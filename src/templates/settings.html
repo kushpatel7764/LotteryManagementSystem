@@ -1,0 +1,36 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <script>
+        function ChangeOrder(event){
+            event.preventDefault();
+
+            const input = document.getElementById("ticket_order_input");
+            const button = document.getElementById("ticket_order_btn");
+
+            if (input.value == "ascending"){
+                input.value = "descending";
+                button.innerHTML = "Descending";
+            } else {
+                input.value = "ascending";
+                button.innerHTML = "Ascending";
+            }
+
+            document.getElementById("orderForm").submit();
+        }
+    </script>
+
+</head>
+<body>
+    <form method="post" action="/settings" id="orderForm">
+        <label> Ticket Order:</label>
+        <select name="ticket_order" id="ticket_order_select" onchange="document.getElementById('orderForm').submit();">
+            <option value="ascending">Ascending</option>
+            <option value="descending">Descending</option>
+        </select>
+    </form>
+</body>
+</html>

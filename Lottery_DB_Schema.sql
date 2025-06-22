@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS TicketTimeLine (
     ScanID Text, 
     ReportID Text NOT NULL DEFAULT "Pending",
     BookID Text NOT NULL,
-    TicketNumber INTEGER NOT NULL,
+    TicketNumber INTEGER NOT NULL, -- the close number of the report
     TicketName TEXT,
     TicketPrice INTEGER NOT NULL,
     created_date DATE DEFAULT CURRENT_DATE,
