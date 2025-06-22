@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import datetime
+from config_utils import load_config
 
 # Connect to database
 def setup_database_schema_with_sql_file(cursor, conn, sql_filename):
@@ -219,7 +220,11 @@ def add_sales_log (cursor, conn, scanned_ticket_info):
     Ticket_Name TEXT,
     Ticket_GameNumber VARCHAR(255),
     """
-    sold = int(scanned_ticket_info["prev_TicketNum"]) - int(scanned_ticket_info["current_TicketNum"])
+    counting_order = load_config()['ticket_order']
+    if counting_order == "descending":
+        sold = int(scanned_ticket_info["prev_TicketNum"]) - int(scanned_ticket_info["current_TicketNum"])
+    else:
+        sold = int(scanned_ticket_info["current_TicketNum"]) - int(scanned_ticket_info["prev_TicketNum"])
     cursor.execute("""
                    INSERT INTO SalesLog (ActiveBookID, prev_TicketNum, current_TicketNum, Ticket_Sold_Quantity, Ticket_Name, Ticket_GameNumber)
                    VALUES (?, ?, ?, ?, ?, ?)
@@ -283,7 +288,11 @@ def update_sales_log_prev_TicketNum(db_path, prev_TicketNum, report_id, ActiveBo
             return
 
         current_TicketNum = int(row[0])
-        sold = int(prev_TicketNum) - current_TicketNum
+        counting_order = load_config()['ticket_order']
+        if counting_order == "descending":
+            sold = int(prev_TicketNum) - current_TicketNum
+        else:
+            sold = current_TicketNum - int(prev_TicketNum)
         
         cursor.execute("""
         UPDATE SalesLog
@@ -314,7 +323,11 @@ def update_sales_log_current_TicketNum(db_path, current_TicketNum, report_id, Ac
             return
 
         prev_TicketNum = int(row[0])
-        sold = prev_TicketNum - int(current_TicketNum)
+        counting_order = load_config()['ticket_order']
+        if counting_order == "descending":
+            sold = int(prev_TicketNum) - current_TicketNum
+        else:
+            sold = current_TicketNum - int(prev_TicketNum)
         
         cursor.execute("""
         UPDATE SalesLog

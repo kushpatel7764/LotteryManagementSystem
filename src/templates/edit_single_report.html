@@ -155,7 +155,11 @@
                 <td class="Close">{{ log["Close"] }}</td>
                 <td>
                     {% if log['Open'] is not none and log['Close'] is not none %}
-                        {{ (log['Open'] - log['Close']) }}
+                        {% if counting_order == "descending"%}
+                            {{ (log['Open'] - log['Close']) }}
+                        {% else %}
+                            {{ (log['Close'] - log['Open']) }}
+                        {% endif %}
                     {% else %}
                         N/A
                     {% endif %}

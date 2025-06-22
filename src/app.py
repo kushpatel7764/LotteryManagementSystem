@@ -54,7 +54,9 @@ def scan_tickets():
     # Instant ticket sold calculation
     instant_tickets_sold_total = calculate_instant_tickets_sold(ReportID="Pending") 
     
-    return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total)
+    # Get the counting order to calc sold
+    counting_order = load_config()['ticket_order']
+    return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total, counting_order=counting_order)
 
 @app.route("/undo_scan", methods=["POST"])
 def undo_scan():
@@ -366,7 +368,10 @@ def edit_single_report(report_id):
     # Instant ticket sold recalculation
     instant_tickets_sold_total = calculate_instant_tickets_sold(ReportID=report_id) 
     sale_report["InstantTicketSold"] = instant_tickets_sold_total
-    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report) 
+    
+    # Get the counting order to calc sold
+    counting_order = load_config()['ticket_order']
+    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order) 
     
 if __name__ == '__main__':
     app.run(debug=True)
