@@ -28,8 +28,8 @@
     <form method="post" action="/settings" id="orderForm">
         <label> Ticket Order:</label>
         <select name="ticket_order" id="ticket_order_select" onchange="document.getElementById('orderForm').submit();">
-            <option value="ascending">Ascending</option>
-            <option value="descending">Descending</option>
+            <option value="ascending" {% if counting_order == 'ascending' %}selected{% endif %}>Ascending</option>
+            <option value="descending" {% if counting_order == 'descending' %}selected{% endif %}>Descending</option>
         </select>
     </form>
 </body>

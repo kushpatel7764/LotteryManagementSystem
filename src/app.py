@@ -8,13 +8,14 @@ import game_number_lookup_table
 from utc_to_local_time import convert_utc_to_local
 from datetime import datetime
 from config_utils import load_config
+from config_utils import update_ticket_order
 
 
 app = Flask(__name__)
 # Feature: Edit lottery, recreate invoice report?
 # Feature: Error UI for user
 # Issue: Sold should take into account that a ticket was found today
-# Issue: 999
+# Issue: undo isSold?
 # SQLite version is ≥ 3.31.0
 
 # Get database path
@@ -55,7 +56,9 @@ def scan_tickets():
     # Instant ticket sold calculation
     instant_tickets_sold_total = calculate_instant_tickets_sold(ReportID="Pending") 
     
-    return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total)
+    # Get the counting order to calc sold
+    counting_order = load_config()['ticket_order']
+    return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total, counting_order=counting_order)
 
 @app.route("/undo_scan", methods=["POST"])
 def undo_scan():
@@ -293,11 +296,11 @@ def delete_book():
 @app.route('/settings', methods=["GET","POST"])
 def settings():
     ticket_order = request.form.get("ticket_order")
-    print(ticket_order)
-    config_file = load_config()
-    config_file["ticket_order"] = ticket_order
-
-    return render_template("settings.html")
+    
+    update_ticket_order(ticket_order)
+    
+    counting_order = load_config()['ticket_order']
+    return render_template("settings.html", counting_order = counting_order)
     
 @app.route('/deactivate_book', methods=['POST', 'GET'])
 def deactivate_book():
@@ -373,7 +376,10 @@ def edit_single_report(report_id):
     # Instant ticket sold recalculation
     instant_tickets_sold_total = calculate_instant_tickets_sold(ReportID=report_id) 
     sale_report["InstantTicketSold"] = instant_tickets_sold_total
-    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report) 
+    
+    # Get the counting order to calc sold
+    counting_order = load_config()['ticket_order']
+    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order) 
     
 if __name__ == '__main__':
     app.run(debug=True)

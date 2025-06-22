@@ -93,7 +93,11 @@
                 </td>
                 <td>
                     {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
-                        {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
+                        {% if counting_order == "descending"%}
+                            {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
+                        {% else %}
+                            {{ ( book['countingTicketNumber'] - book['isAtTicketNumber'] ) }}
+                        {% endif %}
                     {% else %}
                         N/A
                     {% endif %}

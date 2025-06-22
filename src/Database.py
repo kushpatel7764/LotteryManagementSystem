@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import datetime
+from config_utils import load_config
 
 # Connect to database
 def setup_database_schema_with_sql_file(cursor, conn, sql_filename):
@@ -219,10 +220,15 @@ def add_sales_log (cursor, conn, scanned_ticket_info):
     Ticket_Name TEXT,
     Ticket_GameNumber VARCHAR(255),
     """
+    counting_order = load_config()['ticket_order']
+    if counting_order == "descending":
+        sold = int(scanned_ticket_info["prev_TicketNum"]) - int(scanned_ticket_info["current_TicketNum"])
+    else:
+        sold = int(scanned_ticket_info["current_TicketNum"]) - int(scanned_ticket_info["prev_TicketNum"])
     cursor.execute("""
-                   INSERT INTO SalesLog (ActiveBookID, prev_TicketNum, current_TicketNum, Ticket_Name, Ticket_GameNumber)
-                   VALUES (?, ?, ?, ?, ?)
-                   """, (scanned_ticket_info["ActiveBookID"], scanned_ticket_info["prev_TicketNum"], scanned_ticket_info["current_TicketNum"],
+                   INSERT INTO SalesLog (ActiveBookID, prev_TicketNum, current_TicketNum, Ticket_Sold_Quantity, Ticket_Name, Ticket_GameNumber)
+                   VALUES (?, ?, ?, ?, ?, ?)
+                   """, (scanned_ticket_info["ActiveBookID"], scanned_ticket_info["prev_TicketNum"], scanned_ticket_info["current_TicketNum"], sold,
                          scanned_ticket_info["Ticket_Name"], scanned_ticket_info["Ticket_GameNumber"]))
     
     conn.commit()
@@ -264,15 +270,35 @@ def update_pending_sales_log_report_id(db_path, report_id):
     conn.close()
     
 def update_sales_log_prev_TicketNum(db_path, prev_TicketNum, report_id, ActiveBookID):
+    # Also updates the qunatity sold
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
+   
     try:
+        # Step 1: Get current_TicketNum from the DB
+        cursor.execute("""
+            SELECT current_TicketNum FROM SalesLog
+            WHERE ReportID = ? AND ActiveBookID = ?;
+        """, (report_id, ActiveBookID))
+        
+        row = cursor.fetchone()
+        if row is None:
+            print("No matching SalesLog entry found.")
+            return
+
+        current_TicketNum = int(row[0])
+        counting_order = load_config()['ticket_order']
+        if counting_order == "descending":
+            sold = int(prev_TicketNum) - current_TicketNum
+        else:
+            sold = current_TicketNum - int(prev_TicketNum)
+        
         cursor.execute("""
         UPDATE SalesLog
-        SET prev_TicketNum = ?
+        SET prev_TicketNum = ?, Ticket_Sold_Quantity = ?
         WHERE ReportID = ? AND ActiveBookID = ?;
-        """, (prev_TicketNum, report_id, ActiveBookID))
+        """, (prev_TicketNum, sold, report_id, ActiveBookID))
         conn.commit()
     except sqlite3.Error as e:
         print(f"Error updating pending sales log: {e}")
@@ -280,15 +306,34 @@ def update_sales_log_prev_TicketNum(db_path, prev_TicketNum, report_id, ActiveBo
     conn.close()
     
 def update_sales_log_current_TicketNum(db_path, current_TicketNum, report_id, ActiveBookID):
+    # Also updates the qunatity sold
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     try:
+        # Step 1: Get current_TicketNum from the DB
+        cursor.execute("""
+            SELECT prev_TicketNum FROM SalesLog
+            WHERE ReportID = ? AND ActiveBookID = ?;
+        """, (report_id, ActiveBookID))
+        
+        row = cursor.fetchone()
+        if row is None:
+            print("No matching SalesLog entry found.")
+            return
+
+        prev_TicketNum = int(row[0])
+        counting_order = load_config()['ticket_order']
+        if counting_order == "descending":
+            sold = int(prev_TicketNum) - current_TicketNum
+        else:
+            sold = current_TicketNum - int(prev_TicketNum)
+        
         cursor.execute("""
         UPDATE SalesLog
-        SET current_TicketNum = ?
+        SET current_TicketNum = ?, Ticket_Sold_Quantity = ?
         WHERE ReportID = ? AND ActiveBookID = ?;
-        """,  (current_TicketNum, report_id, ActiveBookID))
+        """,  (current_TicketNum, sold, report_id, ActiveBookID))
         conn.commit()
     except sqlite3.Error as e:
         print(f"Error updating sales log: {e}")
