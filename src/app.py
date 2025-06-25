@@ -13,10 +13,6 @@ from config_utils import update_invoice_output_path
 
 
 app = Flask(__name__)
-# Feature: Edit lottery, recreate invoice report?
-# Feature: Error UI for user
-# Issue: Sold should take into account that a ticket was found today
-# Issue: undo isSold?
 # SQLite version is ≥ 3.31.0
 
 # Get database path
