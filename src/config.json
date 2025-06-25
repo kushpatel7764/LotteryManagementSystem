@@ -1,3 +1,4 @@
 {
-    "ticket_order": "ascending"
+    "ticket_order": null,
+    "invoice_output_path": null
 }

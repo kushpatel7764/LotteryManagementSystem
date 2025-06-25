@@ -23,14 +23,122 @@
         }
     </script>
 
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f4f8;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        form {
+            background: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        label {
+            font-size: 1.2em;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        select {
+            padding: 10px 15px;
+            font-size: 1em;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus {
+            border-color: #007BFF;
+        }
+
+        #settings_table{
+            border-spacing: 2%;
+            margin: 0 auto;
+        }
+        #settings_table td {
+            text-align: center;
+            padding: 10px;
+        }
+        #title{
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 40px;
+            color: #333;
+        }
+        #Navigation_Buttons {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4338ca;
+        }
+        .header-bar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        input{
+            padding: 10px 15px;
+            font-size: 1em;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+    </style>
 </head>
 <body>
-    <form method="post" action="/settings" id="orderForm">
-        <label> Ticket Order:</label>
-        <select name="ticket_order" id="ticket_order_select" onchange="document.getElementById('orderForm').submit();">
-            <option value="ascending" {% if counting_order == 'ascending' %}selected{% endif %}>Ascending</option>
-            <option value="descending" {% if counting_order == 'descending' %}selected{% endif %}>Descending</option>
-        </select>
-    </form>
+    <div class="header-bar">
+        <div id="Navigation_Buttons">
+            <button onclick="window.location.href='/scan_tickets'">Scan Tickets</button>
+            <button onclick="window.location.href='/books_managment'">Books Management</button>            
+            <button onclick="window.location.href='/'">Home</button>
+        </div>
+    </div>
+
+    <div id="settings_container">
+        <div id="title">Settings</div>
+        <table id="settings_table">
+            <tr>
+                <td>
+                    <form method="post" action="/settings" id="orderForm">
+                        <label>Ticket Order:</label>
+                        <select name="ticket_order" id="ticket_order_select" onchange="document.getElementById('orderForm').submit();">
+                            <option value="ascending" {% if counting_order == 'ascending' %}selected{% endif %}>Ascending</option>
+                            <option value="descending" {% if counting_order == 'descending' %}selected{% endif %}>Descending</option>
+                        </select>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" action="/settings" id="invoice_output_path">
+                        <label>Invoice Output Path:</label>
+                        <input type="text" id="invoice_output_path" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder"{% if invoice_output_path %} value="{{ invoice_output_path }}" {% endif %} onchange="document.getElementById('invoice_output_path').submit();">
+                    </form>
+                <td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>

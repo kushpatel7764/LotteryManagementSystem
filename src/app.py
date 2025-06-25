@@ -9,6 +9,7 @@ from utc_to_local_time import convert_utc_to_local
 from datetime import datetime
 from config_utils import load_config
 from config_utils import update_ticket_order
+from config_utils import update_invoice_output_path
 
 
 app = Flask(__name__)
@@ -296,11 +297,14 @@ def delete_book():
 @app.route('/settings', methods=["GET","POST"])
 def settings():
     ticket_order = request.form.get("ticket_order")
+    invoice_output_request = request.form.get("outputPath")
     
     update_ticket_order(ticket_order)
-    
+    update_invoice_output_path(invoice_output_request)
+
     counting_order = load_config()['ticket_order']
-    return render_template("settings.html", counting_order = counting_order)
+    invoice_output_path = load_config()['invoice_output_path']
+    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path)
     
 @app.route('/deactivate_book', methods=['POST', 'GET'])
 def deactivate_book():
