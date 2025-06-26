@@ -214,7 +214,7 @@ def do_submit_procedure():
     # Update "Pending" TicketTimeLine ReportID
     Database.update_pending_TicketTimeLine_report_id(db_path, next_ReportID)
     # Create a Invoice
-    create_daily_invoice(next_ReportID)
+    full_path = create_daily_invoice(next_ReportID)
     # Remove sold out books from current ActivatedBooks table using there book ids
     sold_out_books = DatabaseQueries.get_all_sold_books(db_path, next_ReportID)
     for book in sold_out_books:
