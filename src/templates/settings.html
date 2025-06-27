@@ -109,36 +109,36 @@
         }
     </style>
 </head>
-<body>
-    <div class="header-bar">
-        <div id="Navigation_Buttons">
-            <button onclick="window.location.href='/scan_tickets'">Scan Tickets</button>
-            <button onclick="window.location.href='/books_managment'">Books Management</button>            
-            <button onclick="window.location.href='/'">Home</button>
+    <body>
+        <div class="header-bar">
+            <div id="Navigation_Buttons">
+                <button onclick="window.location.href='/scan_tickets'">Scan Tickets</button>
+                <button onclick="window.location.href='/books_managment'">Books Management</button>            
+                <button onclick="window.location.href='/'">Home</button>
+            </div>
         </div>
-    </div>
 
-    <div id="settings_container">
-        <div id="title">Settings</div>
-        <table id="settings_table">
-            <tr>
-                <td>
-                    <form method="post" action="/settings" id="orderForm">
-                        <label>Ticket Order:</label>
-                        <select name="ticket_order" id="ticket_order_select" onchange="document.getElementById('orderForm').submit();">
-                            <option value="ascending" {% if counting_order == 'ascending' %}selected{% endif %}>Ascending</option>
-                            <option value="descending" {% if counting_order == 'descending' %}selected{% endif %}>Descending</option>
-                        </select>
-                    </form>
-                </td>
-                <td>
-                    <form method="post" action="/settings" id="invoice_output_path">
-                        <label>Invoice Output Path:</label>
-                        <input type="text" id="invoice_output_path" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder"{% if invoice_output_path %} value="{{ invoice_output_path }}" {% endif %} onchange="document.getElementById('invoice_output_path').submit();">
-                    </form>
-                <td>
-            </tr>
-        </table>
-    </div>
-</body>
+        <div id="settings_container">
+            <div id="title">Settings</div>
+            <table id="settings_table">
+                <tr>
+                    <td>
+                        <form method="post" action="/settings" id="orderForm">
+                            <label>Ticket Order:</label>
+                            <select name="ticket_order" id="ticket_order_select" onchange="document.getElementById('orderForm').submit();">
+                                <option value="ascending" {% if counting_order == 'ascending' %}selected{% endif %}>Ascending</option>
+                                <option value="descending" {% if counting_order == 'descending' %}selected{% endif %}>Descending</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" action="/settings" id="invoice_output_path">
+                            <label>Invoice Output Path:</label>
+                            <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder"{% if invoice_output_path %} value="{{ invoice_output_path }}" {% endif %} onchange="document.getElementById('invoice_output_path').submit();">
+                        </form>
+                    <td>
+                </tr>
+            </table>
+        </div>
+    </body>
 </html>

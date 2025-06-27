@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import send_file
 import os
 from ScannedCodeInformationManagement import ScannedCodeManagement
 import Database
@@ -229,6 +230,8 @@ def do_submit_procedure():
     Database.clear_countingTicketNumbers(db_path)
 
 def create_daily_invoice(ReportID, store_name="Scuttlebutts Liquors", address="407 Main St, Fairhaven, MA 02719", phone="(508) 999-5253", email="N/a", fileName="invoice_lottery.pdf"):
+
+    
     invoiceLog = DatabaseQueries.get_table_for_invoice(db_path, ReportID)
     store_info = {
         "Business Name": store_name,
@@ -384,7 +387,17 @@ def edit_single_report(report_id):
     # Get the counting order to calc sold
     counting_order = load_config()['ticket_order']
     return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order) 
+
+@app.route('/download/<int:report_id>', methods=['POST'])
+def download_modified_report(report_id):
+    sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
+    sale_report = DatabaseQueries.get_daily_report(db_path, report_id)
+    counting_order = load_config()['ticket_order']
+    if request.method == "POST":
+        create_daily_invoice(report_id)
+    return send_file(os.path.join(os.getcwd(), f"invoice_lottery.pdf"), as_attachment=True)
     
+
 if __name__ == '__main__':
     app.run(debug=True)
     
