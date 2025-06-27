@@ -133,14 +133,17 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
     
 @app.route("/update_salesLog", methods=["GET", "POST"])
 def update_sales_log():
+    updated_report_ids = []
     data = request.get_json()
     book_id = data.get('bookID')
     report_id = data.get("reportID")
     open = data.get("open")
     close = data.get("close")
     
+    
     Database.update_sales_log_prev_TicketNum(db_path, open, report_id, book_id)
     Database.update_sales_log_current_TicketNum(db_path, close, report_id, book_id)
+    updated_report_ids.append(report_id)
 
     previous_reportID = int(report_id) - 1
     next_reportID =  int(report_id) + 1
@@ -151,23 +154,25 @@ def update_sales_log():
         Database.update_sales_log_current_TicketNum(db_path, open, previous_reportID, book_id)
         prev_instant_sold = calculate_instant_tickets_sold(previous_reportID)
         Database.update_sale_report_instant_sold(db_path, prev_instant_sold, previous_reportID)
+        updated_report_ids.append(previous_reportID)
+        
     
     if (next_reportID <= latest_reportID):
         Database.update_sales_log_prev_TicketNum(db_path, close, next_reportID, book_id)
         next_instant_sold = calculate_instant_tickets_sold(next_reportID)
         Database.update_sale_report_instant_sold(db_path, next_instant_sold, next_reportID)
+        updated_report_ids.append(next_reportID)
 
     if (latest_reportID == report_id):
         Database.update_isAtTicketNumber_val(db_path, book_id, close)
 
-
-
+    updated_report_ids_str = updated_report_ids.__str__()
     # A update in sale log means the instant sold should also be updated
     instant_sold = calculate_instant_tickets_sold(report_id)
     Database.update_sale_report_instant_sold(db_path, instant_sold, report_id)
     Database.update_ticketTimeline_ticketnumber(db_path, report_id, book_id, close)
     
-    return jsonify({ "redirect_url": url_for("edit_single_report", report_id=report_id)})
+    return jsonify({"redirect_url": url_for("edit_single_report", report_id=report_id, updated_report_ids=updated_report_ids_str)})
 
 @app.route("/update_sale_report/<report_id>", methods=["GET","POST"])
 def update_sale_report(report_id):
@@ -179,7 +184,7 @@ def update_sale_report(report_id):
         cash_on_hand = request.form["cash_on_hand"]
         
         Database.update_sale_report(db_path, instant_sold, online_sold, instant_cashed, online_cashed, cash_on_hand, report_id)
-    return redirect(url_for("edit_single_report", report_id=report_id))
+    return redirect(url_for("edit_single_report", report_id=report_id, updated_report_ids="None"))
  
 def calculate_instant_tickets_sold(ReportID):
     instant_tickets_sold_quantanties = DatabaseQueries.get_all_instant_tickets_sold_quantity(db_path, ReportID)
@@ -381,8 +386,8 @@ def edit_reports():
             local_reports.append(report)
     return render_template("edit_reports.html", sales_reports=local_reports)
 
-@app.route("/edit_report/<report_id>")
-def edit_single_report(report_id):
+@app.route("/edit_report/<report_id>/<updated_report_ids>",  methods=["GET", "POST"])
+def edit_single_report(report_id, updated_report_ids):
     # Query the sales logs related to this report ID
     sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
     sale_report = DatabaseQueries.get_daily_report(db_path, report_id)
@@ -392,17 +397,17 @@ def edit_single_report(report_id):
     
     # Get the counting order to calc sold
     counting_order = load_config()['ticket_order']
-    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order) 
+    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order, updated_report_ids=updated_report_ids) 
 
 @app.route('/download/<int:report_id>', methods=['POST'])
 def download_modified_report(report_id):
     sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
     sale_report = DatabaseQueries.get_daily_report(db_path, report_id)
     counting_order = load_config()['ticket_order']
+    
     if request.method == "POST":
         create_daily_invoice(report_id)
-    return send_file(os.path.join(os.getcwd(), f"invoice_lottery.pdf"), as_attachment=True)
-    
+    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order) 
 
 if __name__ == '__main__':
     app.run(debug=True)
