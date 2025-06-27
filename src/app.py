@@ -11,13 +11,10 @@ from datetime import datetime
 from config_utils import load_config
 from config_utils import update_ticket_order
 from config_utils import update_invoice_output_path
-
+from datetime import datetime
+from pathlib import Path
 
 app = Flask(__name__)
-# Feature: Edit lottery, recreate invoice report?
-# Feature: Error UI for user
-# Issue: Sold should take into account that a ticket was found today
-# Issue: undo isSold?
 # SQLite version is ≥ 3.31.0
 
 # Get database path
@@ -218,7 +215,7 @@ def do_submit_procedure():
     # Update "Pending" TicketTimeLine ReportID
     Database.update_pending_TicketTimeLine_report_id(db_path, next_ReportID)
     # Create a Invoice
-    create_daily_invoice(next_ReportID)
+    full_path = create_daily_invoice(next_ReportID)
     # Remove sold out books from current ActivatedBooks table using there book ids
     sold_out_books = DatabaseQueries.get_all_sold_books(db_path, next_ReportID)
     for book in sold_out_books:
@@ -229,9 +226,7 @@ def do_submit_procedure():
     Database.update_isAtTicketNumber(db_path)
     Database.clear_countingTicketNumbers(db_path)
 
-def create_daily_invoice(ReportID, store_name="Scuttlebutts Liquors", address="407 Main St, Fairhaven, MA 02719", phone="(508) 999-5253", email="N/a", fileName="invoice_lottery.pdf"):
-
-    
+def create_daily_invoice(ReportID, store_name="Scuttlebutts Liquors", address="407 Main St, Fairhaven, MA 02719", phone="(508) 999-5253", email="N/a"):
     invoiceLog = DatabaseQueries.get_table_for_invoice(db_path, ReportID)
     store_info = {
         "Business Name": store_name,
@@ -240,8 +235,19 @@ def create_daily_invoice(ReportID, store_name="Scuttlebutts Liquors", address="4
         "Email": email
     }
     daily_report = DatabaseQueries.get_daily_report(db_path, ReportID)
-    invoice_number="Invoice001"
-    generate_invoice.generate_lottery_invoice_pdf(fileName, store_info, invoiceLog, invoice_number, daily_report)
+    output_path = load_config()['invoice_output_path']
+    # Determine output directory
+    if output_path and os.path.isdir(output_path):
+        save_dir = output_path
+    else:
+        save_dir = str(Path.home() / "Downloads")
+    now = datetime.now()
+    invoice_number=f"Invoice{ReportID}"
+    fileName=f"Invoice#{ReportID}:{now.strftime('%m-%d-%Y')}.pdf"
+    full_path = os.path.join(save_dir, fileName)
+    
+    generate_invoice.generate_lottery_invoice_pdf(full_path, store_info, invoiceLog, invoice_number, daily_report)
+    return send_file(full_path, as_attachment=True)
     
 
 @app.route('/')

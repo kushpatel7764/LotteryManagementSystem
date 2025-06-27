@@ -290,9 +290,9 @@ def update_sales_log_prev_TicketNum(db_path, prev_TicketNum, report_id, ActiveBo
         current_TicketNum = int(row[0])
         counting_order = load_config()['ticket_order']
         if counting_order == "descending":
-            sold = int(prev_TicketNum) - current_TicketNum
+            sold = int(prev_TicketNum) - int(current_TicketNum)
         else:
-            sold = current_TicketNum - int(prev_TicketNum)
+            sold = int(current_TicketNum) - int(prev_TicketNum)
         
         cursor.execute("""
         UPDATE SalesLog
@@ -325,9 +325,9 @@ def update_sales_log_current_TicketNum(db_path, current_TicketNum, report_id, Ac
         prev_TicketNum = int(row[0])
         counting_order = load_config()['ticket_order']
         if counting_order == "descending":
-            sold = int(prev_TicketNum) - current_TicketNum
+            sold = int(prev_TicketNum) - int(current_TicketNum)
         else:
-            sold = current_TicketNum - int(prev_TicketNum)
+            sold = int(current_TicketNum) - int(prev_TicketNum)
         
         cursor.execute("""
         UPDATE SalesLog
