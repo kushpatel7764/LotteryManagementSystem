@@ -18,3 +18,10 @@ def update_invoice_output_path(invoice_output_path):
     config['invoice_output_path'] = invoice_output_path
     with open(CONFIG_PATH, 'w') as f:
         json.dump(config, f, indent=4)
+def update_business_info(name, value):
+    #Name of the business info you want to change in the config file
+    #Value is the value it should be changed to
+    config = load_config()
+    config[name] = value
+    with open(CONFIG_PATH, 'w') as f:
+        json.dump(config, f, indent=4)

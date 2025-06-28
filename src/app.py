@@ -11,6 +11,7 @@ from datetime import datetime
 from config_utils import load_config
 from config_utils import update_ticket_order
 from config_utils import update_invoice_output_path
+from config_utils import update_business_info 
 from datetime import datetime
 from pathlib import Path
 
@@ -231,8 +232,14 @@ def do_submit_procedure():
     Database.update_isAtTicketNumber(db_path)
     Database.clear_countingTicketNumbers(db_path)
 
-def create_daily_invoice(ReportID, store_name="Scuttlebutts Liquors", address="407 Main St, Fairhaven, MA 02719", phone="(508) 999-5253", email="N/a"):
+def create_daily_invoice(ReportID):
     invoiceLog = DatabaseQueries.get_table_for_invoice(db_path, ReportID)
+    
+    store_name = "Store Name" if load_config()["business_name"] is None else load_config()["business_name"] 
+    address = "Store Address" if load_config()["business_address"] is None else load_config()["business_address"] 
+    phone = "N/a" if load_config()["business_phone"] is None else load_config()["business_phone"] 
+    email = "N/a" if load_config()["business_email"] is None else load_config()["business_email"] 
+    
     store_info = {
         "Business Name": store_name,
         "Address": address,
@@ -310,15 +317,32 @@ def delete_book():
 
 @app.route('/settings', methods=["GET","POST"])
 def settings():
-    ticket_order = request.form.get("ticket_order")
-    invoice_output_request = request.form.get("outputPath")
+    if request.method == "POST":
+        ticket_order = request.form.get("ticket_order") if request.form.get("ticket_order") is not None else load_config()['ticket_order']
+        invoice_output_request = request.form.get("outputPath") if request.form.get("outputPath") is not None else load_config()['invoice_output_path']
+        business_Name_Output = request.form.get("BusinessName") if request.form.get("BusinessName") is not None else load_config()['business_name']
+        business_Address_Output = request.form.get("BusinessAddress") if request.form.get("BusinessAddress") is not None else load_config()['business_address']
+        business_Phone_Output = request.form.get("BusinessPhone") if request.form.get("BusinessPhone") is not None else load_config()['business_phone']
+        business_Email_Output = request.form.get("BusinessEmail") if request.form.get("BusinessEmail") is not None else load_config()['business_email']
+
+        update_ticket_order(ticket_order)
+        update_invoice_output_path(invoice_output_request)
+        update_business_info(name="business_name", value = business_Name_Output)
+        update_business_info(name="business_address", value = business_Address_Output)
+        update_business_info(name="business_phone", value = business_Phone_Output)
+        update_business_info(name="business_email", value = business_Email_Output)
     
-    update_ticket_order(ticket_order)
-    update_invoice_output_path(invoice_output_request)
 
     counting_order = load_config()['ticket_order']
     invoice_output_path = load_config()['invoice_output_path']
-    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path)
+    business_Info = {
+        "Name": load_config()["business_name"],
+        "Address": load_config()["business_address"],
+        "Phone": load_config()["business_phone"],
+        "Email": load_config()["business_email"]
+    }
+    
+    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path, business_Info = business_Info,)
     
 @app.route('/deactivate_book', methods=['POST', 'GET'])
 def deactivate_book():
