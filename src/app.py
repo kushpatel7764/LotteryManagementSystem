@@ -72,6 +72,9 @@ def undo_scan():
 
             # Step 3: Clear the counting ticket number
             Database.clear_counting_ticket_number(db_path, book_id)
+            
+            #Step 4: Mark Book Unsold
+            Database.update_is_sold_for_book(db_path, False, book_id)
 
             print("Undo successful.")
         except Exception as e:
@@ -83,7 +86,7 @@ def undo_scan():
 def book_sold_out():
     book_id = request.form.get("book_id")
     # Tell Database book is sold out - sets it to be removed from activated tickets
-    Database.update_is_sold_for_book(db_path, book_id)
+    Database.update_is_sold_for_book(db_path, True, book_id)
     # Update the closing number for book
     Database.update_counting_ticket_number(db_path, book_id, -1)
     # Insert to TicketTimeline
