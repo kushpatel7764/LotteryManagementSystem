@@ -20,11 +20,10 @@ app = Flask(__name__)
 
 # Get database path
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')
+db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')    
 
 @app.route('/scan_tickets', methods=["GET", "POST"])
 def scan_tickets():
-
     if request.method == "POST":
         # Get book ids for all the active books 
         all_active_book_ids = DatabaseQueries.get_all_active_book_ids(db=db_path)

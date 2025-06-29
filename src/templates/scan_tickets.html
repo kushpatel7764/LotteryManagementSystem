@@ -33,9 +33,33 @@
             document.getElementById("instant_cashed").addEventListener("input", calculateCashDue);
             document.getElementById("online_cashed").addEventListener("input", calculateCashDue);
         });
+
+        function closeModal() {
+            document.getElementById("popupModal").style.display = "none";
+        }
+        function canSubmit() {
+            event.preventDefault();
+            document.getElementById("popupModal").style.display = "block";
+        }
+        function submitFormTo(actionUrl) {
+            const form = document.querySelector('.daily-totals-form');
+            form.action = actionUrl;
+            closeModal();
+            form.submit();
+        }
+
     </script>
 </head>
 <body>
+    <!-- Popup Message -->
+    <div id="popupModal" class="modal">
+        <div class="modal-content">
+            <p>Did you make sure your newly activated books are also activated in this system?</p>
+            <button onclick="submitFormTo('/submit')" type="submit">YES</button>
+            <button onclick="closeModal()">NO</button>
+        </div>
+    </div>
+
     <div class="header-bar">
         <h1>Scan Tickets Page</h1>
         <div id="Navigation_Buttons">
@@ -135,7 +159,7 @@
         <label for="total_due">Total Due:</label>
         <input name="total_due" id="total_due" readonly><br><br>
 
-        <button type="submit">Submit</button>
+        <button onclick="canSubmit()">Submit</button>
     </form>
 </body>
 </html>
