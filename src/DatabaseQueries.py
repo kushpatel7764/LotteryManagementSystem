@@ -20,6 +20,18 @@ def get_books(db):
 
     return books_list
 
+def count_activated_books(db):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(ActiveBookID)  FROM ActivatedBooks;")
+    activated_book_id_count = cursor.fetchone()
+    conn.close()
+    
+    if activated_book_id_count:
+        return activated_book_id_count[0]
+    else:
+        print("Could not retrieve activated books count!")
+
 def get_activated_books(db):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()

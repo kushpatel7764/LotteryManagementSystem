@@ -37,7 +37,7 @@
 </head>
 <body>
     <div class="header-bar">
-        <h1>Scan Tickets Page</h1>
+        <h1>Scan Books Page</h1>
         <div id="Navigation_Buttons">
             <button onclick="window.location.href='/books_managment'">Books Management</button>
             <button onclick="window.location.href='/'">Home</button>
@@ -45,7 +45,7 @@
     </div>
 
     <form method="POST" id="scanForm" class="scan-box">
-        <label for="scanned_code"><strong>Scan Ticket:</strong></label><br>
+        <label for="scanned_code"><strong>Scan Ticket: </strong></label><br>
         <input type="text"
                name="scanned_code"
                id="scanned_code"
@@ -61,7 +61,7 @@
         {% endif %}
     </form>
 
-    <h2>Activated Tickets</h2>
+    <h2>Activated Books: {{activated_book_count}}</h2>
     <table>
         <thead>
             <tr>

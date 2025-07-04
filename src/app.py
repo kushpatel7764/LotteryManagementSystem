@@ -57,7 +57,9 @@ def scan_tickets():
     
     # Get the counting order to calc sold
     counting_order = load_config()['ticket_order']
-    return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total, counting_order=counting_order)
+    #Get activated ticket count
+    activated_ticket_count = DatabaseQueries.count_activated_books(db_path)
+    return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total, counting_order=counting_order, activated_book_count=activated_ticket_count)
 
 @app.route("/undo_scan", methods=["POST"])
 def undo_scan():
@@ -138,6 +140,7 @@ def update_sales_log():
     report_id = data.get("reportID")
     open = data.get("open")
     close = data.get("close")
+    
     
     Database.update_sales_log_prev_TicketNum(db_path, open, report_id, book_id)
     Database.update_sales_log_current_TicketNum(db_path, close, report_id, book_id)
