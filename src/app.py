@@ -11,6 +11,7 @@ from datetime import datetime
 from config_utils import load_config
 from config_utils import update_ticket_order
 from config_utils import update_invoice_output_path
+from config_utils import update_business_info 
 from datetime import datetime
 from pathlib import Path
 
@@ -19,11 +20,10 @@ app = Flask(__name__)
 
 # Get database path
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')
+db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')    
 
 @app.route('/scan_tickets', methods=["GET", "POST"])
 def scan_tickets():
-
     if request.method == "POST":
         # Get book ids for all the active books 
         all_active_book_ids = DatabaseQueries.get_all_active_book_ids(db=db_path)
@@ -74,6 +74,9 @@ def undo_scan():
 
             # Step 3: Clear the counting ticket number
             Database.clear_counting_ticket_number(db_path, book_id)
+            
+            #Step 4: Mark Book Unsold
+            Database.update_is_sold_for_book(db_path, False, book_id)
 
             print("Undo successful.")
         except Exception as e:
@@ -85,7 +88,7 @@ def undo_scan():
 def book_sold_out():
     book_id = request.form.get("book_id")
     # Tell Database book is sold out - sets it to be removed from activated tickets
-    Database.update_is_sold_for_book(db_path, book_id)
+    Database.update_is_sold_for_book(db_path, True, book_id)
     # Update the closing number for book
     Database.update_counting_ticket_number(db_path, book_id, -1)
     # Insert to TicketTimeline
@@ -135,6 +138,7 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
     
 @app.route("/update_salesLog", methods=["GET", "POST"])
 def update_sales_log():
+    updated_report_ids = []
     data = request.get_json()
     book_id = data.get('bookID')
     report_id = data.get("reportID")
@@ -144,6 +148,7 @@ def update_sales_log():
     
     Database.update_sales_log_prev_TicketNum(db_path, open, report_id, book_id)
     Database.update_sales_log_current_TicketNum(db_path, close, report_id, book_id)
+    updated_report_ids.append(report_id)
 
     previous_reportID = int(report_id) - 1
     next_reportID =  int(report_id) + 1
@@ -154,23 +159,25 @@ def update_sales_log():
         Database.update_sales_log_current_TicketNum(db_path, open, previous_reportID, book_id)
         prev_instant_sold = calculate_instant_tickets_sold(previous_reportID)
         Database.update_sale_report_instant_sold(db_path, prev_instant_sold, previous_reportID)
+        updated_report_ids.append(previous_reportID)
+        
     
     if (next_reportID <= latest_reportID):
         Database.update_sales_log_prev_TicketNum(db_path, close, next_reportID, book_id)
         next_instant_sold = calculate_instant_tickets_sold(next_reportID)
         Database.update_sale_report_instant_sold(db_path, next_instant_sold, next_reportID)
+        updated_report_ids.append(next_reportID)
 
     if (latest_reportID == report_id):
         Database.update_isAtTicketNumber_val(db_path, book_id, close)
 
-
-
+    updated_report_ids_str = updated_report_ids.__str__()
     # A update in sale log means the instant sold should also be updated
     instant_sold = calculate_instant_tickets_sold(report_id)
     Database.update_sale_report_instant_sold(db_path, instant_sold, report_id)
     Database.update_ticketTimeline_ticketnumber(db_path, report_id, book_id, close)
     
-    return jsonify({ "redirect_url": url_for("edit_single_report", report_id=report_id)})
+    return jsonify({"redirect_url": url_for("edit_single_report", report_id=report_id, updated_report_ids=updated_report_ids_str)})
 
 @app.route("/update_sale_report/<report_id>", methods=["GET","POST"])
 def update_sale_report(report_id):
@@ -182,7 +189,7 @@ def update_sale_report(report_id):
         cash_on_hand = request.form["cash_on_hand"]
         
         Database.update_sale_report(db_path, instant_sold, online_sold, instant_cashed, online_cashed, cash_on_hand, report_id)
-    return redirect(url_for("edit_single_report", report_id=report_id))
+    return redirect(url_for("edit_single_report", report_id=report_id, updated_report_ids="None"))
  
 def calculate_instant_tickets_sold(ReportID):
     instant_tickets_sold_quantanties = DatabaseQueries.get_all_instant_tickets_sold_quantity(db_path, ReportID)
@@ -229,8 +236,14 @@ def do_submit_procedure():
     Database.update_isAtTicketNumber(db_path)
     Database.clear_countingTicketNumbers(db_path)
 
-def create_daily_invoice(ReportID, store_name="Scuttlebutts Liquors", address="407 Main St, Fairhaven, MA 02719", phone="(508) 999-5253", email="N/a"):
+def create_daily_invoice(ReportID):
     invoiceLog = DatabaseQueries.get_table_for_invoice(db_path, ReportID)
+    
+    store_name = "Store Name" if load_config()["business_name"] is None else load_config()["business_name"] 
+    address = "Store Address" if load_config()["business_address"] is None else load_config()["business_address"] 
+    phone = "N/a" if load_config()["business_phone"] is None else load_config()["business_phone"] 
+    email = "N/a" if load_config()["business_email"] is None else load_config()["business_email"] 
+    
     store_info = {
         "Business Name": store_name,
         "Address": address,
@@ -308,15 +321,32 @@ def delete_book():
 
 @app.route('/settings', methods=["GET","POST"])
 def settings():
-    ticket_order = request.form.get("ticket_order")
-    invoice_output_request = request.form.get("outputPath")
+    if request.method == "POST":
+        ticket_order = request.form.get("ticket_order") if request.form.get("ticket_order") is not None else load_config()['ticket_order']
+        invoice_output_request = request.form.get("outputPath") if request.form.get("outputPath") is not None else load_config()['invoice_output_path']
+        business_Name_Output = request.form.get("BusinessName") if request.form.get("BusinessName") is not None else load_config()['business_name']
+        business_Address_Output = request.form.get("BusinessAddress") if request.form.get("BusinessAddress") is not None else load_config()['business_address']
+        business_Phone_Output = request.form.get("BusinessPhone") if request.form.get("BusinessPhone") is not None else load_config()['business_phone']
+        business_Email_Output = request.form.get("BusinessEmail") if request.form.get("BusinessEmail") is not None else load_config()['business_email']
+
+        update_ticket_order(ticket_order)
+        update_invoice_output_path(invoice_output_request)
+        update_business_info(name="business_name", value = business_Name_Output)
+        update_business_info(name="business_address", value = business_Address_Output)
+        update_business_info(name="business_phone", value = business_Phone_Output)
+        update_business_info(name="business_email", value = business_Email_Output)
     
-    update_ticket_order(ticket_order)
-    update_invoice_output_path(invoice_output_request)
 
     counting_order = load_config()['ticket_order']
     invoice_output_path = load_config()['invoice_output_path']
-    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path)
+    business_Info = {
+        "Name": load_config()["business_name"],
+        "Address": load_config()["business_address"],
+        "Phone": load_config()["business_phone"],
+        "Email": load_config()["business_email"]
+    }
+    
+    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path, business_Info = business_Info,)
     
 @app.route('/deactivate_book', methods=['POST', 'GET'])
 def deactivate_book():
@@ -384,8 +414,8 @@ def edit_reports():
             local_reports.append(report)
     return render_template("edit_reports.html", sales_reports=local_reports)
 
-@app.route("/edit_report/<report_id>")
-def edit_single_report(report_id):
+@app.route("/edit_report/<report_id>/<updated_report_ids>",  methods=["GET", "POST"])
+def edit_single_report(report_id, updated_report_ids):
     # Query the sales logs related to this report ID
     sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
     sale_report = DatabaseQueries.get_daily_report(db_path, report_id)
@@ -395,17 +425,17 @@ def edit_single_report(report_id):
     
     # Get the counting order to calc sold
     counting_order = load_config()['ticket_order']
-    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order) 
+    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order, updated_report_ids=updated_report_ids) 
 
 @app.route('/download/<int:report_id>', methods=['POST'])
 def download_modified_report(report_id):
     sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
     sale_report = DatabaseQueries.get_daily_report(db_path, report_id)
     counting_order = load_config()['ticket_order']
+    
     if request.method == "POST":
         create_daily_invoice(report_id)
-    return send_file(os.path.join(os.getcwd(), f"invoice_lottery.pdf"), as_attachment=True)
-    
+    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order) 
 
 if __name__ == '__main__':
     app.run(debug=True)

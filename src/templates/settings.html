@@ -138,6 +138,17 @@
                         </form>
                     <td>
                 </tr>
+                <tr>
+                    <td>
+                        <form method="post" action="/settings" id="businessPortfolioForm">
+                            <label>Business Portfolio:</label>
+                            <label>Business Name: <input type="text" id="business_name" name="BusinessName" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Name"] %} value="{{ business_Info["Name"] }}" {% endif %}></label>
+                            <label>Business Address: <input type="text" id="business_address" name="BusinessAddress" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Address"] %} value="{{ business_Info["Address"] }}" {% endif %}></label>
+                            <label>Business Phone: <input type="text" id="business_phone" name="BusinessPhone" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Phone"] %} value="{{ business_Info["Phone"] }}" {% endif %}></label>
+                            <label>Business Email: <input type="text" id="business_email" name="BusinessEmail" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Email"] %} value="{{ business_Info["Email"] }}" {% endif %}></label>
+                        </form>
+                    </td>
+                </tr>
             </table>
         </div>
     </body>

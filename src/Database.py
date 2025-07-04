@@ -188,23 +188,23 @@ def delete_TicketTimeLine_by_book_id(db_path, book_id):
     conn.commit()
     conn.close()
     
-def book_is_sold(cursor, conn, book_id, date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S")):
+def book_is_sold(cursor, conn, isSold, book_id, date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S")):
     cursor.execute("""
         UPDATE Books
-        SET Is_Sold = True,
+        SET Is_Sold = ?,
         updated_at = ?
         WHERE BookID = ?
-    """, (date, book_id))
+    """, (isSold ,date, book_id))
     
     conn.commit()
     
-def update_is_sold_for_book(database_path, book_id):
+def update_is_sold_for_book(database_path, isSold, book_id):
     
     initialize_database(database_path)
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
     try:
-        book_is_sold(cursor, conn, book_id)
+        book_is_sold(cursor, conn, isSold, book_id)
     except sqlite3.Error as e:
         print(f"Error updating is_sold: {e}")
     

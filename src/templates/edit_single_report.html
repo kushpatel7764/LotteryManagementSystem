@@ -203,6 +203,9 @@
         <button type="submit" formaction="/edit_report/{{report_id}}">Save</button>
 
         <button type="submit" formaction="/download/{{report_id}}">Download</button>
+        <br>
+        <br>
+        <label>{% if updated_report_ids is not none %} Report IDs that may be updated are: {{updated_report_ids}} {% endif %}  </label>
     </form>
 </body>
 </html>

@@ -1,4 +1,8 @@
 {
-    "ticket_order": null,
-    "invoice_output_path": null
+    "ticket_order": "ascending",
+    "invoice_output_path": "0000000",
+    "business_name": "bye",
+    "business_address": "hi 3nd ave",
+    "business_phone": "82845757757575",
+    "business_email": "iujwruiw@gmail.com"
 }
