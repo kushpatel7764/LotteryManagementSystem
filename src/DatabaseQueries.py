@@ -212,6 +212,25 @@ def get_all_sold_books(db, ReportID):
     finally:
         conn.close()
         
+def is_sold(db, book_id):
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+        
+        query = """
+            SELECT Is_Sold 
+            FROM Books 
+            WHERE BookID = ?;
+        """
+        cursor.execute(query, (book_id,))
+        result_table = cursor.fetchone()
+        return result_table[0]
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
+        
 def get_table_for_invoice(db, ReportID):
     try:
         conn = sqlite3.connect(db)
@@ -341,6 +360,35 @@ def get_sales_log(db, ReportID):
         return None
     finally:
         conn.close()
+        
+def get_sales_log_with_bookid(db, ReportID, book_id):
+     # Not really daily report but a session report
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+        
+        query = """
+            SELECT *
+            FROM SalesLog
+            Where ReportID = ? and ActiveBookID = ?;
+        """
+        cursor.execute(query, (ReportID, book_id))
+        result_table = cursor.fetchone()
+        result_row = {
+            "ActiveBookID": result_table[3],
+            "Open": result_table[4],
+            "Close": result_table[5],
+            "Sold": result_table[6],
+            "Game Name": result_table[7],
+            "Game #": result_table[8]
+        }
+            
+        return result_row
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
 
 def get_gm_from_lookup(db):
     try:
@@ -400,6 +448,23 @@ def next_report_ID(db):
         return None
     finally:
         conn.close()
+
+def get_game_num_of(db, book_id):
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT GameNumber FROM Books Where BookID = ? LIMIT 1", (book_id,))
+        row = cursor.fetchone()[0]
+
+        if row:
+            return row
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
+
 
 def can_Submit(db):
     try:

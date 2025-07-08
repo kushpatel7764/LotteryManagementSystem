@@ -232,6 +232,29 @@ def add_sales_log (cursor, conn, scanned_ticket_info):
                          scanned_ticket_info["Ticket_Name"], scanned_ticket_info["Ticket_GameNumber"]))
     
     conn.commit()
+    
+def add_sales_log_at_report_id (cursor, conn, scanned_ticket_info):
+    
+    """
+    ActiveBookID VARCHAR(255),
+    prev_TicketNum INTEGER,
+    current_TicketNum INTEGER,
+    Ticket_Sold_Quantity INTEGER, (Calculated)
+    Ticket_Name TEXT,
+    Ticket_GameNumber VARCHAR(255),
+    """
+    counting_order = load_config()['ticket_order']
+    if counting_order == "descending":
+        sold = int(scanned_ticket_info["prev_TicketNum"]) - int(scanned_ticket_info["current_TicketNum"])
+    else:
+        sold = int(scanned_ticket_info["current_TicketNum"]) - int(scanned_ticket_info["prev_TicketNum"])
+    cursor.execute("""
+                   INSERT INTO SalesLog (ActiveBookID, prev_TicketNum, current_TicketNum, Ticket_Sold_Quantity, Ticket_Name, Ticket_GameNumber)
+                   VALUES (?, ?, ?, ?, ?, ?)
+                   """, (scanned_ticket_info["ReportID"], scanned_ticket_info["ActiveBookID"], scanned_ticket_info["prev_TicketNum"], scanned_ticket_info["current_TicketNum"], sold,
+                         scanned_ticket_info["Ticket_Name"], scanned_ticket_info["Ticket_GameNumber"]))
+    
+    conn.commit()
 
 def insert_sales_log (database_path, scanned_ticket_info):
     
@@ -239,7 +262,10 @@ def insert_sales_log (database_path, scanned_ticket_info):
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
     try:
-        add_sales_log(cursor, conn, scanned_ticket_info)
+        if "ReportID" in scanned_ticket_info:
+            add_sales_log_at_report_id(cursor, conn, scanned_ticket_info)
+        else:
+            add_sales_log(cursor, conn, scanned_ticket_info)
     except sqlite3.Error as e:
         print(f"SalesLog error: {e}")
     

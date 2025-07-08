@@ -144,15 +144,63 @@ def update_sales_log():
     report_id = data.get("reportID")
     open = data.get("open")
     close = data.get("close")
+    game_number = DatabaseQueries.get_game_num_of(db_path, book_id)
+    # prev_open = DatabaseQueries.get_sales_log_with_bookid(db_path, report_id, book_id)["open"]
+    # prev_close = DatabaseQueries.get_sales_log_with_bookid(db_path, report_id, book_id)["close"]
     
+    
+    previous_reportID = int(report_id) - 1
+    next_reportID =  int(report_id) + 1
+    latest_reportID = int(DatabaseQueries.next_report_ID(db_path)) - 1
+    
+    is_book_sold = DatabaseQueries.is_sold(db_path, book_id)
     
     Database.update_sales_log_prev_TicketNum(db_path, open, report_id, book_id)
     Database.update_sales_log_current_TicketNum(db_path, close, report_id, book_id)
     updated_report_ids.append(report_id)
 
-    previous_reportID = int(report_id) - 1
-    next_reportID =  int(report_id) + 1
-    latest_reportID = int(DatabaseQueries.next_report_ID(db_path)) - 1
+    if is_book_sold and close != "-1":
+        # Update Is_Sold attribute to not sold for this book id.
+        Database.update_is_sold_for_book(db_path, False, book_id)
+        # Update salesLog and TicketTimeline
+        int_report_id = int(report_id)
+        for id in range(int_report_id + 1, latest_reportID + 1):
+            # Add salesLog
+            sale_log_info = {
+            "ReportID": str(id), 
+            "ActiveBookID": book_id,
+            "prev_TicketNum": close, # index 4 is the isAtTicketNumber
+            "current_TicketNum": close,
+            "Ticket_Name": DatabaseQueries.get_ticket_name(db_path, game_number),
+            "Ticket_GameNumber": game_number
+            }
+            Database.insert_sales_log(db_path, sale_log_info)
+            # Add TicketTimeline
+            book = DatabaseQueries.get_book(db_path, book_id)
+            book_amount = book[2]
+            TicketPrice = book[3]
+            TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
+            scanID = f"{game_number}{book_id}{close}{TicketPrice}{book_amount}" 
+            insert_ticket(scanID, book_id, close, TicketName, TicketPrice)
+            # A update in sale log means the instant sold should also be updated
+            instant_sold = calculate_instant_tickets_sold(id)
+            Database.update_sale_report_instant_sold(db_path, instant_sold, id)
+            
+        # Update ActivatedBooks
+        # Add TicketTimeline
+        book = DatabaseQueries.get_book(db_path, book_id)
+        book_amount = book[2]
+        TicketPrice = book[3]
+        TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
+        scanID = f"{game_number}{book_id}{close}{TicketPrice}{book_amount}" 
+        activate_book_info = {
+            "ActivationID": scanID,
+            "ActiveBookID": book_id,
+            "isAtTicketNumber": close
+        }
+        Database.insert_book_to_ActivatedBook_table(database_path=db_path, active_book_info=activate_book_info)
+        
+        
 
     if (not previous_reportID < 1):
         Database.update_ticketTimeline_ticketnumber(db_path, previous_reportID, book_id, open)
