@@ -105,7 +105,7 @@ def book_sold_out():
     
     return redirect(url_for("scan_tickets"))  # or your page name
 
-def insert_ticket(scanID, BookID, TicketNumber, TicketName, TicketPrice):
+def insert_ticket(scanID, BookID, TicketNumber, TicketName, TicketPrice, ReportID=None):
     ticket_info = {
         "ScanID": scanID,
         "BookID": BookID,
@@ -113,6 +113,8 @@ def insert_ticket(scanID, BookID, TicketNumber, TicketName, TicketPrice):
         "TicketName": TicketName,
         "TicketPrice": TicketPrice
     }
+    if ReportID:
+        ticket_info["ReportID"] = ReportID
     # Insert this ticket in TicketTimeline
     Database.insert_ticket_to_TicketTimeline_table(db_path, ticket_info)
     
@@ -175,19 +177,17 @@ def update_sales_log():
             "Ticket_GameNumber": game_number
             }
             Database.insert_sales_log(db_path, sale_log_info)
+            # A update in sale log means the instant sold should also be updated
+            instant_sold = calculate_instant_tickets_sold(id)
+            Database.update_sale_report_instant_sold(db_path, instant_sold, id)
             # Add TicketTimeline
             book = DatabaseQueries.get_book(db_path, book_id)
             book_amount = book[2]
             TicketPrice = book[3]
             TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
             scanID = f"{game_number}{book_id}{close}{TicketPrice}{book_amount}" 
-            insert_ticket(scanID, book_id, close, TicketName, TicketPrice)
-            # A update in sale log means the instant sold should also be updated
-            instant_sold = calculate_instant_tickets_sold(id)
-            Database.update_sale_report_instant_sold(db_path, instant_sold, id)
-            
+            insert_ticket(scanID, book_id, close, TicketName, TicketPrice, str(id))
         # Update ActivatedBooks
-        # Add TicketTimeline
         book = DatabaseQueries.get_book(db_path, book_id)
         book_amount = book[2]
         TicketPrice = book[3]

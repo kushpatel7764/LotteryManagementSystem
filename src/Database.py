@@ -70,7 +70,6 @@ def add_ticket_to_timeline(conn, cursor, ticket_info):
     Parameters:
         ticket_info (dict): A dictionary with keys:
             - ScanID
-            - ReportID
             - BookID
             - TicketNumber
             - TicketName
@@ -81,6 +80,33 @@ def add_ticket_to_timeline(conn, cursor, ticket_info):
         VALUES (?, ?, ?, ?, ?)
     """, (
         ticket_info["ScanID"],
+        ticket_info["BookID"],
+        ticket_info["TicketNumber"],
+        ticket_info["TicketName"],
+        ticket_info["TicketPrice"]
+    ))
+
+    conn.commit()
+    
+def add_ticket_to_timeline_at_reportID(conn, cursor, ticket_info):
+    """
+    Inserts a ticket record into the database.
+
+    Parameters:
+        ticket_info (dict): A dictionary with keys:
+            - ScanID
+            - ReportID
+            - BookID
+            - TicketNumber
+            - TicketName
+            - TicketPrice
+    """
+    cursor.execute("""
+        INSERT INTO TicketTimeline (ScanID, ReportID, BookID, TicketNumber, TicketName, TicketPrice)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        ticket_info["ScanID"],
+        ticket_info["ReportID"],
         ticket_info["BookID"],
         ticket_info["TicketNumber"],
         ticket_info["TicketName"],
@@ -104,7 +130,10 @@ def insert_ticket_to_TicketTimeline_table(database_path, ticket_info):
     cursor = conn.cursor()
 
     try:
-        add_ticket_to_timeline(conn, cursor, ticket_info)
+        if "ReportID" in ticket_info:
+            add_ticket_to_timeline_at_reportID(conn, cursor, ticket_info)
+        else:
+            add_ticket_to_timeline(conn, cursor, ticket_info)
     except sqlite3.IntegrityError as e: 
         if "UNIQUE constraint failed" in str(e):
             # the updated_time attribute should now be updated to new utc time.
@@ -249,8 +278,8 @@ def add_sales_log_at_report_id (cursor, conn, scanned_ticket_info):
     else:
         sold = int(scanned_ticket_info["current_TicketNum"]) - int(scanned_ticket_info["prev_TicketNum"])
     cursor.execute("""
-                   INSERT INTO SalesLog (ActiveBookID, prev_TicketNum, current_TicketNum, Ticket_Sold_Quantity, Ticket_Name, Ticket_GameNumber)
-                   VALUES (?, ?, ?, ?, ?, ?)
+                   INSERT INTO SalesLog (ReportID ,ActiveBookID, prev_TicketNum, current_TicketNum, Ticket_Sold_Quantity, Ticket_Name, Ticket_GameNumber)
+                   VALUES (? ,?, ?, ?, ?, ?, ?)
                    """, (scanned_ticket_info["ReportID"], scanned_ticket_info["ActiveBookID"], scanned_ticket_info["prev_TicketNum"], scanned_ticket_info["current_TicketNum"], sold,
                          scanned_ticket_info["Ticket_Name"], scanned_ticket_info["Ticket_GameNumber"]))
     
