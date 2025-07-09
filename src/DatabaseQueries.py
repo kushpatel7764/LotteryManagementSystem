@@ -305,7 +305,8 @@ def get_all_sales_reports(db):
         
         query = """
             SELECT *
-            FROM SaleReport;
+            FROM SaleReport
+            ORDER BY ReportID DESC;
         """
         cursor.execute(query)
         result_table = cursor.fetchall()
