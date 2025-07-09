@@ -14,6 +14,7 @@ from config_utils import update_invoice_output_path
 from config_utils import update_business_info 
 from datetime import datetime
 from pathlib import Path
+from email_invoice import email_invoice
 
 app = Flask(__name__)
 # SQLite version is ≥ 3.31.0
@@ -251,6 +252,9 @@ def calculate_instant_tickets_sold(ReportID):
 def submit():
     if DatabaseQueries.can_Submit(db_path):
         do_submit_procedure()
+        
+        
+        
     
     return redirect(url_for("scan_tickets"))
 
@@ -283,6 +287,11 @@ def do_submit_procedure():
     # countingTicketNumber needs to be set to None since nothing is being counted after submit.
     Database.update_isAtTicketNumber(db_path)
     Database.clear_countingTicketNumbers(db_path)
+    # TODO: Map report ID to SaleRport ReportID and get Date from there later
+    now = datetime.now()
+    fileName=f"Invoice#{next_ReportID}:{now.strftime('%m-%d-%Y')}.pdf"
+    email_invoice(filename=fileName)
+    
 
 def create_daily_invoice(ReportID):
     invoiceLog = DatabaseQueries.get_table_for_invoice(db_path, ReportID)
