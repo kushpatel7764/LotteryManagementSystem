@@ -1,0 +1,117 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f0f4f8;
+    font-family: "Segoe UI", sans-serif;
+}
+
+form {
+    background: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+label {
+    font-size: 1.2em;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 12px;
+}
+
+select {
+    padding: 10px 15px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+select:focus {
+    border-color: #007BFF;
+}
+
+#settings_table{
+    border-spacing: 2%;
+    margin: 0 auto;
+}
+#settings_table td {
+    text-align: center;
+    padding: 10px;
+}
+#title{
+    text-align: center;
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 40px;
+    color: #333;
+}
+#Navigation_Buttons {
+    display: flex;
+    gap: 10px;
+}
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #4338ca;
+}
+.header-bar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+input{
+    padding: 10px 15px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+#popupLabel {
+    position: absolute;
+    top: 25%;
+    right: 42.5%;
+    padding: 5px 10px;
+    color: red;
+    background-color: #ffe6e6;
+    border: 1px solid red;
+    border-radius: 5px;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+}
+#popupWarningLabel{
+    position: absolute;
+    top: 30%;
+    right: 42.5%;
+    padding: 5px 10px;
+    color: gold;
+    background-color: #ffe6e6;
+    border: 1px solid gold;
+    border-radius: 5px;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+}
+#popupLabel.show {
+    opacity: 1;
+}
+#popupWarningLabel.show{
+    opacity: 1;
+}

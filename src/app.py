@@ -8,6 +8,7 @@ import generate_invoice
 import game_number_lookup_table
 from utc_to_local_time import convert_utc_to_local
 from datetime import datetime
+import re
 from config_utils import load_config
 from config_utils import update_ticket_order
 from config_utils import update_invoice_output_path
@@ -379,6 +380,7 @@ def delete_book():
 @app.route('/settings', methods=["GET","POST"])
 def settings():
     errorMessage = None
+    warning = None
     DEFAULT_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
     if request.method == "POST":
         ticket_order = request.form.get("ticket_order") if request.form.get("ticket_order") is not None else load_config()['ticket_order']
@@ -394,12 +396,32 @@ def settings():
             update_invoice_output_path(invoice_output_request)
         else: 
             update_invoice_output_path(DEFAULT_DOWNLOADS_PATH)
-            errorMessage = "Not a valid output PATH! Resetting to DEFAULT PATH."
+            errorMessage = "Not a valid output PATH!"
+            warning = "Resetting to DEFAULT PATH"
         
         update_business_info(name="business_name", value = business_Name_Output)
-        update_business_info(name="business_address", value = business_Address_Output)
-        update_business_info(name="business_phone", value = business_Phone_Output)
-        update_business_info(name="business_email", value = business_Email_Output)
+        
+        # validate Address
+        if re.fullmatch(r"^[0-9]+[\s]+[A-Za-z\s]+[,]{0,1}[\s]*[A-Za-z\s]+$", business_Address_Output) is not None:
+            update_business_info(name="business_address", value = business_Address_Output)
+        else:
+            update_business_info(name="business_address", value = "")
+            errorMessage = "Not a valid ADDRESS!"
+        
+        # validate Phone Number
+        if re.fullmatch(r"^\+?\d{10,15}$", business_Phone_Output) is not None:
+            update_business_info(name="business_phone", value = business_Phone_Output)
+        else:
+            update_business_info(name="business_phone", value = "")
+            errorMessage = "Not a valid PHONE NUMBER!"
+            
+        # validate Email
+        if re.fullmatch(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", business_Email_Output) is not None:
+            update_business_info(name="business_email", value = business_Email_Output)
+        else:
+            if business_Email_Output != "":
+                update_business_info(name="business_email", value = "")
+                errorMessage = "Not a valid EMAIL!"
     
 
     counting_order = load_config()['ticket_order']
@@ -411,7 +433,7 @@ def settings():
         "Email": load_config()["business_email"]
     }
     
-    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path, business_Info = business_Info, errorMessage=errorMessage)
+    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path, business_Info = business_Info, errorMessage=errorMessage, warning=warning)
     
 @app.route('/deactivate_book', methods=['POST', 'GET'])
 def deactivate_book():
