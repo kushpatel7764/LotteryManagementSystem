@@ -378,7 +378,8 @@ def delete_book():
 
 @app.route('/settings', methods=["GET","POST"])
 def settings():
-    errormessage = None
+    errorMessage = None
+    DEFAULT_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
     if request.method == "POST":
         ticket_order = request.form.get("ticket_order") if request.form.get("ticket_order") is not None else load_config()['ticket_order']
         invoice_output_request = request.form.get("outputPath") if request.form.get("outputPath") is not None else load_config()['invoice_output_path']
@@ -388,7 +389,13 @@ def settings():
         business_Email_Output = request.form.get("BusinessEmail") if request.form.get("BusinessEmail") is not None else load_config()['business_email']
 
         update_ticket_order(ticket_order)
-        update_invoice_output_path(invoice_output_request)
+        
+        if os.path.isdir(invoice_output_request):
+            update_invoice_output_path(invoice_output_request)
+        else: 
+            update_invoice_output_path(DEFAULT_DOWNLOADS_PATH)
+            errorMessage = "Not a valid output PATH! Resetting to DEFAULT PATH."
+        
         update_business_info(name="business_name", value = business_Name_Output)
         update_business_info(name="business_address", value = business_Address_Output)
         update_business_info(name="business_phone", value = business_Phone_Output)
@@ -404,7 +411,7 @@ def settings():
         "Email": load_config()["business_email"]
     }
     
-    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path, business_Info = business_Info, errormessage=errormessage)
+    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path, business_Info = business_Info, errorMessage=errorMessage)
     
 @app.route('/deactivate_book', methods=['POST', 'GET'])
 def deactivate_book():

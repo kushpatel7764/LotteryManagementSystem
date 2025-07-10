@@ -31,11 +31,11 @@
                 popup.classList.remove("show");
             }, 2000);
         }
-   
-
-        if (errormessage) {
-            showPopup("{{ errormessage }}");
-        }
+        window.onload = function() {
+            {% if errorMessage %}
+                showPopup("{{ errorMessage }}");
+            {% endif %}
+        };
     </script>
 
     <style>
@@ -122,7 +122,7 @@
             outline: none;
             transition: border-color 0.3s ease;
         }
-         #popupLabel {
+        #popupLabel {
             position: absolute;
             top: 25%;
             right: 42.5%;
@@ -144,7 +144,7 @@
 </head>
     <body>
          <div>
-            <label id="popupLabel">{{errormessage}}</label>
+            <label id="popupLabel"></label>
         </div>
 
         <div class="header-bar">
@@ -171,7 +171,7 @@
                     <td>
                         <form method="post" action="/settings" id="invoice_output_path">
                             <label>Invoice Output Path:</label>
-                            <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder" onchange="document.getElementById('invoice_output_path').submit();">
+                            <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder" value="{{ invoice_output_path }}" onchange="document.getElementById('invoice_output_path').submit();">
                             
                         </form>
                     <td>

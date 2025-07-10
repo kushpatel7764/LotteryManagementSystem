@@ -1,7 +1,7 @@
 {
-    "ticket_order": "ascending",
-    "invoice_output_path": "ffffffffffffffffffffffffffff",
-    "business_name": "bye",
+    "ticket_order": "descending",
+    "invoice_output_path": "/Users/kushpatel/Downloads",
+    "business_name": "fdlkjn",
     "business_address": "hi 3nd ave",
     "business_phone": "82845757757575",
     "business_email": "shivpatelrp1233@gmail.com"
