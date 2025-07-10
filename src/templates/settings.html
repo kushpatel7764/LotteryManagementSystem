@@ -21,6 +21,21 @@
 
             document.getElementById("orderForm").submit();
         }
+        function showPopup(message) {
+            const popup = document.getElementById("popupLabel");
+            popup.textContent = message;
+            popup.classList.add("show");
+
+            // Hide after 2 seconds
+            setTimeout(() => {
+                popup.classList.remove("show");
+            }, 2000);
+        }
+   
+
+        if (errormessage) {
+            showPopup("{{ errormessage }}");
+        }
     </script>
 
     <style>
@@ -107,9 +122,31 @@
             outline: none;
             transition: border-color 0.3s ease;
         }
+         #popupLabel {
+            position: absolute;
+            top: 25%;
+            right: 42.5%;
+            padding: 5px 10px;
+            color: red;
+            background-color: #ffe6e6;
+            border: 1px solid red;
+            border-radius: 5px;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+        }
+
+        #popupLabel.show {
+            opacity: 1;
+        }
     </style>
 </head>
     <body>
+         <div>
+            <label id="popupLabel">{{errormessage}}</label>
+        </div>
+
         <div class="header-bar">
             <div id="Navigation_Buttons">
                 <button onclick="window.location.href='/scan_tickets'">Scan Tickets</button>
@@ -134,7 +171,8 @@
                     <td>
                         <form method="post" action="/settings" id="invoice_output_path">
                             <label>Invoice Output Path:</label>
-                            <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder"{% if invoice_output_path %} value="{{ invoice_output_path }}" {% endif %} onchange="document.getElementById('invoice_output_path').submit();">
+                            <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder" onchange="document.getElementById('invoice_output_path').submit();">
+                            
                         </form>
                     <td>
                 </tr>

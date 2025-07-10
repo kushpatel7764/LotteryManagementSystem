@@ -46,7 +46,7 @@
             const closeCell = getCloseCellByBookId(bookID);
 
 
-            if (img.src.includes('Check_Mark.png')){
+            if (img.src.includes('Check_Mark.png') && (openCell.firstChild.value >= "0" && closeCell.firstChild.value >= "0")){
                 img.src = "{{ url_for('static', filename='Edit_Icon.png') }}";
                 button.style.backgroundColor = "#4f46e5";
                 openCell.innerHTML = openCell.firstChild.value;

@@ -378,6 +378,7 @@ def delete_book():
 
 @app.route('/settings', methods=["GET","POST"])
 def settings():
+    errormessage = None
     if request.method == "POST":
         ticket_order = request.form.get("ticket_order") if request.form.get("ticket_order") is not None else load_config()['ticket_order']
         invoice_output_request = request.form.get("outputPath") if request.form.get("outputPath") is not None else load_config()['invoice_output_path']
@@ -403,7 +404,7 @@ def settings():
         "Email": load_config()["business_email"]
     }
     
-    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path, business_Info = business_Info,)
+    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path, business_Info = business_Info, errormessage=errormessage)
     
 @app.route('/deactivate_book', methods=['POST', 'GET'])
 def deactivate_book():
