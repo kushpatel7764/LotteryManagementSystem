@@ -6,9 +6,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='Nav.css') }}">
     {% block extra_css %}{% endblock %}
     {% block extra_js %}{% endblock %}
+    
 </head>
 <body>
-        <div class="button-container">
+    <div class="button-container">
+            <div id="header">
+                <label>{% block header %} Header {% endblock %}</label>
+            </div>
             <button id="main-button">☰</button>
             <div class="slide-buttons" id="slide-buttons">
                 <button onclick="window.location.href='/'" class="slide-btn">Home</button>
@@ -16,8 +20,7 @@
                 <button onclick="window.location.href='/books_managment'" class="slide-btn">Books Management</button>
                 <button onclick="window.location.href='/edit_reports'" class="slide-btn">Edit Reports</button>
             </div>
-        </div>
-
+     </div>
         <script>
             const mainBtn = document.getElementById("main-button");
             const slideBtns = document.getElementById("slide-buttons");
@@ -33,7 +36,7 @@
                 }
             });
         </script>
-        <div>
+        <div class="content">
             {% block content%}{% endblock %}
         </div>
 </body>

@@ -3,10 +3,8 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
 {% endblock %}
+ {% block header %} Edit Reports {% endblock %}  
 {% block content %}
-    <div class="header-bar">
-        <h1>Edit Reports</h1>
-    </div>
     <!-- Filter Form -->
     <form method="GET" action="/edit_reports" class="filter-form">
         <label for="date">Filter by Date:</label>

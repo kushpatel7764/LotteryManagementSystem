@@ -86,11 +86,9 @@
 
     </script>
 {% endblock %}
-
+{% block header %} Books Management {% endblock %}  
 {% block content %}
-    <div class="header-bar">
-        <h1>Books Management</h1>
-    </div>
+
     <form method="POST" id="AddBookForm" class="scan-box">
         <label for="add_book_code"><strong>Add Book:</strong></label><br>
         <input type="text"

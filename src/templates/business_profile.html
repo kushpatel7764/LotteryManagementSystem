@@ -3,7 +3,7 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
 {% endblock %}
-    
+
 {% block extra_js %}
     <script>
         function showErrorPopup(message) {
@@ -23,7 +23,7 @@
         };
     </script>
 {% endblock %}
-
+{% block header %} Business Profile {% endblock %}  
 {% block content %}
         <div>
             <label id="popupLabel"></label>
@@ -34,7 +34,6 @@
 
 
         <div id="profile_container">
-            <div id="title">Business Profile</div>
             <table id="profile_table">
                 <tr>
                     <td>
