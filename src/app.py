@@ -379,15 +379,41 @@ def delete_book():
 
     return jsonify({ "redirect_url": url_for('books_managment') })
 
+@app.route('/business_profile', methods=["GET","POST"])
+def business_profile():
+    error_message = None
+    if request.method == "POST":
+        config = load_config()
+        
+        # Process form input with fallback to config
+        form_data = extract_businessProfileForm_data(config)
+        
+        # Validate and update business info fields
+        errors = validate_and_update_business_info(form_data)
+        if errors:
+            error_message = errors[0]  # Only show the first error
+    
+    # Load current config for rendering
+    config = load_config()
+    return render_template(
+        "business_profile.html",
+        business_Info={
+            "Name": config["business_name"],
+            "Address": config["business_address"],
+            "Phone": config["business_phone"],
+            "Email": config["business_email"],
+        },
+        errorMessage=error_message
+    )
+
 @app.route('/settings', methods=["GET","POST"])
 def settings():
-    error_message = None
     warning_message = None
     if request.method == "POST":
         config = load_config()
     
         # Process form input with fallback to config
-        form_data = extract_businessPortfolioForm_data(config)
+        form_data = extract_settingForm_data(config)
 
         # Update ticket order
         update_ticket_order(form_data["ticket_order"])
@@ -396,36 +422,27 @@ def settings():
         valid_output, warning_message = validate_invoice_output_path(form_data["output_path"])
         update_invoice_output_path(valid_output)
 
-        # Validate and update business info fields
-        errors = validate_and_update_business_info(form_data)
-
-        if errors:
-            error_message = errors[0]  # Only show the first error
-
     # Load current config for rendering
     config = load_config()
     return render_template(
         "settings.html",
         counting_order=config["ticket_order"],
         invoice_output_path=config["invoice_output_path"],
-        business_Info={
-            "Name": config["business_name"],
-            "Address": config["business_address"],
-            "Phone": config["business_phone"],
-            "Email": config["business_email"],
-        },
-        errorMessage=error_message,
         warning=warning_message
     )
 
-def extract_businessPortfolioForm_data(config):
+def extract_settingForm_data(config):
     return {
         "ticket_order": request.form.get("ticket_order") or config["ticket_order"],
-        "output_path": request.form.get("outputPath") or config["invoice_output_path"],
+        "output_path": request.form.get("outputPath") or config["invoice_output_path"]
+    }
+
+def extract_businessProfileForm_data(config):
+    return {
         "business_name": request.form.get("BusinessName") or config["business_name"],
         "business_address": request.form.get("BusinessAddress") or config["business_address"],
         "business_phone": request.form.get("BusinessPhone") or config["business_phone"],
-        "business_email": request.form.get("BusinessEmail") or config["business_email"],
+        "business_email": request.form.get("BusinessEmail") or config["business_email"]
     }
 
 def validate_invoice_output_path(path):
