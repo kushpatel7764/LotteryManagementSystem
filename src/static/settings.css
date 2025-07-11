@@ -32,9 +32,7 @@ select {
     outline: none;
     transition: border-color 0.3s ease;
 }
-#header {
-    text-align: right;
-}
+
 select:focus {
     border-color: #007BFF;
 }
@@ -83,13 +81,13 @@ input{
     outline: none;
     transition: border-color 0.3s ease;
 }
-#popupLabel {
+#popupWarningLabel {
     position: absolute;
     top: 25%;
     right: 42.5%;
     padding: 5px 10px;
-    color: rgb(204,51,0);
-    background-color: #ffe6e6;
+    color: rgb(255,204,0);
+    background-color: #fffbe6;
     border-radius: 5px;
     z-index: 9999;
     opacity: 0;
@@ -97,7 +95,7 @@ input{
     pointer-events: none;
 }
 
-#popupLabel.show { 
+#popupWarningLabel.show { 
     opacity: 1;
 }
 
