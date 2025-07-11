@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
     <script>
         function ChangeOrder(event){
             event.preventDefault();
@@ -21,7 +21,7 @@
 
             document.getElementById("orderForm").submit();
         }
-        function showPopup(message) {
+        function showErrorPopup(message) {
             const popup = document.getElementById("popupLabel");
             popup.textContent = message;
             popup.classList.add("show");
@@ -31,124 +31,67 @@
                 popup.classList.remove("show");
             }, 2000);
         }
+        function showWarningPopup(message) {
+            const warningpopup = document.getElementById("popupWarningLabel");
+            warningpopup.textContent = message;
+            warningpopup.classList.add("show");
+
+            // Hide after 2 seconds
+            setTimeout(() => {
+                warningpopup.classList.remove("show");
+            }, 2000);
+        }
+        window.onload = function() {
+            {% if errorMessage %}
+                showErrorPopup("{{ errorMessage }}");
+            {% endif %}
+            {% if warning %}
+                showWarningPopup("{{ warning }}");
+            {% endif %}
+        };
     </script>
-
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #f0f4f8;
-            font-family: "Segoe UI", sans-serif;
-        }
-
-        form {
-            background: #ffffff;
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        label {
-            font-size: 1.2em;
-            font-weight: 500;
-            display: block;
-            margin-bottom: 12px;
-        }
-
-        select {
-            padding: 10px 15px;
-            font-size: 1em;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-
-        select:focus {
-            border-color: #007BFF;
-        }
-
-        #settings_table{
-            border-spacing: 2%;
-            margin: 0 auto;
-        }
-        #settings_table td {
-            text-align: center;
-            padding: 10px;
-        }
-        #title{
-            text-align: center;
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 40px;
-            color: #333;
-        }
-        #Navigation_Buttons {
-            display: flex;
-            gap: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4f46e5;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #4338ca;
-        }
-        .header-bar {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-        input{
-            padding: 10px 15px;
-            font-size: 1em;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-         #popupLabel {
-            position: absolute;
-            top: 25%;
-            right: 42.5%;
-            padding: 5px 10px;
-            color: red;
-            background-color: #ffe6e6;
-            border: 1px solid red;
-            border-radius: 5px;
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            pointer-events: none;
-        }
-
-        #popupLabel.show {
-            opacity: 1;
-        }
-    </style>
 </head>
     <body>
-         <div>
-            <label id="popupLabel">{{errormessage}}</label>
+        <div>
+            <label id="popupLabel"></label>
+        </div>
+        <div>
+            <label id="popupWarningLabel"></label>
         </div>
 
-        <div class="header-bar">
+        <div class="button-container">
+            <button id="main-button">☰</button>
+            <div class="slide-buttons" id="slide-buttons">
+                <button style="font-size: 25px;" onclick="window.location.href='/'" class="slide-btn">⌂</button>
+                <button onclick="window.location.href='/scan_tickets'" class="slide-btn">Scan Tickets</button>
+                <button onclick="window.location.href='/books_managment'" class="slide-btn">Books Management</button>
+                <button onclick="window.location.href='/edit_reports'" class="slide-btn">Edit Reports</button>
+            </div>
+        </div>
+
+        <script>
+            const mainBtn = document.getElementById("main-button");
+            const slideBtns = document.getElementById("slide-buttons");
+
+            mainBtn.addEventListener("click", () => {
+                slideBtns.classList.toggle("show");
+                const isVisible = slideBtns.classList.contains("show");
+
+                if (isVisible){
+                    mainBtn.innerText = "➤";
+                }else{
+                  mainBtn.innerText = "☰";  
+                }
+            });
+        </script>        
+
+        <!-- <div class="header-bar">
             <div id="Navigation_Buttons">
                 <button onclick="window.location.href='/scan_tickets'">Scan Tickets</button>
                 <button onclick="window.location.href='/books_managment'">Books Management</button>            
                 <button onclick="window.location.href='/'">Home</button>
             </div>
-        </div>
+        </div> -->
 
         <div id="settings_container">
             <div id="title">Settings</div>
@@ -166,7 +109,7 @@
                     <td>
                         <form method="post" action="/settings" id="invoice_output_path">
                             <label>Invoice Output Path:</label>
-                            <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder" onchange="document.getElementById('invoice_output_path').submit();">
+                            <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder" value="{{ invoice_output_path }}" onchange="document.getElementById('invoice_output_path').submit();">
                             
                         </form>
                     <td>
@@ -175,24 +118,14 @@
                     <td>
                         <form method="post" action="/settings" id="businessPortfolioForm">
                             <label>Business Portfolio:</label>
-                            <label>Business Name: <input type="text" id="business_name" name="BusinessName" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Name"] %} value="{{ business_Info["Name"] }}" {% endif %}></label>
-                            <label>Business Address: <input type="text" id="business_address" name="BusinessAddress" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Address"] %} value="{{ business_Info["Address"] }}" {% endif %}></label>
-                            <label>Business Phone: <input type="text" id="business_phone" name="BusinessPhone" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Phone"] %} value="{{ business_Info["Phone"] }}" {% endif %}></label>
-                            <label>Business Email: <input type="text" id="business_email" name="BusinessEmail" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Email"] %} value="{{ business_Info["Email"] }}" {% endif %}></label>
+                            <label>Business Name: <input type="text" id="business_name" name="BusinessName" placeholder="e.g. Scuttlebutts Liquors" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Name"] %} value="{{ business_Info["Name"] }}" {% endif %}></label>
+                            <label>Business Address: <input type="text" id="business_address" name="BusinessAddress" placeholder="123 Main St, Springfield, IL 62704" pattern="^[0-9]+[\s]+[A-Za-z\s]+[,]{0,1}[\s]*[A-Za-z\s]+$" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Address"] %} value="{{ business_Info["Address"] }}" {% endif %}></label>
+                            <label>Business Phone: <input type="tel" id="business_phone" pattern="^\d{10}$" placeholder="Enter 10-digit number" name="BusinessPhone" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Phone"] %} value="{{ business_Info["Phone"] }}" {% endif %}></label>
+                            <label>Business Email: <input type="text" id="business_email" name="BusinessEmail" placeholder="e.g. johndoe@example.com" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Email"] %} value="{{ business_Info["Email"] }}" {% endif %}></label>
                         </form>
                     </td>
                 </tr>
             </table>
         </div>
-
-        <script>
-            console.log("wjrw");
-            //const errormessage = {{ errormessage | tojson | default("null") | safe }};
-            if (errormessage) {
-                console.log("hi");
-                showPopup('{{errormessage}}');
-            }
-        </script>
-
     </body>
 </html>

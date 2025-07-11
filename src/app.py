@@ -8,6 +8,7 @@ import generate_invoice
 import game_number_lookup_table
 from utc_to_local_time import convert_utc_to_local
 from datetime import datetime
+import re
 from config_utils import load_config
 from config_utils import update_ticket_order
 from config_utils import update_invoice_output_path
@@ -22,6 +23,8 @@ app = Flask(__name__)
 # Get database path
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')    
+
+DEFAULT_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
 
 @app.route('/scan_tickets', methods=["GET", "POST"])
 def scan_tickets():
@@ -378,33 +381,89 @@ def delete_book():
 
 @app.route('/settings', methods=["GET","POST"])
 def settings():
-    errormessage = None
+    error_message = None
+    warning_message = None
     if request.method == "POST":
-        ticket_order = request.form.get("ticket_order") if request.form.get("ticket_order") is not None else load_config()['ticket_order']
-        invoice_output_request = request.form.get("outputPath") if request.form.get("outputPath") is not None else load_config()['invoice_output_path']
-        business_Name_Output = request.form.get("BusinessName") if request.form.get("BusinessName") is not None else load_config()['business_name']
-        business_Address_Output = request.form.get("BusinessAddress") if request.form.get("BusinessAddress") is not None else load_config()['business_address']
-        business_Phone_Output = request.form.get("BusinessPhone") if request.form.get("BusinessPhone") is not None else load_config()['business_phone']
-        business_Email_Output = request.form.get("BusinessEmail") if request.form.get("BusinessEmail") is not None else load_config()['business_email']
-
-        update_ticket_order(ticket_order)
-        update_invoice_output_path(invoice_output_request)
-        update_business_info(name="business_name", value = business_Name_Output)
-        update_business_info(name="business_address", value = business_Address_Output)
-        update_business_info(name="business_phone", value = business_Phone_Output)
-        update_business_info(name="business_email", value = business_Email_Output)
+        config = load_config()
     
+        # Process form input with fallback to config
+        form_data = extract_businessPortfolioForm_data(config)
 
-    counting_order = load_config()['ticket_order']
-    invoice_output_path = load_config()['invoice_output_path']
-    business_Info = {
-        "Name": load_config()["business_name"],
-        "Address": load_config()["business_address"],
-        "Phone": load_config()["business_phone"],
-        "Email": load_config()["business_email"]
+        # Update ticket order
+        update_ticket_order(form_data["ticket_order"])
+
+        # Validate and update invoice output path
+        valid_output, warning_message = validate_invoice_output_path(form_data["output_path"])
+        update_invoice_output_path(valid_output)
+
+        # Validate and update business info fields
+        errors = validate_and_update_business_info(form_data)
+
+        if errors:
+            error_message = errors[0]  # Only show the first error
+
+    # Load current config for rendering
+    config = load_config()
+    return render_template(
+        "settings.html",
+        counting_order=config["ticket_order"],
+        invoice_output_path=config["invoice_output_path"],
+        business_Info={
+            "Name": config["business_name"],
+            "Address": config["business_address"],
+            "Phone": config["business_phone"],
+            "Email": config["business_email"],
+        },
+        errorMessage=error_message,
+        warning=warning_message
+    )
+
+def extract_businessPortfolioForm_data(config):
+    return {
+        "ticket_order": request.form.get("ticket_order") or config["ticket_order"],
+        "output_path": request.form.get("outputPath") or config["invoice_output_path"],
+        "business_name": request.form.get("BusinessName") or config["business_name"],
+        "business_address": request.form.get("BusinessAddress") or config["business_address"],
+        "business_phone": request.form.get("BusinessPhone") or config["business_phone"],
+        "business_email": request.form.get("BusinessEmail") or config["business_email"],
     }
-    
-    return render_template("settings.html", counting_order = counting_order, invoice_output_path = invoice_output_path, business_Info = business_Info, errormessage=errormessage)
+
+def validate_invoice_output_path(path):
+    if os.path.isdir(path):
+        return path, None
+    return DEFAULT_DOWNLOADS_PATH, "Resetting to DEFAULT PATH (invalid output path)"
+
+def validate_and_update_business_info(data):
+    errors = []
+
+    # Business Name (always updated without validation)
+    update_business_info(name="business_name", value=data["business_name"])
+
+    # Address validation
+    address = data["business_address"]
+    if address == "" or re.match("^(\\d{1,}) [a-zA-Z0-9\\s]+(\\,)? [a-zA-Z]+(\\,)? [A-Z]{2} [0-9]{5,6}$", address):
+        update_business_info(name="business_address", value=address)
+    else:
+        update_business_info(name="business_address", value="")
+        errors.append("Not a valid ADDRESS!")
+
+    # Phone number validation
+    phone = data["business_phone"]
+    if phone == "" or re.fullmatch(r"^\+?\d{10,15}$", phone):
+        update_business_info(name="business_phone", value=phone)
+    else:
+        update_business_info(name="business_phone", value="")
+        errors.append("Not a valid PHONE NUMBER!")
+
+    # Email validation (allow empty field)
+    email = data["business_email"]
+    if email == "" or re.fullmatch(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
+        update_business_info(name="business_email", value=email)
+    else:
+        update_business_info(name="business_email", value="")
+        errors.append("Not a valid EMAIL!")
+
+    return errors
     
 @app.route('/deactivate_book', methods=['POST', 'GET'])
 def deactivate_book():
