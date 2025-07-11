@@ -31,11 +31,6 @@
                 popup.classList.remove("show");
             }, 2000);
         }
-   
-
-        if (errormessage) {
-            showPopup("{{ errormessage }}");
-        }
     </script>
 
     <style>
@@ -189,5 +184,15 @@
                 </tr>
             </table>
         </div>
+
+        <script>
+            console.log("wjrw");
+            //const errormessage = {{ errormessage | tojson | default("null") | safe }};
+            if (errormessage) {
+                console.log("hi");
+                showPopup('{{errormessage}}');
+            }
+        </script>
+
     </body>
 </html>
