@@ -86,9 +86,8 @@ input{
     top: 25%;
     right: 42.5%;
     padding: 5px 10px;
-    color: red;
+    color: rgb(204,51,0);
     background-color: #ffe6e6;
-    border: 1px solid red;
     border-radius: 5px;
     z-index: 9999;
     opacity: 0;
@@ -97,19 +96,18 @@ input{
 }
 #popupWarningLabel{
     position: absolute;
-    top: 30%;
+    top: 10%;
     right: 42.5%;
     padding: 5px 10px;
-    color: gold;
-    background-color: #ffe6e6;
-    border: 1px solid gold;
+    color: rgb(255,204,0);
+    background-color: #fffbe6;
     border-radius: 5px;
     z-index: 9999;
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
     pointer-events: none;
 }
-#popupLabel.show {
+#popupLabel.show { 
     opacity: 1;
 }
 #popupWarningLabel.show{
