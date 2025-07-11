@@ -94,15 +94,21 @@ def book_sold_out():
     # Tell Database book is sold out - sets it to be removed from activated tickets
     Database.update_is_sold_for_book(db_path, True, book_id)
     # Update the closing number for book
-    Database.update_counting_ticket_number(db_path, book_id, -1)
-    # Insert to TicketTimeline
+    config = load_config()
     book = DatabaseQueries.get_book(db_path, book_id)
     game_number = book[1]
-    book_amount = book[2]
-    TicketPrice = book[3]
-    TicketNumber = -1
+    book_amount = book[3]
+    TicketPrice = book[4]
+    if config["ticket_order"] == "ascending":
+        sold_out_val = book_amount
+    elif config["ticket_order"] == "descending":
+        sold_out_val = -1
+
+    TicketNumber = sold_out_val
+    Database.update_counting_ticket_number(db_path, book_id, sold_out_val)
+    # Insert to TicketTimeline
     TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
-    scanID = f"{game_number}{book_id}998{TicketPrice}{book_amount}" # -----TicketNumber 998 in scannID means -1.
+    scanID = f"{game_number}{book_id}998{TicketPrice}{book_amount}" # -----TicketNumber 998 in scannID means BookSoldOut.
     insert_ticket(scanID, book_id, TicketNumber, TicketName, TicketPrice)
     # Add a sales log
     add_sales_log(book_id, TicketNumber, game_number)
@@ -186,15 +192,15 @@ def update_sales_log():
             Database.update_sale_report_instant_sold(db_path, instant_sold, id)
             # Add TicketTimeline
             book = DatabaseQueries.get_book(db_path, book_id)
-            book_amount = book[2]
-            TicketPrice = book[3]
+            book_amount = book[3]
+            TicketPrice = book[4]
             TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
             scanID = f"{game_number}{book_id}{close}{TicketPrice}{book_amount}" 
             insert_ticket(scanID, book_id, close, TicketName, TicketPrice, str(id))
         # Update ActivatedBooks
         book = DatabaseQueries.get_book(db_path, book_id)
-        book_amount = book[2]
-        TicketPrice = book[3]
+        book_amount = book[3]
+        TicketPrice = book[4]
         TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
         scanID = f"{game_number}{book_id}{close}{TicketPrice}{book_amount}" 
         activate_book_info = {
