@@ -1,9 +1,11 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings</title>
+{% extends "navButton.html" %}
+{% block title %}Settings{% endblock %}
+
+    {% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
+    {% endblock %}
+    
+    {% block extra_js %}
     <script>
         function ChangeOrder(event){
             event.preventDefault();
@@ -37,48 +39,15 @@
             {% endif %}
         };
     </script>
-</head>
-    <body>
+    {% endblock %}
+    
+    {% block content%}
         <div>
             <label id="popupLabel"></label>
         </div>
         <div>
             <label id="popupWarningLabel"></label>
-        </div>
-
-        <div class="button-container">
-            <button id="main-button">☰</button>
-            <div class="slide-buttons" id="slide-buttons">
-                <button style="font-size: 25px;" onclick="window.location.href='/'" class="slide-btn">⌂</button>
-                <button onclick="window.location.href='/scan_tickets'" class="slide-btn">Scan Tickets</button>
-                <button onclick="window.location.href='/books_managment'" class="slide-btn">Books Management</button>
-                <button onclick="window.location.href='/edit_reports'" class="slide-btn">Edit Reports</button>
-            </div>
-        </div>
-
-        <script>
-            const mainBtn = document.getElementById("main-button");
-            const slideBtns = document.getElementById("slide-buttons");
-
-            mainBtn.addEventListener("click", () => {
-                slideBtns.classList.toggle("show");
-                const isVisible = slideBtns.classList.contains("show");
-
-                if (isVisible){
-                    mainBtn.innerText = "➤";
-                }else{
-                  mainBtn.innerText = "☰";  
-                }
-            });
-        </script>        
-
-        <!-- <div class="header-bar">
-            <div id="Navigation_Buttons">
-                <button onclick="window.location.href='/scan_tickets'">Scan Tickets</button>
-                <button onclick="window.location.href='/books_managment'">Books Management</button>            
-                <button onclick="window.location.href='/'">Home</button>
-            </div>
-        </div> -->
+        </div>        
 
         <div id="settings_container">
             <div id="title">Settings</div>
@@ -103,5 +72,4 @@
                 </tr>
             </table>
         </div>
-    </body>
-</html>
+    {% endblock %}

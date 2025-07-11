@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Books Managment</title>
+{% extends "navButton.html" %}
+{% block title %}Books Management{% endblock %}
+{% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
-    <script>
+{% endblock %}
+   
+{% block extra_js %}
+   <script>
         function checkLengthAndSubmitAddBook() {
             const func_route = "/books_managment"
             const input = document.getElementById('add_book_code');
@@ -84,14 +85,11 @@
         }
 
     </script>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <div class="header-bar">
         <h1>Books Management</h1>
-        <div id="Navigation_Buttons">
-            <button onclick="window.location.href='/scan_tickets'">Scan Tickets</button>
-            <button onclick="window.location.href='/'">Home</button>
-        </div>
     </div>
     <form method="POST" id="AddBookForm" class="scan-box">
         <label for="add_book_code"><strong>Add Book:</strong></label><br>
@@ -162,5 +160,4 @@
         {% endfor %}
         </tbody>
     </table>
-</body>
-</html>
+{% endblock %}

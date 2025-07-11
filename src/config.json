@@ -1,6 +1,6 @@
 {
-    "ticket_order": "descending",
-    "invoice_output_path": "C:\\Users\\Kush Patel\\Downloads\\libraries",
+    "ticket_order": "ascending",
+    "invoice_output_path": "C:\\Users\\Kush Patel\\Downloads",
     "business_name": "MIT",
     "business_address": "77 Massachusetts Ave, Cambridge, MA 02139",
     "business_phone": "6172531000",

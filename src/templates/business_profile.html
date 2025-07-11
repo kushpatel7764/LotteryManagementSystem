@@ -1,9 +1,10 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Profile</title>
+{% extends "navButton.html" %}
+{% block title %}Business Profile{% endblock %}
+{% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
+{% endblock %}
+    
+{% block extra_js %}
     <script>
         function showErrorPopup(message) {
             const popup = document.getElementById("popupLabel");
@@ -21,8 +22,9 @@
             {% endif %}
         };
     </script>
-</head>
-    <body>
+{% endblock %}
+
+{% block content %}
         <div>
             <label id="popupLabel"></label>
         </div>
@@ -30,14 +32,6 @@
             <label id="popupWarningLabel"></label>
         </div>
 
-
-        <div class="header-bar">
-            <div id="Navigation_Buttons">
-                <button onclick="window.location.href='/scan_tickets'">Scan Tickets</button>
-                <button onclick="window.location.href='/books_managment'">Books Management</button>            
-                <button onclick="window.location.href='/'">Home</button>
-            </div>
-        </div>
 
         <div id="profile_container">
             <div id="title">Business Profile</div>
@@ -56,5 +50,4 @@
                 </tr>
             </table>
         </div>
-    </body>
-</html>
+{% endblock %}

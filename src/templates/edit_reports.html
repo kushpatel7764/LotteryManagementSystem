@@ -1,18 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Reports</title>
+{% extends "navButton.html" %}
+{% block title %}Edit Reports{% endblock %}
+{% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
-</head>
-<body>
+{% endblock %}
+{% block content %}
     <div class="header-bar">
         <h1>Edit Reports</h1>
-        <div id="Navigation_Buttons">
-            <button onclick="window.location.href='/'">Home</button>
-        </div>
     </div>
-
     <!-- Filter Form -->
     <form method="GET" action="/edit_reports" class="filter-form">
         <label for="date">Filter by Date:</label>
@@ -55,5 +49,4 @@
         {% endfor %}
         </tbody>
     </table>
-</body>
-</html>
+{% endblock %}
