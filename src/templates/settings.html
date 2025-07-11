@@ -21,16 +21,6 @@
 
             document.getElementById("orderForm").submit();
         }
-        function showErrorPopup(message) {
-            const popup = document.getElementById("popupLabel");
-            popup.textContent = message;
-            popup.classList.add("show");
-
-            // Hide after 2 seconds
-            setTimeout(() => {
-                popup.classList.remove("show");
-            }, 2000);
-        }
         function showWarningPopup(message) {
             const warningpopup = document.getElementById("popupWarningLabel");
             warningpopup.textContent = message;
@@ -42,9 +32,6 @@
             }, 2000);
         }
         window.onload = function() {
-            {% if errorMessage %}
-                showErrorPopup("{{ errorMessage }}");
-            {% endif %}
             {% if warning %}
                 showWarningPopup("{{ warning }}");
             {% endif %}
@@ -113,17 +100,6 @@
                             
                         </form>
                     <td>
-                </tr>
-                <tr>
-                    <td>
-                        <form method="post" action="/settings" id="businessPortfolioForm">
-                            <label>Business Portfolio:</label>
-                            <label>Business Name: <input type="text" id="business_name" name="BusinessName" placeholder="e.g. Scuttlebutts Liquors" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Name"] %} value="{{ business_Info["Name"] }}" {% endif %}></label>
-                            <label>Business Address: <input type="text" id="business_address" name="BusinessAddress" placeholder="123 Main St, Springfield, IL 62704" pattern="^[0-9]+[\s]+[A-Za-z\s]+[,]{0,1}[\s]*[A-Za-z\s]+$" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Address"] %} value="{{ business_Info["Address"] }}" {% endif %}></label>
-                            <label>Business Phone: <input type="tel" id="business_phone" pattern="^\d{10}$" placeholder="Enter 10-digit number" name="BusinessPhone" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Phone"] %} value="{{ business_Info["Phone"] }}" {% endif %}></label>
-                            <label>Business Email: <input type="text" id="business_email" name="BusinessEmail" placeholder="e.g. johndoe@example.com" onchange="document.getElementById('businessPortfolioForm').submit();"{% if business_Info["Email"] %} value="{{ business_Info["Email"] }}" {% endif %}></label>
-                        </form>
-                    </td>
                 </tr>
             </table>
         </div>
