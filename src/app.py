@@ -1,3 +1,7 @@
+
+import eventlet
+eventlet.monkey_patch()
+from flask_socketio import SocketIO, emit
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask import send_file
 import os
@@ -9,6 +13,7 @@ import game_number_lookup_table
 from utc_to_local_time import convert_utc_to_local
 from datetime import datetime
 import re
+
 from config_utils import load_config
 from config_utils import update_ticket_order
 from config_utils import update_invoice_output_path
@@ -17,7 +22,10 @@ from datetime import datetime
 from pathlib import Path
 from email_invoice import email_invoice
 
+
 app = Flask(__name__)
+socketio = SocketIO(app, async_mode="threading", cors_allowed_origins="*")  # Allow all for dev
+
 # SQLite version is ≥ 3.31.0
 
 # Get database path
@@ -577,12 +585,20 @@ def download_modified_report(report_id):
         create_daily_invoice(report_id)
     return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order) 
 
+
+@socketio.on('connect')
+def on_connect():
+    print("Client connected")
+
 @app.route('/receive', methods=['POST'])
 def receive():
     barcode = request.form.get('barcode')
     print(f"Received barcode: {barcode}")
+    with app.app_context():
+        socketio.emit("barcode_scanned", {"barcode": barcode})
     return "Received"
 
+
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
     
