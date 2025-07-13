@@ -577,9 +577,12 @@ def download_modified_report(report_id):
         create_daily_invoice(report_id)
     return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order) 
 
+@app.route('/receive', methods=['POST'])
+def receive():
+    barcode = request.form.get('barcode')
+    print(f"Received barcode: {barcode}")
+    return "Received"
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
     
-# Check if reportID is the one before next report id or not, if it is then it means that it is a current reportID. TODO: Updating isSOLD?
-# If not current reportID then on submit: update that sales log book id and update relative sales logs as well, also redo sales report after this update as well. Update TicketTimeline.
-# If current reportID then: update that sales log book id and update relative sales logs as well, also redo sales report after this update as well. Update TicketTimeline. update isAtTicketNumber if closing number was changed.
