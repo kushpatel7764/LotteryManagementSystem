@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import Database
 import DatabaseQueries
+import os
 
 
 def get_lottery_net_lookup_table():
@@ -34,11 +35,20 @@ def get_lottery_net_lookup_table():
     return new_df
 
 def insert_new_ticket_name_to_lookup_table(db_path):
-    lottery_lookup_table = get_lottery_net_lookup_table()
-    for _, row in lottery_lookup_table.iterrows():
-        if not is_gm_in_lookup_table(row["Game No."]):
-            Database.insert_Ticket_name(db_path, row["Game Name"], row["Game No."])
-            track_gms_in_lookup_table(db_path)
+    # make sure the database with the lookup table is present before doing anything
+    if is_lottery_DB_present():
+        lottery_lookup_table = get_lottery_net_lookup_table()
+        for _, row in lottery_lookup_table.iterrows():
+            # make sure gm is not in the lookup table before inserting a new name
+            if not is_gm_in_lookup_table(row["Game No."]):
+                Database.insert_Ticket_name(db_path, row["Game Name"], row["Game No."])
+                track_gms_in_lookup_table(db_path)
+    else:
+        file_name="TicketNameLook_GM_Track"
+        parent_dir = os.path.dirname(os.path.abspath(__file__))  # Current script directory
+        parent_dir = os.path.dirname(parent_dir)  # Go one level up
+        db_path = os.path.join(parent_dir, file_name)
+        os.remove(db_path)
         
 def track_gms_in_lookup_table(db_path, file_name="TicketNameLook_GM_Track"):
     """
@@ -60,3 +70,9 @@ def is_gm_in_lookup_table(g_num,file_name="TicketNameLook_GM_Track"):
         return True
     else:
         return False
+    
+def is_lottery_DB_present(file_name="Lottery_Management_Database.db"):
+    parent_dir = os.path.dirname(os.path.abspath(__file__))  # Current script directory
+    parent_dir = os.path.dirname(parent_dir)  # Go one level up
+    db_path = os.path.join(parent_dir, file_name)
+    return os.path.exists(db_path)

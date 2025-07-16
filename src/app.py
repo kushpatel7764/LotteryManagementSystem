@@ -269,10 +269,6 @@ def calculate_instant_tickets_sold(ReportID):
 def submit():
     if DatabaseQueries.can_Submit(db_path):
         do_submit_procedure()
-        
-        
-        
-    
     return redirect(url_for("scan_tickets"))
 
 def do_submit_procedure():
@@ -344,7 +340,6 @@ def create_daily_invoice(ReportID):
 def home():
     # While loading the home page initalize the database. 
     Database.initialize_database(db_path)
-    game_number_lookup_table.insert_new_ticket_name_to_lookup_table(db_path)
     return render_template('index.html')
 
 @app.route('/books_managment', methods=["GET", "POST"])
@@ -374,6 +369,7 @@ def books_managment():
 def add_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
     game_number = scanned_info.get_game_num()
+    game_number_lookup_table.insert_new_ticket_name_to_lookup_table(db_path)
     book_info = {
         "BookID": scanned_info.get_book_id(),
         "GameNumber": game_number,
