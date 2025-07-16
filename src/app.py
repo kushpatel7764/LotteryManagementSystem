@@ -523,6 +523,11 @@ def activate_book_procedure(scanned_code):
     # So check to make sure that the book being instered is prensent in the system and is not already activated. 
     activate_book_id = activate_book_info["ActiveBookID"]
     if DatabaseQueries.is_book(db=db_path, book_id=activate_book_id) and not(DatabaseQueries.is_activated_book(db=db_path, activated_book_id=activate_book_id)):
+        was_active_ticket_num = DatabaseQueries.was_activated(db_path, activate_book_id)
+        # check to see if the book has been activated previosly or not
+        if was_active_ticket_num:
+            activate_book_info["isAtTicketNumber"] = was_active_ticket_num
+            
         # Active the book
         Database.insert_book_to_ActivatedBook_table(database_path=db_path, active_book_info=activate_book_info)
         return f"Book ({activate_book_id}) has been activated!"

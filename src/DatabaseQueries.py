@@ -126,10 +126,11 @@ def get_scan_ticket_page_table(db_path):
 
         cursor.execute(
             """
-            SELECT TicketNameLookup.TicketName, ActivatedBooks.ActiveBookID, Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber 
+            SELECT TicketNameLookup.TicketName, ActivatedBooks.ActiveBookID, Books.TicketPrice, Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber 
             FROM ActivatedBooks 
             Join Books ON ActiveBookID = BookID
-            Left Join TicketNameLookup ON Books.GameNumber = TicketNameLookup.GameNumber;
+            Left Join TicketNameLookup ON Books.GameNumber = TicketNameLookup.GameNumber
+            ORDER BY Books.TicketPrice DESC;
             """
         )
         result_table = cursor.fetchall()
@@ -139,10 +140,11 @@ def get_scan_ticket_page_table(db_path):
                 {
                     "TicketName": table[0],
                     "ActiveBookID": table[1],
-                    "GameNumber": table[2],
-                    'Is_Sold': table[3],
-                    "isAtTicketNumber": table[4],
-                    "countingTicketNumber": table[5]
+                    "ticketPrice": table[2],
+                    "GameNumber": table[3],
+                    'Is_Sold': table[4],
+                    "isAtTicketNumber": table[5],
+                    "countingTicketNumber": table[6]
                 }
             )
         
@@ -480,6 +482,25 @@ def can_Submit(db):
                 if row[0] is None:
                     return False
             return True
+        
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
+        
+def was_activated(db, BookID):
+    try:
+        conn = sqlite3.connect(db)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT TicketNumber FROM TicketTimeLine where BookID = ? ORDER BY ReportID DESC", (BookID,))
+        rows = cursor.fetchall()
+        
+        if rows:
+            return rows[0][0]
+        else:
+            return None
         
     except sqlite3.Error as e:
         print(f"Database error: {e}")
