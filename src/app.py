@@ -117,7 +117,7 @@ def book_sold_out():
     # Insert to TicketTimeline
     TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
     scanID = f"{game_number}{book_id}998{TicketPrice}{book_amount}" # -----TicketNumber 998 in scannID means BookSoldOut.
-    insert_ticket(scanID, book_id, TicketNumber, TicketName, TicketPrice)
+    insert_ticket(scanID, book_id, -1, TicketName, TicketPrice)
     # Add a sales log
     add_sales_log(book_id, TicketNumber, game_number)
     
@@ -345,7 +345,6 @@ def home():
 @app.route('/books_managment', methods=["GET", "POST"])
 def books_managment():
     status_message_add_book = ""
-    
     if request.method == 'POST':
         scanned_code = request.form['add_book_code']
         add_book_procedure(scanned_code)
@@ -525,7 +524,7 @@ def activate_book_procedure(scanned_code):
     if DatabaseQueries.is_book(db=db_path, book_id=activate_book_id) and not(DatabaseQueries.is_activated_book(db=db_path, activated_book_id=activate_book_id)):
         was_active_ticket_num = DatabaseQueries.was_activated(db_path, activate_book_id)
         # check to see if the book has been activated previosly or not
-        if was_active_ticket_num:
+        if was_active_ticket_num and was_active_ticket_num > -1:
             activate_book_info["isAtTicketNumber"] = was_active_ticket_num
             
         # Active the book

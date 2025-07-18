@@ -1,6 +1,9 @@
 import sqlite3
+import Database  
+
 
 def get_books(db):
+    Database.initialize_database(db)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Books")
@@ -21,6 +24,7 @@ def get_books(db):
     return books_list
 
 def count_activated_books(db):
+    Database.initialize_database(db)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(ActiveBookID)  FROM ActivatedBooks;")
@@ -33,6 +37,7 @@ def count_activated_books(db):
         print("Could not retrieve activated books count!")
 
 def get_activated_books(db):
+    Database.initialize_database(db)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM ActivatedBooks")
@@ -49,6 +54,7 @@ def get_activated_books(db):
     return activated_books_list
 
 def is_book(db, book_id):
+    Database.initialize_database(db)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
@@ -61,6 +67,7 @@ def is_book(db, book_id):
         return False
     
 def is_activated_book(db, activated_book_id):
+    Database.initialize_database(db)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM ActivatedBooks WHERE ActiveBookID = ? LIMIT 1;", (activated_book_id,))
@@ -73,6 +80,7 @@ def is_activated_book(db, activated_book_id):
         return False
     
 def get_activated_book_isAtTicketNumber(db, activated_book_id):
+    Database.initialize_database(db)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT isAtTicketNumber FROM ActivatedBooks WHERE ActiveBookID = ? LIMIT 1;", (activated_book_id,))
@@ -82,6 +90,7 @@ def get_activated_book_isAtTicketNumber(db, activated_book_id):
     return activated_book_isAtTicketNumber
 
 def get_activated_book(db, activated_book_id):
+    Database.initialize_database(db)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM ActivatedBooks WHERE ActiveBookID = ? LIMIT 1;", (activated_book_id,))
@@ -91,6 +100,7 @@ def get_activated_book(db, activated_book_id):
     return activated_book
 
 def get_book(db, book_id):
+    Database.initialize_database(db)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
@@ -100,6 +110,7 @@ def get_book(db, book_id):
     return book
 
 def get_ticket_with_bookid(db, book_id):
+    Database.initialize_database(db)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM TicketTimeLine WHERE BookID = ? LIMIT 1;", (book_id,))
@@ -109,6 +120,7 @@ def get_ticket_with_bookid(db, book_id):
     return book
 
 def get_all_active_book_ids(db):
+    Database.initialize_database(db)
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     cursor.execute("SELECT ActiveBookID FROM ActivatedBooks")
@@ -119,9 +131,10 @@ def get_all_active_book_ids(db):
     conn.close()
     return active_book_ids
 
-def get_scan_ticket_page_table(db_path):
+def get_scan_ticket_page_table(db):
+    Database.initialize_database(db)
     try:
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(db)
         cursor = conn.cursor()
 
         cursor.execute(
@@ -158,6 +171,7 @@ def get_scan_ticket_page_table(db_path):
         conn.close()
         
 def get_all_instant_tickets_sold_quantity(db, ReportID):
+    Database.initialize_database(db)
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -188,6 +202,7 @@ def get_all_instant_tickets_sold_quantity(db, ReportID):
         conn.close()
     
 def get_all_sold_books(db, ReportID):
+    Database.initialize_database(db)
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -215,6 +230,7 @@ def get_all_sold_books(db, ReportID):
         conn.close()
         
 def is_sold(db, book_id):
+    Database.initialize_database(db)
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -234,6 +250,7 @@ def is_sold(db, book_id):
         conn.close()
         
 def get_table_for_invoice(db, ReportID):
+    Database.initialize_database(db)
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -268,6 +285,7 @@ def get_table_for_invoice(db, ReportID):
         conn.close()
         
 def get_daily_report(db, ReportID):
+    Database.initialize_database(db)
     # Not really daily report but a session report
     try:
         conn = sqlite3.connect(db)
@@ -300,6 +318,7 @@ def get_daily_report(db, ReportID):
         conn.close()
 
 def get_all_sales_reports(db):
+    Database.initialize_database(db)
      # Not really daily report but a session report
     try:
         conn = sqlite3.connect(db)
@@ -334,6 +353,7 @@ def get_all_sales_reports(db):
         conn.close()
     
 def get_sales_log(db, ReportID):
+    Database.initialize_database(db)
      # Not really daily report but a session report
     try:
         conn = sqlite3.connect(db)
@@ -365,6 +385,7 @@ def get_sales_log(db, ReportID):
         conn.close()
         
 def get_sales_log_with_bookid(db, ReportID, book_id):
+    Database.initialize_database(db)
      # Not really daily report but a session report
     try:
         conn = sqlite3.connect(db)
@@ -394,6 +415,7 @@ def get_sales_log_with_bookid(db, ReportID, book_id):
         conn.close()
 
 def get_gm_from_lookup(db):
+    Database.initialize_database(db)
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -412,6 +434,7 @@ def get_gm_from_lookup(db):
         conn.close()
 
 def get_ticket_name(db, game_number):
+    Database.initialize_database(db)
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -434,6 +457,7 @@ def get_ticket_name(db, game_number):
         conn.close()
         
 def next_report_ID(db):
+    Database.initialize_database(db)
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -453,6 +477,7 @@ def next_report_ID(db):
         conn.close()
 
 def get_game_num_of(db, book_id):
+    Database.initialize_database(db)
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -470,6 +495,7 @@ def get_game_num_of(db, book_id):
 
 
 def can_Submit(db):
+    Database.initialize_database(db)
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
@@ -490,6 +516,7 @@ def can_Submit(db):
         conn.close()
         
 def was_activated(db, BookID):
+    Database.initialize_database(db)
     try:
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
