@@ -4,6 +4,9 @@ class ScannedCodeManagement:
     def __init__(self, scanned_code):
         self.scanned_code = scanned_code
     
+    def validate_scanned_code(self):
+        pass
+    
     def get_game_num(self):
      """
      From "input": 35600949981000515070000000091
