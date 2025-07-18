@@ -34,14 +34,16 @@ def get_lottery_net_lookup_table():
     new_df = df.drop(columns=['Price', "Top Prize", "Prizes Remaining", "Odds of Winning"])
     return new_df
 
-def insert_new_ticket_name_to_lookup_table(db_path, file_name="TicketNameLook_GM_Track"):
+def insert_new_ticket_name_to_lookup_table(db_path, file_name="TicketNameLook_GM_Track.txt"):
+    create_empty_gm_track_file(file_name) # in case ticketNamelook_gm_track is not there
     # make sure the database with the lookup table is present before doing anything
-    if compare_game_numbers(db_path, file_name)["in_file_not_in_db"] > 0:
+    if len(compare_game_numbers(db_path, file_name)["in_file_not_in_db"]) > 0:
         remove_TicketName_GM_Track(file_name)
+        create_empty_gm_track_file(file_name) # put it back after removing data
     lottery_lookup_table = get_lottery_net_lookup_table()
     for _, row in lottery_lookup_table.iterrows():
         # make sure gm is not in the lookup table before inserting a new name
-        if not is_gm_in_lookup_table(row["Game No."]):
+        if not is_gm_in_lookup_table(row["Game No."], file_name):
             Database.insert_Ticket_name(db_path, row["Game Name"], row["Game No."])
             track_gms_in_lookup_table(db_path)
         
@@ -51,7 +53,7 @@ def remove_TicketName_GM_Track(file_name):
     db_path = os.path.join(parent_dir, file_name)
     os.remove(db_path)
         
-def track_gms_in_lookup_table(db_path, file_name="TicketNameLook_GM_Track"):
+def track_gms_in_lookup_table(db_path, file_name="TicketNameLook_GM_Track.txt"):
     """
     Get Game numbers from lookup table and store them in file for use
     """
@@ -65,7 +67,7 @@ def track_gms_in_lookup_table(db_path, file_name="TicketNameLook_GM_Track"):
                 temp_string += tuple + "\n"
         f.write(temp_string)
 
-def is_gm_in_lookup_table(g_num,file_name="TicketNameLook_GM_Track"):
+def is_gm_in_lookup_table(g_num,file_name):
     game_number_list = load_from_gm_track_file(file_name)
     if g_num in game_number_list:
         return True
@@ -95,10 +97,16 @@ def compare_game_numbers(db_path, track_file_path):
     file_game_numbers = set(track_df)
 
     # Compare
+    # Will remove elements from file_game_number that are also in lookup_table_game_number
     in_file_not_in_db = file_game_numbers - lookup_table_game_numbers
-    # in_file_not_in_db < 0 means lookup_table_game_numbers has more than file
-    # in_file_not_in_db > 0 means lookup_table_game_numbers has less than file
+    
     return {
         "in_file_not_in_db": in_file_not_in_db,
         "common": lookup_table_game_numbers & file_game_numbers
     }
+    
+def create_empty_gm_track_file(file_name):
+    if not os.path.exists(file_name):
+        with open(file_name, 'w') as f:
+            pass  # Just create an empty file
+
