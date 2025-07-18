@@ -34,21 +34,22 @@ def get_lottery_net_lookup_table():
     new_df = df.drop(columns=['Price', "Top Prize", "Prizes Remaining", "Odds of Winning"])
     return new_df
 
-def insert_new_ticket_name_to_lookup_table(db_path):
+def insert_new_ticket_name_to_lookup_table(db_path, file_name="TicketNameLook_GM_Track"):
     # make sure the database with the lookup table is present before doing anything
-    if is_lottery_DB_present():
-        lottery_lookup_table = get_lottery_net_lookup_table()
-        for _, row in lottery_lookup_table.iterrows():
-            # make sure gm is not in the lookup table before inserting a new name
-            if not is_gm_in_lookup_table(row["Game No."]):
-                Database.insert_Ticket_name(db_path, row["Game Name"], row["Game No."])
-                track_gms_in_lookup_table(db_path)
-    else:
-        file_name="TicketNameLook_GM_Track"
-        parent_dir = os.path.dirname(os.path.abspath(__file__))  # Current script directory
-        parent_dir = os.path.dirname(parent_dir)  # Go one level up
-        db_path = os.path.join(parent_dir, file_name)
-        os.remove(db_path)
+    if compare_game_numbers(db_path, file_name)["in_file_not_in_db"] > 0:
+        remove_TicketName_GM_Track(file_name)
+    lottery_lookup_table = get_lottery_net_lookup_table()
+    for _, row in lottery_lookup_table.iterrows():
+        # make sure gm is not in the lookup table before inserting a new name
+        if not is_gm_in_lookup_table(row["Game No."]):
+            Database.insert_Ticket_name(db_path, row["Game Name"], row["Game No."])
+            track_gms_in_lookup_table(db_path)
+        
+def remove_TicketName_GM_Track(file_name):
+    parent_dir = os.path.dirname(os.path.abspath(__file__))  # Current script directory
+    parent_dir = os.path.dirname(parent_dir)  # Go one level up
+    db_path = os.path.join(parent_dir, file_name)
+    os.remove(db_path)
         
 def track_gms_in_lookup_table(db_path, file_name="TicketNameLook_GM_Track"):
     """
@@ -57,22 +58,47 @@ def track_gms_in_lookup_table(db_path, file_name="TicketNameLook_GM_Track"):
     lookup_gm = DatabaseQueries.get_gm_from_lookup(db_path)
     with open(file_name, "w") as f:
         temp_string = ""
-        for tuple in lookup_gm:
-            temp_string += tuple[0] + "\n"
+        for i,tuple in enumerate(lookup_gm):
+            if i == len(lookup_gm) - 1:
+                temp_string += tuple
+            else:
+                temp_string += tuple + "\n"
         f.write(temp_string)
 
 def is_gm_in_lookup_table(g_num,file_name="TicketNameLook_GM_Track"):
-    game_number_list = []
-    with open(file_name, "r") as f:
-        for line in f:
-            game_number_list.append(line.strip("\n"))
+    game_number_list = load_from_gm_track_file(file_name)
     if g_num in game_number_list:
         return True
     else:
         return False
+
+def load_from_gm_track_file(file_name):
+    game_number_list = []
+    with open(file_name, "r") as f:
+        for line in f:
+            game_number_list.append(line.strip("\n"))
+    return game_number_list
+    
     
 def is_lottery_DB_present(file_name="Lottery_Management_Database.db"):
     parent_dir = os.path.dirname(os.path.abspath(__file__))  # Current script directory
     parent_dir = os.path.dirname(parent_dir)  # Go one level up
     db_path = os.path.join(parent_dir, file_name)
     return os.path.exists(db_path)
+
+def compare_game_numbers(db_path, track_file_path):
+    # GET Gamenumber from Lookup table
+    lookup_table_game_numbers = DatabaseQueries.get_gm_from_lookup(db_path)
+
+    # Load game_number from the TicketNameLook_GM_Track file
+    track_df = load_from_gm_track_file(track_file_path)
+    file_game_numbers = set(track_df)
+
+    # Compare
+    in_file_not_in_db = file_game_numbers - lookup_table_game_numbers
+    # in_file_not_in_db < 0 means lookup_table_game_numbers has more than file
+    # in_file_not_in_db > 0 means lookup_table_game_numbers has less than file
+    return {
+        "in_file_not_in_db": in_file_not_in_db,
+        "common": lookup_table_game_numbers & file_game_numbers
+    }

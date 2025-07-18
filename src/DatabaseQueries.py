@@ -403,7 +403,7 @@ def get_gm_from_lookup(db):
             FROM TicketNameLookup;
         """
         cursor.execute(query)
-        result_table = cursor.fetchall()
+        result_table = set(row[0] for row in cursor.fetchall())
         return result_table
     except sqlite3.Error as e:
         print(f"Database error: {e}")
