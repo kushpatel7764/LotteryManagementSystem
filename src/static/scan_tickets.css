@@ -5,6 +5,23 @@
     padding: 10px;
 }
 
+#scanInfoButton{
+    position: relative;
+    bottom: 25px;
+    right: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    font-size: 10px;
+    text-align: center;
+    line-height: 16px;
+    padding: 0;
+    cursor: pointer;
+}
+
 #Navigation_Buttons {
     display: flex;
     gap: 10px;
