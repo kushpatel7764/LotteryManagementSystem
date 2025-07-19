@@ -5,7 +5,9 @@ class ScannedCodeManagement:
         self.scanned_code = scanned_code
     
     def validate_scanned_code(self):
-        pass
+        barcode = self.scanned_code
+        if not barcode.isdigit() or len(barcode) != 19:
+            return 
     
     def get_game_num(self):
      """
