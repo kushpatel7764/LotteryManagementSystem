@@ -109,7 +109,13 @@
                     });
                 }
             }
+            function showInfoImage() {
+                document.getElementById('infoModal').style.display = 'flex';
+            }
 
+            function hideInfoImage() {
+                document.getElementById('infoModal').style.display = 'none';
+            }
         </script>
 
 {% endblock %}
@@ -125,6 +131,7 @@
                autofocus
                required
                oninput="checkLengthAndSubmitAddBook()">
+        <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton"> i </button>
         <!-- Submit button is hidden since auto-submit is now enabled -->
         <button type="submit" style="display:none;">Submit</button>
 
@@ -142,6 +149,7 @@
                autofocus
                required
                oninput="checkLengthAndSubmitActivateBook()">
+        <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton"> i </button>
         <!-- Submit button is hidden since auto-submit is now enabled -->
         <button type="submit" style="display:none;">Submit</button>
 
@@ -185,4 +193,13 @@
         {% endfor %}
         </tbody>
     </table>
+    <!-- Modal for Image -->
+    <div id="infoModal">
+        <div style="position: relative; background: white; padding: 10px; border-radius: 8px;">
+            <img src="{{ url_for('static', filename='BookManagementInfoImg.JPG') }}" 
+                alt="Info Image" 
+                style="max-width: 90vw; max-height: 80vh; display: block; margin: auto;">
+            <button onclick="hideInfoImage()" id="InfoModalCloseBtn" onmouseover="this.style.backgroundColor='#f2f2f2'" onmouseout="this.style.backgroundColor='#ff3d3d'">×</button>
+        </div>
+    </div>
 {% endblock %}

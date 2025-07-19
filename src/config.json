@@ -1,7 +1,7 @@
 {
-    "ticket_order": "ascending",
-    "invoice_output_path": "/Users/kushpatel/Downloads",
-    "business_name": "Mjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",
+    "ticket_order": "descending",
+    "invoice_output_path": "C:\\Users\\Kush Patel\\Downloads",
+    "business_name": "Mj",
     "business_address": "",
     "business_phone": "",
     "business_email": "kkjjnbiububiubu@com.gmail"
