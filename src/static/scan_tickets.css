@@ -222,3 +222,8 @@ tr.row {
     margin-right: 15px;
 }
 
+
+.barcode-highlight {
+    border: 2px solid limegreen;
+    box-shadow: 0 0 5px limegreen;
+}

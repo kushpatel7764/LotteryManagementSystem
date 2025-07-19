@@ -1,3 +1,7 @@
+
+import eventlet
+eventlet.monkey_patch()
+from flask_socketio import SocketIO, emit
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask import send_file
 import os
@@ -9,6 +13,7 @@ import game_number_lookup_table
 from utc_to_local_time import convert_utc_to_local
 from datetime import datetime
 import re
+
 from config_utils import load_config
 from config_utils import update_ticket_order
 from config_utils import update_invoice_output_path
@@ -17,7 +22,10 @@ from datetime import datetime
 from pathlib import Path
 from email_invoice import email_invoice
 
+
 app = Flask(__name__)
+socketio = SocketIO(app, async_mode="threading", cors_allowed_origins="*")  # Allow all for dev
+
 # SQLite version is ≥ 3.31.0
 
 # Get database path
@@ -109,7 +117,7 @@ def book_sold_out():
     # Insert to TicketTimeline
     TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
     scanID = f"{game_number}{book_id}998{TicketPrice}{book_amount}" # -----TicketNumber 998 in scannID means BookSoldOut.
-    insert_ticket(scanID, book_id, TicketNumber, TicketName, TicketPrice)
+    insert_ticket(scanID, book_id, -1, TicketName, TicketPrice)
     # Add a sales log
     add_sales_log(book_id, TicketNumber, game_number)
     
@@ -261,10 +269,6 @@ def calculate_instant_tickets_sold(ReportID):
 def submit():
     if DatabaseQueries.can_Submit(db_path):
         do_submit_procedure()
-        
-        
-        
-    
     return redirect(url_for("scan_tickets"))
 
 def do_submit_procedure():
@@ -336,13 +340,11 @@ def create_daily_invoice(ReportID):
 def home():
     # While loading the home page initalize the database. 
     Database.initialize_database(db_path)
-    game_number_lookup_table.insert_new_ticket_name_to_lookup_table(db_path)
     return render_template('index.html')
 
 @app.route('/books_managment', methods=["GET", "POST"])
 def books_managment():
     status_message_add_book = ""
-    
     if request.method == 'POST':
         scanned_code = request.form['add_book_code']
         add_book_procedure(scanned_code)
@@ -366,6 +368,7 @@ def books_managment():
 def add_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code)
     game_number = scanned_info.get_game_num()
+    game_number_lookup_table.insert_new_ticket_name_to_lookup_table(db_path)
     book_info = {
         "BookID": scanned_info.get_book_id(),
         "GameNumber": game_number,
@@ -519,6 +522,11 @@ def activate_book_procedure(scanned_code):
     # So check to make sure that the book being instered is prensent in the system and is not already activated. 
     activate_book_id = activate_book_info["ActiveBookID"]
     if DatabaseQueries.is_book(db=db_path, book_id=activate_book_id) and not(DatabaseQueries.is_activated_book(db=db_path, activated_book_id=activate_book_id)):
+        was_active_ticket_num = DatabaseQueries.was_activated(db_path, activate_book_id)
+        # check to see if the book has been activated previosly or not
+        if was_active_ticket_num and was_active_ticket_num > -1:
+            activate_book_info["isAtTicketNumber"] = was_active_ticket_num
+            
         # Active the book
         Database.insert_book_to_ActivatedBook_table(database_path=db_path, active_book_info=activate_book_info)
         return f"Book ({activate_book_id}) has been activated!"
@@ -577,9 +585,20 @@ def download_modified_report(report_id):
         create_daily_invoice(report_id)
     return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order) 
 
+
+@socketio.on('connect')
+def on_connect():
+    print("Client connected")
+
+@app.route('/receive', methods=['POST'])
+def receive():
+    barcode = request.form.get('barcode')
+    print(f"Received barcode: {barcode}")
+    with app.app_context():
+        socketio.emit("barcode_scanned", {"barcode": barcode})
+    return "Received"
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
     
-# Check if reportID is the one before next report id or not, if it is then it means that it is a current reportID. TODO: Updating isSOLD?
-# If not current reportID then on submit: update that sales log book id and update relative sales logs as well, also redo sales report after this update as well. Update TicketTimeline.
-# If current reportID then: update that sales log book id and update relative sales logs as well, also redo sales report after this update as well. Update TicketTimeline. update isAtTicketNumber if closing number was changed.
