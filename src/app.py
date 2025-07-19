@@ -62,7 +62,7 @@ def scan_tickets():
         else:
             print("UnActivated Book")
     # Get all the active books basically. In reality, making a table to show to the user using activated bookids.
-    activate_books = DatabaseQueries.get_scan_ticket_page_table(db_path=db_path)
+    activate_books = DatabaseQueries.get_scan_ticket_page_table(db=db_path)
     
     # Instant ticket sold calculation
     instant_tickets_sold_total = calculate_instant_tickets_sold(ReportID="Pending") 
