@@ -79,7 +79,12 @@
         function hideInfoImage() {
             document.getElementById('infoModal').style.display = 'none';
         }
-
+        window.onload = function() {
+        {% if error_message %}
+            const scanInput = document.querySelector('[name="scanned_code"]');
+            if (scanInput) scanInput.value = "";
+        {% endif %}
+        }
     </script>
 
 {% endblock %}
@@ -110,8 +115,8 @@
         <!-- Submit button is hidden since auto-submit is now enabled -->
         <button type="submit" style="display:none;">Submit</button>
 
-        {% if status_message %}
-        <div class="status-message">{{ status_message }}</div>
+        {% if error_message %}
+            <div class="status-message error">{{ error_message }}</div>
         {% endif %}
     </form>
 

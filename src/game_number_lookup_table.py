@@ -31,7 +31,7 @@ def get_lottery_net_lookup_table():
 
     # Create DataFrame
     df = pd.DataFrame(rows, columns=headers)
-    new_df = df.drop(columns=['Price', "Top Prize", "Prizes Remaining", "Odds of Winning"])
+    new_df = df.drop(columns=["Top Prize", "Prizes Remaining", "Odds of Winning"])
     return new_df
 
 def insert_new_ticket_name_to_lookup_table(db_path, file_name="TicketNameLook_GM_Track.txt"):
@@ -60,11 +60,11 @@ def track_gms_in_lookup_table(db_path, file_name="TicketNameLook_GM_Track.txt"):
     lookup_gm = DatabaseQueries.get_gm_from_lookup(db_path)
     with open(file_name, "w") as f:
         temp_string = ""
-        for i,tuple in enumerate(lookup_gm):
+        for i,item in enumerate(lookup_gm):
             if i == len(lookup_gm) - 1:
-                temp_string += tuple
+                temp_string += item
             else:
-                temp_string += tuple + "\n"
+                temp_string += item + "\n"
         f.write(temp_string)
 
 def is_gm_in_lookup_table(g_num,file_name):
