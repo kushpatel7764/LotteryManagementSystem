@@ -293,7 +293,7 @@ def do_submit_procedure():
     # Update "Pending" TicketTimeLine ReportID
     Database.update_pending_TicketTimeLine_report_id(db_path, next_ReportID)
     # Create a Invoice
-    full_path = create_daily_invoice(next_ReportID)
+    create_daily_invoice(next_ReportID)
     # Remove sold out books from current ActivatedBooks table using there book ids
     sold_out_books = DatabaseQueries.get_all_sold_books(db_path, next_ReportID)
     for book in sold_out_books:
@@ -303,9 +303,9 @@ def do_submit_procedure():
     # countingTicketNumber needs to be set to None since nothing is being counted after submit.
     Database.update_isAtTicketNumber(db_path)
     Database.clear_countingTicketNumbers(db_path)
-    # TODO: Map report ID to SaleRport ReportID and get Date from there later
+    # TODO: File not found at given location error
     now = datetime.now()
-    fileName=f"Invoice#{next_ReportID}:{now.strftime('%m-%d-%Y')}.pdf"
+    fileName=f"Invoice#{next_ReportID}-{now.strftime('%m-%d-%Y')}.pdf"
     email_invoice(filename=fileName)
     
 
@@ -332,7 +332,7 @@ def create_daily_invoice(ReportID):
         save_dir = str(Path.home() / "Downloads")
     now = datetime.now()
     invoice_number=f"Invoice{ReportID}"
-    fileName=f"Invoice#{ReportID}:{now.strftime('%m-%d-%Y')}.pdf"
+    fileName=f"Invoice#{ReportID}-{now.strftime('%m-%d-%Y')}.pdf"
     full_path = os.path.join(save_dir, fileName)
     
     generate_invoice.generate_lottery_invoice_pdf(full_path, store_info, invoiceLog, invoice_number, daily_report)
