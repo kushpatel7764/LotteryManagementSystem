@@ -56,12 +56,15 @@ def insert_book_info_to_Books_table(database_path, book_info):
     cursor = conn.cursor()
 
     try:
-        add_book(conn, cursor, book_info)
+        add_book(conn, cursor, book_info)   
     except sqlite3.Error as e:
-        print(f"Error adding book to the database: {e}")
+        if "UNIQUE constraint failed: Books.BookID" in str(e):
+            return f"BOOK IS ALREADY IN THE DATABASE", "error"
+        return f"BOOK INSERTION ERROR: {e}", "error"
 
-    print("book data successfully inserted!")
     conn.close()
+    return "BOOK ADDED!", "success"
+    
     
 def add_ticket_to_timeline(conn, cursor, ticket_info):
     """
@@ -177,10 +180,10 @@ def insert_book_to_ActivatedBook_table(database_path, active_book_info):
     try:
         add_activate_book_info_to_Activated_Book(conn, cursor, active_book_info)
     except sqlite3.Error as e:
-        print(f"Error Activating the book: {e}")
+        return f"ERROR ACTIVATING BOOK: {e}"
     
-    print("book activated successfully!")
     conn.close()
+    return f"Book ({active_book_info["ActiveBookID"]}) has been activated!", "success"
 
 def update_counting_ticket_number_for_book_id_query(cursor, conn, book_id, new_ticket_number, date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S")): 
     # SQL query to update the countingTicketNumber

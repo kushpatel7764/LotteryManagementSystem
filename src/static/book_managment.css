@@ -92,27 +92,31 @@ button {
     cursor: pointer;
 }
 
-.SoldOutButton{
-    padding: 5px 10px;
-    margin-left: 5px;
-}
 
 button:hover {
     background-color: #4338ca;
 }
 
-.status-message {
+.status-activate_book_message, .status-add_book_message {
     font-weight: bold;
     margin-top: 10px;
 }
 
-.status-message.error {
+.status-activate_book_message.error{
     color: red;
 }
 
-.status-message.success {
+.status-add_book_message.error {
+    color: red;
+}
+.status-activate_book_message.success{
     color: green;
 }
+
+.status-add_book_message.success {
+    color: green;
+}
+
 
 
 table {
@@ -126,23 +130,79 @@ th, td {
     padding: 12px;
     border: 1px solid #ddd;
 }
+/*Delete and Deactivate option CSS*/
+tr .options_Button{
+    box-shadow: none;
+    position: relative;
+    padding: 5px;
+    background-color: rgb(249, 250, 251);
+    border-color: rgb(249, 250, 251);
+    width: 0;
+    height: 0;
+    overflow: visible; /* allow contents to escape bounds */
+}
 
-/*X Button for Scan Tickets Page*/
-.x_button_container{
-    border: none;
+tr .th_OptionsButton{
+    box-shadow: none;
+    border-color: rgb(249, 250, 251);
     background-color: rgb(249, 250, 251);
 }
 
-tr.row.scanned {
-    background-color: #10b953a7;
+
+td.options_Button.activated .dropbtn {
+    background-color: #10b95f; /* green */
+    color: white;
 }
 
-.x_button_container button{
-    background-color: red;
+td.options_Button.activated .dropdown-content{
+    background-color: #10b95f;
+    box-shadow: 0px 8px 16px #10b953;
+    color: white;
+}
+td.options_Button.activated .dropdown-content button:hover{
+    background-color: #48de81;
+}
+.dropbtn {
+  background-color: #4f46e5;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
 }
 
-.x_button_container button:hover{
-    background-color: rgb(199, 0, 0);
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: #4338ca;
+  min-width: 140px;
+  box-shadow: 0px 8px 16px #6f67d1;
+  z-index: 1;
+  border-radius: 8px;
+  padding: 6px 15px;
+  box-sizing: border-box;
+  overflow: hidden; 
+}
+
+.dropdown-content button {
+    padding: none;
+    background: none;
+    border: none;
+    text-align: center;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s ease;
+    outline: none; 
+}
+
+.dropdown-content button:hover {
+  background-color: #5c52cb;
+}
+
+.dropdown-container.show .dropdown-content {
+  display: block;
 }
 
 /*Edit Button*/

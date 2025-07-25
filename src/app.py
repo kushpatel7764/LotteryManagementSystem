@@ -36,7 +36,8 @@ DEFAULT_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
 
 @app.route('/scan_tickets', methods=["GET", "POST"])
 def scan_tickets():
-    error_message = None  # Initialize error message
+    message = ""  # Initialize error message
+    message_type = ""
     if request.method == "POST":
         # Get book ids for all the active books 
         all_active_book_ids = DatabaseQueries.get_all_active_book_ids(db=db_path)
@@ -47,9 +48,11 @@ def scan_tickets():
         extracted_vals = scanned_info.extract_all_scanned_code()
         
         if extracted_vals == "INVALID BARCODE":
-            error_message = "INVALID BARCODE"
+            message = "INVALID BARCODE"
+            message_type = "error"
         elif extracted_vals["book_id"] not in all_active_book_ids:
-            error_message = "Book is not activated. Please activate it before scanning."
+            message = "Book IS NOT ACTIVATED! PLEASE ACTIVATE BEFORE SCANNING."
+            message_type = "error"
         else:
             # Insert ticket
             scanID = scanned_code
@@ -58,6 +61,8 @@ def scan_tickets():
             Database.update_counting_ticket_number(db_path, extracted_vals["book_id"], extracted_vals["ticket_number"])
             # Add sales log
             add_sales_log(extracted_vals["book_id"], extracted_vals["ticket_number"], extracted_vals["game_number"])
+            message = "TICKET SCANNED"
+            message_type = "success"
 
     # Get all the active books basically. In reality, making a table to show to the user using activated bookids.
     activate_books = DatabaseQueries.get_scan_ticket_page_table(db=db_path)
@@ -69,7 +74,7 @@ def scan_tickets():
     counting_order = load_config()['ticket_order']
     #Get activated ticket count
     activated_ticket_count = DatabaseQueries.count_activated_books(db_path)
-    return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total, counting_order=counting_order, activated_book_count=activated_ticket_count, error_message=error_message)
+    return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total, counting_order=counting_order, activated_book_count=activated_ticket_count, message=message, message_type=message_type)
 
 @app.route("/undo_scan", methods=["POST"])
 def undo_scan():
@@ -342,15 +347,20 @@ def home():
 
 @app.route('/books_managment', methods=["GET", "POST"])
 def books_managment():
-    status_message_add_book = ""
+    add_book_message = ""
+    add_book_message_type = ""
+    activate_book_message = request.args.get('activate_book_message', '') # The redirect from /activate will generate a URL like: 
+    # /books_managment?activate_book_message=SomeMessage&activate_book_message_type=success
+    # request.args.get('activate_book_message', '') will then get these arguments
+    activate_book_message_type = request.args.get('activate_book_message_type', '')
     if request.method == 'POST':
         scanned_code = request.form['add_book_code']
-        add_book_procedure(scanned_code)
-        status_message_add_book = "Book added to the database."
+        add_book_message, add_book_message_type = add_book_procedure(scanned_code)
     
     # Books info for the books table to display on screen 
     books = DatabaseQueries.get_books(db=db_path)
     
+    # Setting TicketNames
     for book in books:
         game_number = book["GameNumber"]
         book["TicketName"] = DatabaseQueries.get_ticket_name(db_path, game_number)
@@ -358,23 +368,34 @@ def books_managment():
     # Get activated books (just the BookIDs)
     activated_books = DatabaseQueries.get_activated_books(db_path)  # should return a list of dicts or a list of IDs
     activated_ids = {book['ActiveBookID'] for book in activated_books}  # Use set for faster lookup
-    
-    status_message_activate_book = request.args.get('status_message_activate_book')
-    
-    return render_template('books_managment.html', books=books, activated_ids=activated_ids, status_message_add_book=status_message_add_book, status_message_activate_book=status_message_activate_book)
+        
+    return render_template('books_managment.html', 
+                           books=books, 
+                           activated_ids=activated_ids, 
+                           add_book_message=add_book_message, 
+                           add_book_message_type=add_book_message_type, 
+                           activate_book_message=activate_book_message, 
+                           activate_book_message_type=activate_book_message_type)
 
 def add_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code, db_path=db_path)
     extracted_vals = scanned_info.extract_all_scanned_code()
-    game_number_lookup_table.insert_new_ticket_name_to_lookup_table(db_path)
-    book_info = {
-        "BookID": extracted_vals["book_id"],
-        "GameNumber": extracted_vals["game_number"],
-        "Is_Sold": False,
-        "BookAmount": extracted_vals["book_amount"],
-        "TicketPrice": extracted_vals["ticket_price"]
-    }
-    Database.insert_book_info_to_Books_table(database_path=db_path, book_info=book_info)
+    
+    if extracted_vals == "INVALID BARCODE":
+        return "INVALID BARCODE", "error" # message, message_type
+    else:
+        message = ""
+        message_type = ""
+        game_number_lookup_table.insert_new_ticket_name_to_lookup_table(db_path)
+        book_info = {
+            "BookID": extracted_vals["book_id"],
+            "GameNumber": extracted_vals["game_number"],
+            "Is_Sold": False,
+            "BookAmount": extracted_vals["book_amount"],
+            "TicketPrice": extracted_vals["ticket_price"]
+        }
+        message, message_type = Database.insert_book_info_to_Books_table(database_path=db_path, book_info=book_info)
+        return message, message_type
     
 @app.route('/delete_book', methods=['POST', 'GET'])
 def delete_book():
@@ -500,36 +521,48 @@ def deactivate_book():
 
 @app.route('/activate_book', methods=["GET", "POST"])
 def activate_book():
-    status_message_activate_book = "" # Displays the message on website
+    activate_book_message = ""
+    activate_book_message_type = ""
     
     if request.method == 'POST':
         scanned_code = request.form['activate_book_code']
-        status_message_activate_book = activate_book_procedure(scanned_code)
+        activate_book_message, activate_book_message_type = activate_book_procedure(scanned_code) 
         
-    return redirect(url_for("books_managment", status_message_activate_book=status_message_activate_book))
+    return redirect(url_for("books_managment", activate_book_message=activate_book_message, activate_book_message_type=activate_book_message_type))
 
 def activate_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code, db_path=db_path)
     extracted_vals = scanned_info.extract_all_scanned_code()
+    
+    if extracted_vals == "INVALID BARCODE":
+        return "INVALID BARCODE", "error" # message, message_type
+    # The book being activated must already be registered in the system. 
+    # So check to make sure that the book being instered is prensent in the system and is not already activated. 
+    book_exists = DatabaseQueries.is_book(db=db_path, book_id=extracted_vals["book_id"])
+    book_is_activated = DatabaseQueries.is_activated_book(db=db_path, activated_book_id=extracted_vals["book_id"])
+
+    if not book_exists:
+        return "BOOK DOES NOT EXISTS IN BOOKS DATABASE!", "error"
+
+    if book_is_activated:
+        return "BOOK HAS ALREADY BEEN ACTIVATED!", "error"
+    
+    message = ""
+    message_type = ""
     activate_book_info = {
         "ActivationID": scanned_code,
         "ActiveBookID": extracted_vals["book_id"],
         "isAtTicketNumber": extracted_vals["ticket_number"]
     }
-    # The book being activated must already be registered in the system. 
-    # So check to make sure that the book being instered is prensent in the system and is not already activated. 
-    activate_book_id = activate_book_info["ActiveBookID"]
-    if DatabaseQueries.is_book(db=db_path, book_id=activate_book_id) and not(DatabaseQueries.is_activated_book(db=db_path, activated_book_id=activate_book_id)):
-        was_active_ticket_num = DatabaseQueries.was_activated(db_path, activate_book_id)
-        # check to see if the book has been activated previosly or not
-        if was_active_ticket_num and was_active_ticket_num > -1:
-            activate_book_info["isAtTicketNumber"] = was_active_ticket_num
-            
-        # Active the book
-        Database.insert_book_to_ActivatedBook_table(database_path=db_path, active_book_info=activate_book_info)
-        return f"Book ({activate_book_id}) has been activated!"
-    else:
-        return f"Error: Book does not already exist in data base or has already been activated!"
+    was_active_ticket_num = DatabaseQueries.was_activated(db_path, activate_book_info["ActiveBookID"])
+    # check to see if the book has been activated previosly or not
+    if was_active_ticket_num and was_active_ticket_num > -1:
+        activate_book_info["isAtTicketNumber"] = was_active_ticket_num
+        
+    # Active the book
+    message, message_type= Database.insert_book_to_ActivatedBook_table(database_path=db_path, active_book_info=activate_book_info)
+    return message, message_type
+
 
 @app.route('/edit_reports')
 def edit_reports():

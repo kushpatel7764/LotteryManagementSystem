@@ -1,7 +1,7 @@
 {% extends "navButton.html" %}
 {% block title %}Books Management{% endblock %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='book_managment.css') }}">
 {% endblock %}
    
 {% block extra_js %}
@@ -19,7 +19,9 @@
 
                 // Simulate input event so browser recognizes value change
                 activeElement.dispatchEvent(new Event("input", { bubbles: true }));
-
+                
+                // Store the ID of the last-focused input
+                sessionStorage.setItem("lastFocusedInput", activeElement.id);
 
                 const form = activeElement.form;
                 if (form) {
@@ -116,7 +118,29 @@
             function hideInfoImage() {
                 document.getElementById('infoModal').style.display = 'none';
             }
-        </script>
+
+            window.addEventListener("DOMContentLoaded", function () {
+                const lastFocusedID = sessionStorage.getItem("lastFocusedInput");
+
+                if (lastFocusedID) {
+                    const input = document.getElementById(lastFocusedID);
+                    if (input) {
+                        input.focus();
+                    }
+                }
+            });
+
+            window.onload = function() {
+            {% if add_book_message %}
+                const scanInput = document.querySelector('[name="add_book_code"]');
+                if (scanInput) scanInput.value = "";
+            {% endif %}
+            {% if activate_book_message %}
+                const scanInput = document.querySelector('[name="activate_book_code"]');
+                if (scanInput) scanInput.value = "";
+            {% endif %}
+            }
+    </script>
 
 {% endblock %}
 {% block header %} Books Management {% endblock %}  
@@ -128,15 +152,14 @@
                name="add_book_code"
                id="add_book_code"
                placeholder="Scan book or ticket to add to the system"
-               autofocus
                required
                oninput="checkLengthAndSubmitAddBook()">
         <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton"> i </button>
         <!-- Submit button is hidden since auto-submit is now enabled -->
         <button type="submit" style="display:none;">Submit</button>
 
-        {% if status_message_add_book %}
-        <div class="status-message">{{ status_message_add_book }}</div>
+        {% if add_book_message %}
+            <div class="status-add_book_message {{ add_book_message_type }}">{{ add_book_message }}</div>
         {% endif %}
     </form>
 
@@ -146,15 +169,14 @@
                name="activate_book_code"
                id="activate_book_code"
                placeholder="Scan book or ticket to activate it"
-               autofocus
                required
                oninput="checkLengthAndSubmitActivateBook()">
         <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton"> i </button>
         <!-- Submit button is hidden since auto-submit is now enabled -->
         <button type="submit" style="display:none;">Submit</button>
 
-        {% if status_message_activate_book %}
-        <div class="status-message">{{ status_message_activate_book }}</div>
+        {% if activate_book_message %}
+            <div class="status-activate_book_message {{ activate_book_message_type }}">{{ activate_book_message }}</div>
         {% endif %}
     </form>
 

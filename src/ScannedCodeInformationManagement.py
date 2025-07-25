@@ -13,35 +13,43 @@ class ScannedCodeManagement:
         - Must be exactly 29 characters
         - Checks that game number, ticket price, and book amount are within expected bounds
         """
+        output = False
         barcode = self.scanned_code
         if not barcode.isdigit() or len(barcode) != 29:
             return False
         
         game_num = self.get_game_num()
-        ticket_price = self.get_ticket_price()
+        ticket_price = int(self.get_ticket_price()) # Converting to int for easier comparison 
         book_amount = self.get_book_amount()
 
         lottery_lookup_table = game_number_lookup_table.get_lottery_net_lookup_table()
-        # distinct_prices = lottery_lookup_table["Price"].unique()
-        # cleaned_prices = [price.replace('$', '') for price in distinct_prices]
+        distinct_prices = lottery_lookup_table["Price"].unique()
+        cleaned_prices = [int(price.replace('$', '')) for price in distinct_prices] # because ticket_price is int
         for _, row in lottery_lookup_table.iterrows():
             # is valid game_number
             if row["Game No."] == game_num:
+                rmv_dollar_sign = row["Price"].replace('$', '')
                 # is valid price for gm
-                if row["Price"] != ticket_price:
-                    return False
-            else:
-                return False
+                # to do this convert two ticket_price and rmv_dollar_sign price from the lottery website to int so easy comparision.
+                # This way we can avoid the string comparison issue of "02" != "2"
+                int_web_price = int(rmv_dollar_sign)
+                if int_web_price == ticket_price:
+                    output = True
         
-        # book amount range {Price: min_book_amount}
-        book_sizes = {
-        "01": 99, "02": 99, "05": 99,
-        "10": 49, "20": 49, "30": 49, "50": 49}
-        
-        if int(book_amount) < book_sizes[ticket_price]:
+        if not (ticket_price in cleaned_prices):
             return False
         
-        return True
+        # book amount range {Price: min_book_amount}
+        book_sizes = {x: 49 if x > 5 else 99 for x in cleaned_prices}
+        # example output: {1: 99, 2: 99, 5: 99, 10: 49, 20: 49, 30: 49, 50: 49}
+        
+        min_book_amount = book_sizes[ticket_price]
+        max_book_amount = 700
+        
+        if max_book_amount < int(book_amount) or int(book_amount) < min_book_amount:
+            return False
+        
+        return output
     
     def get_game_num(self):
      """
