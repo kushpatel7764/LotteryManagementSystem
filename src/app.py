@@ -152,7 +152,7 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
     # ---- Calulateing sold (999 will change this)
     sale_log_info = {
         "ActiveBookID": book_id,
-        "prev_TicketNum": activate_book_isAtTicketNumber[0], # index 4 is the isAtTicketNumber
+        "prev_TicketNum": activate_book_isAtTicketNumber, # index 4 is the isAtTicketNumber
         "current_TicketNum": lastest_ticket_number,
         "Ticket_Name": DatabaseQueries.get_ticket_name(db_path, game_number),
         "Ticket_GameNumber": game_number
@@ -331,7 +331,7 @@ def create_daily_invoice(ReportID):
     else:
         save_dir = str(Path.home() / "Downloads")
     now = datetime.now()
-    invoice_number=f"Invoice{ReportID}"
+    invoice_number=f"{ReportID}"
     fileName=f"Invoice#{ReportID}-{now.strftime('%m-%d-%Y')}.pdf"
     full_path = os.path.join(save_dir, fileName)
     

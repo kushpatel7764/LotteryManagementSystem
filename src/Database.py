@@ -153,21 +153,6 @@ def add_ticket_to_timeline_at_reportID(cursor, ticket_info):
     )
 
 
-def set_updated_time_in_timeline(cursor, scanID, updated_time):
-    # TODO: Remove where scanID = ? and change to ReportID = ? and ActivatedBookID = ?
-    """
-    Sets the update_time in TicketTimeLine for a specfic ticket record
-    """
-    cursor.execute(
-        """
-                UPDATE TicketTimeline
-                SET updated_time = ?
-                WHERE scanID = ?;
-                   """,
-        (updated_time, scanID),
-    )
-
-
 def insert_ticket_to_TicketTimeline_table(database_path, ticket_info):
     """
     Inserts a ticket record into the 'TicketTimeline' table of the specified SQLite database.
