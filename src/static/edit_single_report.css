@@ -89,3 +89,28 @@ tr.row {
     background-color: rgba(0,0,0,0.5); /* Transparent dark background */
 }
 
+/* Error message display css */
+.flash-message {
+    margin: 20px auto;
+    padding: 12px 20px;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    opacity: 1;
+    transition: opacity 1s ease-out; /* Smooth fade-out */
+}
+
+.flash-message.success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #10b981;
+}
+
+.flash-message.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #ef4444;
+}
+

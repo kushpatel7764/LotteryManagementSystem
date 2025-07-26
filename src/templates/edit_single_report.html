@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Sales Log for {{ report_id }}</title>
+{% extends "navButton.html" %}
+{% block title %}Edit Report Page {% endblock %}
+{% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='edit_single_report.css') }}">
+{% endblock %}
+{% block extra_js %}
     <script>
         function getOpenCellByBookId(bookId) {
             const rows = document.querySelectorAll("tr");
@@ -122,17 +122,24 @@
             
             img.style.filter = 'invert(1)';
         }
+        
+        setTimeout(() => {
+        const msg = document.querySelector(".flash-message");
+        if (msg) {
+            msg.style.opacity = '0'; // Trigger CSS fade out
+            setTimeout(() => msg.remove(), 1000);
+        }
+    }, 4000); // Start fade after 4 seconds
     </script>
-</head>
-<body>
-    <div class="header-bar">
-        <h1>Sales Logs for Report ID: {{ report_id }}</h1>
-        <div id="Navigation_Buttons">
-            <button onclick="window.location.href='/edit_reports'">← Back to Reports</button>
+{% endblock %}
+{% block header %} Edit Report {{report_id}} {% endblock %}  
+{% block content %}
+    {% if message %}
+        <div class="flash-message {{ message_type }}">
+            {{ message }}
         </div>
-    </div>
-
-    <h2>Sales Log Entries</h2>
+    {% endif %}
+    <h2>Sale Entries</h2>
     <table>
         <thead>
             <tr>
@@ -205,5 +212,4 @@
         <br>
         <label>{% if updated_report_ids is not none %} Report IDs that may be updated are: {{updated_report_ids}} {% endif %}  </label>
     </form>
-</body>
-</html>
+{%endblock%}

@@ -595,6 +595,8 @@ def edit_reports():
 
 @app.route("/edit_report/<report_id>/<updated_report_ids>",  methods=["GET", "POST"])
 def edit_single_report(report_id, updated_report_ids):
+    message="Inside the report"
+    message_type = "success"
     # Query the sales logs related to this report ID
     sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
     sale_report = DatabaseQueries.get_daily_report(db_path, report_id)
@@ -604,7 +606,14 @@ def edit_single_report(report_id, updated_report_ids):
     
     # Get the counting order to calc sold
     counting_order = load_config()['ticket_order']
-    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order, updated_report_ids=updated_report_ids) 
+    return render_template("edit_single_report.html", 
+                           report_id=report_id, 
+                           sales_logs=sales_logs, 
+                           sale_report=sale_report, 
+                           counting_order=counting_order, 
+                           updated_report_ids=updated_report_ids,
+                           message=message,
+                           message_type=message_type) 
 
 @app.route('/download/<int:report_id>', methods=['POST'])
 def download_modified_report(report_id):
