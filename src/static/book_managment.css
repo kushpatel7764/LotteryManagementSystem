@@ -205,12 +205,6 @@ td.options_Button.activated .dropdown-content button:hover{
   display: block;
 }
 
-/*Edit Button*/
-.edit_button img{
-    width: 30px;
-    height: 30px;
-    filter: invert(1);
-}
 
 th {
     background-color: rgb(230, 230, 230);

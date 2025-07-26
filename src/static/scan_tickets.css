@@ -145,12 +145,6 @@ tr.row.scanned {
     background-color: rgb(199, 0, 0);
 }
 
-/*Edit Button*/
-.edit_button img{
-    width: 30px;
-    height: 30px;
-    filter: invert(1);
-}
 
 th {
     background-color: rgb(230, 230, 230);
@@ -161,6 +155,7 @@ tr.row {
     font-weight: bold;
 }
 
+/* Modal content box */
 .modal {
     display: none; /* Show on load */
     position: fixed;
@@ -173,7 +168,7 @@ tr.row {
     background-color: rgba(0,0,0,0.5); /* Transparent dark background */
 }
 
-/* Modal content box */
+
 .modal-content {
     background-color: white;
     margin: 15% auto;

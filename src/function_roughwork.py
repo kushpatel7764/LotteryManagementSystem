@@ -53,3 +53,10 @@ cleaned_prices = [1,2,5,10,20,30,50]
 
 book_sizes = {x: 49 if x > 5 else 99 for x in cleaned_prices}
 print(book_sizes)
+
+
+#if "UNIQUE constraint failed" in str(e):
+            # the updated_time attribute should now be updated to new utc time.
+        #set_updated_time_in_timeline(conn, cursor, ticket_info["ScanID"], datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S"))
+        #else:
+        

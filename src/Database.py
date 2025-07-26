@@ -5,8 +5,21 @@ from config_utils import load_config
 
 # Connect to database
 def setup_database_schema_with_sql_file(cursor, conn, sql_filename):
+    """
+    Executes an SQL schema script to set up or modify the structure of a SQLite database.
+
+    Parameters:
+        cursor (sqlite3.Cursor): The cursor object used to execute SQL commands.
+        conn (sqlite3.Connection): The active SQLite database connection.
+        sql_filename (str): The filename of the SQL file containing the schema setup instructions.
+
+    Description:
+        This function locates the provided SQL file (assumed to be one directory above the script),
+        reads its contents, and executes the SQL script using the given database cursor.
+        After execution, it commits the changes to the database.
+    """
     
-    setup_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Moves up one level
+    setup_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sql_file_path = os.path.join(setup_dir, sql_filename)
 
     # Read the SQL schema file
@@ -17,6 +30,12 @@ def setup_database_schema_with_sql_file(cursor, conn, sql_filename):
     conn.commit()
 
 def initialize_database(database_path):
+    """
+    Initializes a new or existing SQLite database by setting up its schema.
+
+    Parameters:
+        database_path (str): The file path to the SQLite database file.
+    """
     
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
@@ -50,6 +69,20 @@ def add_book(conn, cursor, book_info):
     conn.commit()
 
 def insert_book_info_to_Books_table(database_path, book_info):
+    """
+    Inserts a book record into the 'Books' table of the specified SQLite database.
+
+    Parameters:
+        database_path (str): The path to the SQLite database file.
+        book_info (dict): The book data to be inserted. The format must match
+                            the expected input of the add_book() function.
+
+    Returns:
+        tuple: A tuple containing a status message and a status type:
+               - ("BOOK ADDED!", "success") if insertion was successful.
+               - ("BOOK IS ALREADY IN THE DATABASE", "error") if the BookID already exists.
+               - ("BOOK INSERTION ERROR: <error>", "error") for any other database error.
+    """
     
     initialize_database(database_path)
     conn = sqlite3.connect(database_path)
@@ -68,7 +101,7 @@ def insert_book_info_to_Books_table(database_path, book_info):
     
 def add_ticket_to_timeline(conn, cursor, ticket_info):
     """
-    Inserts a ticket record into the database.
+    Inserts a ticket record into the tickettimeline table with a "pending" reportID.
 
     Parameters:
         ticket_info (dict): A dictionary with keys:
@@ -93,7 +126,7 @@ def add_ticket_to_timeline(conn, cursor, ticket_info):
     
 def add_ticket_to_timeline_at_reportID(conn, cursor, ticket_info):
     """
-    Inserts a ticket record into the database.
+    Inserts a ticket record into the tickettimeline table with a specific reportID.
 
     Parameters:
         ticket_info (dict): A dictionary with keys:
@@ -119,6 +152,11 @@ def add_ticket_to_timeline_at_reportID(conn, cursor, ticket_info):
     conn.commit()
 
 def set_updated_time_in_timeline(conn, cursor, scanID, updated_time):
+    # TODO: Remove where scanID = ? and change to ReportID = ? and ActivatedBookID = ?
+    """
+    Sets the update_time in TicketTimeLine for a specfic ticket record
+    """
+    
     cursor.execute("""
                 UPDATE TicketTimeline
                 SET updated_time = ?
@@ -127,7 +165,26 @@ def set_updated_time_in_timeline(conn, cursor, scanID, updated_time):
     conn.commit()
     
 def insert_ticket_to_TicketTimeline_table(database_path, ticket_info):
-    
+    """
+    Inserts a ticket record into the 'TicketTimeline' table of the specified SQLite database.
+
+    Parameters:
+        database_path (str): The file path to the SQLite database.
+        ticket_info (dict): A dictionary containing ticket details.
+                            If it includes a "ReportID" key, the ticket will be inserted 
+                            at the associated report using `add_ticket_to_timeline_at_reportID`.
+                            Otherwise, it uses `add_ticket_to_timeline`.
+
+    Returns:
+        tuple: A tuple with a message and status type.
+
+    Description:
+        This function:
+        1. Checks whether a "ReportID" is provided in the `ticket_info`:
+           - If yes, it calls `add_ticket_to_timeline_at_reportID` to insert the ticket.
+           - If no, it calls `add_ticket_to_timeline`.
+        2. Handles and returns error messages for integrity or general SQLite exceptions.
+    """
     initialize_database(database_path)
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
@@ -138,16 +195,13 @@ def insert_ticket_to_TicketTimeline_table(database_path, ticket_info):
         else:
             add_ticket_to_timeline(conn, cursor, ticket_info)
     except sqlite3.IntegrityError as e: 
-        if "UNIQUE constraint failed" in str(e):
-            # the updated_time attribute should now be updated to new utc time.
-            set_updated_time_in_timeline(conn, cursor, ticket_info["ScanID"], datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S"))
-        else:
-            print("Integrity error:", e)
+            return f"INTEGRITY ERROR SETTING TICKET TIMELINE: {e}", "error"
     except sqlite3.Error as e:
-        print(f"Error inserting ticket to TicketTimeLine: {e}")
+        return f"ERROR INSERTING SETTING TICKET TIMELINE: {e}", "error"
 
-    print("Ticket data successfully inserted!")
     conn.close()
+    return "TICKET SUCCESSFULLY INSERTED!", "success"
+    
     
     
 def add_activate_book_info_to_Activated_Book(conn, cursor, activated_book_info):
@@ -173,16 +227,30 @@ def add_activate_book_info_to_Activated_Book(conn, cursor, activated_book_info):
     conn.commit()
     
 def insert_book_to_ActivatedBook_table(database_path, active_book_info):
-    
+    """
+    Inserts an activated book record into the 'ActivatedBook' table of the specified SQLite database.
+
+    Parameters:
+        database_path (str): The file path to the SQLite database.
+        active_book_info (dict): A dictionary containing information about the activated book.
+                                 Must include the key "ActiveBookID" for success message formatting.
+
+    Returns:
+        tuple: a message and status type.
+
+    Description:
+        1. Attempts to insert the activation info using `add_activate_book_info_to_Activated_Book`.
+        2. Returns an error message on failure, or a success message including the ActiveBookID.
+    """
     initialize_database(database_path)
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
     try:
         add_activate_book_info_to_Activated_Book(conn, cursor, active_book_info)
     except sqlite3.Error as e:
-        return f"ERROR ACTIVATING BOOK: {e}"
-    
-    conn.close()
+        return f"ERROR ACTIVATING BOOK: {e}", "error"
+    finally:
+        conn.close()
     return f"Book ({active_book_info["ActiveBookID"]}) has been activated!", "success"
 
 def update_counting_ticket_number_for_book_id_query(cursor, conn, book_id, new_ticket_number, date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S")): 
@@ -200,45 +268,107 @@ def update_counting_ticket_number_for_book_id_query(cursor, conn, book_id, new_t
     conn.commit()
     
 def update_counting_ticket_number(database_path, book_id, new_ticket_number):
-    
+    """
+    Updates the counting ticket number for a given book in the ActivatedBooks table.
+
+    Parameters:
+        database_path (str): The path to the SQLite database file.
+        book_id (str): The unique identifier of the book whose ticket number is being updated.
+        new_ticket_number (int): The new ticket number to set for the book.
+
+    Returns:
+        tuple: A tuple containing:
+               - A success message and status ("COUNTING TICKET NUMBER UPDATED!", "success") if successful.
+               - An error message and status ("ERROR UPDATING CLOSE VALUE: <error>", "error") if an SQLite error occurs.
+
+    Description:
+        This function:
+        1. Attempts to update the ticket number associated with the provided book ID
+           by calling `update_counting_ticket_number_for_book_id_query`.
+        2. Catches and returns any SQLite errors encountered.
+    """
     initialize_database(database_path)
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
     try:
         update_counting_ticket_number_for_book_id_query(cursor, conn, book_id, new_ticket_number)
     except sqlite3.Error as e:
-        print(f"Error updating counting_ticket_number: {e}")
+        return f"ERROR UPDATING CLOSE VALUE: {e}", "error"
     
     conn.close()
     
 def delete_TicketTimeLine_by_book_id(db_path, book_id):
-    # Deletes only current Sales Report tickets
+    """
+    Deletes ticket entries for a specific book from the TicketTimeLine table
+    where the ReportID is marked as 'Pending'.
+
+    Parameters:
+        db_path (str): The file path to the SQLite database.
+        book_id (str or int): The BookID whose associated pending timeline entries should be deleted.
+
+    Returns:
+        tuple: 
+            - ("ERROR DELETING TICKETTIMELINE BOOKID(<book_id>): <error>", "error") on failure.
+    """
     
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM TicketTimeLine WHERE BookID = ? AND ReportID = 'Pending';", (book_id,))
-    conn.commit()
+    try:
+        cursor.execute("DELETE FROM TicketTimeLine WHERE BookID = ? AND ReportID = 'Pending';", (book_id,))
+        conn.commit()
+    except sqlite3.Error as e:
+        return f"ERROR DELETING TICKETTIMELINE BOOKID({book_id}): {e}", "error"
     conn.close()
     
 def book_is_sold(cursor, conn, isSold, book_id, date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S")):
+    """
+    Updates the 'Is_Sold' status of a book in the Books table.
+
+    Parameters:
+        cursor (sqlite3.Cursor): The database cursor to execute SQL.
+        conn (sqlite3.Connection): The open connection to the database.
+        isSold (int): The new value to set for the Is_Sold column (e.g., 0 or 1).
+        book_id (str): The ID of the book to update.
+        date: The timestamp to set as 'updated_at'. Defaults to current UTC time.
+
+    Description:
+        This function updates the 'Is_Sold' flag and the 'updated_at' timestamp
+        for the specified book in the database.
+    """
     cursor.execute("""
         UPDATE Books
         SET Is_Sold = ?,
         updated_at = ?
         WHERE BookID = ?
     """, (isSold ,date, book_id))
-    
     conn.commit()
     
 def update_is_sold_for_book(database_path, isSold, book_id):
-    
+    """
+    Updates the 'Is_Sold' status for a specific book in the database.
+
+    Parameters:
+        database_path (str): The path to the SQLite database file.
+        isSold (bool or int): The new sold status to set (e.g., 0 or 1).
+        book_id (str or int): The ID of the book to update.
+
+    Returns:
+        tuple:
+            - ("BOOK SOLD STATUS UPDATED", "success") on success.
+            - ("ERROR UPDATING SOLD VALUE TO <isSold>: <error>", "error") on failure.
+
+    Description:
+        This function:
+        1. Delegates the actual update to the `book_is_sold` helper function.
+        2. Catches and returns any SQLite errors.
+    """
     initialize_database(database_path)
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
     try:
         book_is_sold(cursor, conn, isSold, book_id)
     except sqlite3.Error as e:
-        print(f"Error updating is_sold: {e}")
+        return f"ERROR UPDATING SOLD VALUE TO {isSold}: {e}", "error"
     
     conn.close()
     
@@ -289,7 +419,19 @@ def add_sales_log_at_report_id (cursor, conn, scanned_ticket_info):
     conn.commit()
 
 def insert_sales_log (database_path, scanned_ticket_info):
-    
+    """
+    Inserts a sales log entry into the SalesLog table based on scanned ticket data.
+
+    Parameters:
+        database_path (str): The file path to the SQLite database.
+        scanned_ticket_info (dict): Dictionary containing ticket information.
+                                    If it includes "ReportID", logs the sale under that report.
+                                    Otherwise, it logs the sale with a default/pending status.
+
+    Returns:
+        tuple:
+            - ("ERROR LOGGING TICKET SALE DATA: <error>", "error") on SQLite error.
+    """
     initialize_database(database_path)
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
@@ -299,19 +441,54 @@ def insert_sales_log (database_path, scanned_ticket_info):
         else:
             add_sales_log(cursor, conn, scanned_ticket_info)
     except sqlite3.Error as e:
-        print(f"SalesLog error: {e}")
+        return f"ERROR LOGGING TICKET SALE DATA: {e}", "error"
     
     conn.close()
     
 def delete_sales_log_by_book_id(db_path, book_id):
+    """
+    Deletes all pending sales log entries for a specific book from the SalesLog table.
+
+    Parameters:
+        db_path (str): The file path to the SQLite database.
+        book_id (str or int): The ActiveBookID whose pending sales logs should be deleted.
+
+    Returns:
+        tuple:
+            - ("Sales log entries deleted for BookID (<book_id>)", "success") on successful deletion.
+            - ("ERROR DELETING LOGGED SALE DATA FOR BOOKID(<book_id>): <error>", "error") on SQLite error.
+
+    Description:
+        This function deletes records from the SalesLog table where ActiveBookID matches the given book_id
+        and ReportID is 'Pending'. This is used to clear temporary log entries.
+    """
     # Deletes only current Sales log
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM SalesLog WHERE ActiveBookID = ? AND ReportID = 'Pending';", (book_id,))
-    conn.commit()
+    try:
+        cursor.execute("DELETE FROM SalesLog WHERE ActiveBookID = ? AND ReportID = 'Pending';", (book_id,))
+        conn.commit()
+    except sqlite3.Error as e:
+        return f"ERROR DELETING LOGGED SALE DATA FOR BOOKID({book_id}): {e}", "error"
     conn.close()
     
 def update_pending_sales_log_report_id(db_path, report_id):
+    """
+    Updates all 'Pending' sales log entries by assigning them a specified ReportID.
+
+    Parameters:
+        db_path (str): The path to the SQLite database file.
+        report_id (str or int): The ReportID to assign to all sales log entries currently marked as 'Pending'.
+
+    Returns:
+        tuple:
+            - ("ERROR SETTING REPORTID FOR PENDING SALE LOG: <error>", "error") on failure.
+
+    Description:
+        This function connects to the database and updates all entries in the SalesLog table
+        with a ReportID of 'Pending', setting them to the specified report_id.
+        Useful when finalizing a batch of scanned ticket sales into a report.
+    """
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -323,11 +500,33 @@ def update_pending_sales_log_report_id(db_path, report_id):
         """, (report_id,))
         conn.commit()
     except sqlite3.Error as e:
-        print(f"Error updating pending sales log: {e}")
+        print(f"ERROR SETTING REPORTID FOR PENDING SALE LOG: {e}"), "error"
         
     conn.close()
     
 def update_sales_log_prev_TicketNum(db_path, prev_TicketNum, report_id, ActiveBookID):
+    """
+    Updates the `prev_TicketNum` in the SalesLog table and recalculates the quantity sold.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        prev_TicketNum (int): The previous (starting) ticket number.
+        report_id (str or int): The ReportID of the sale.
+        ActiveBookID (str or int): The ActiveBookID associated with the sale.
+
+    Returns:
+        tuple:
+            - ("NO MATCHING SALE ENTRY FOUND.", "error") if no record is found.
+            - ("ERROR UPDATING OPEN VALUE FOR LOGGED SALES: <error>", "error") on SQLite error.
+            - None if the update is successful.
+
+    Description:
+        This function:
+        1. Retrieves the current_TicketNum for the specified report/book.
+        2. Calculates the number of tickets sold based on the counting order from config.
+        3. Updates both `prev_TicketNum` and `Ticket_Sold_Quantity` in the SalesLog table.
+    """
+    
     # Also updates the qunatity sold
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
@@ -342,8 +541,7 @@ def update_sales_log_prev_TicketNum(db_path, prev_TicketNum, report_id, ActiveBo
         
         row = cursor.fetchone()
         if row is None:
-            print("No matching SalesLog entry found.")
-            return
+            return "NO MATCHING SALE ENTRY FOUND.", "error"
 
         current_TicketNum = int(row[0])
         counting_order = load_config()['ticket_order']
@@ -359,11 +557,33 @@ def update_sales_log_prev_TicketNum(db_path, prev_TicketNum, report_id, ActiveBo
         """, (prev_TicketNum, sold, report_id, ActiveBookID))
         conn.commit()
     except sqlite3.Error as e:
-        print(f"Error updating pending sales log: {e}")
-        
-    conn.close()
+        return f"ERROR UPDATING OPEN VALUE FOR LOGGED SALES: {e}", "error"
+    finally:
+        conn.close()
     
 def update_sales_log_current_TicketNum(db_path, current_TicketNum, report_id, ActiveBookID):
+    """
+    Updates the `current_TicketNum` in the SalesLog table and recalculates the quantity sold.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        current_TicketNum (int): The current (ending) ticket number.
+        report_id (str or int): The ReportID of the sale.
+        ActiveBookID (str or int): The ActiveBookID associated with the sale.
+
+    Returns:
+        tuple:
+            - ("NO MATCHING SALE ENTRY FOUND.", "error") if no record is found.
+            - ("ERROR UPDATING OPEN VALUE FOR LOGGED SALES: <error>", "error") on SQLite error.
+            - None if the update is successful.
+
+    Description:
+        This function:
+        1. Retrieves the `prev_TicketNum` from the database.
+        2. Calculates the quantity of tickets sold using the config's ticket counting order.
+        3. Updates `current_TicketNum` and `Ticket_Sold_Quantity` accordingly.
+    """
+    
     # Also updates the qunatity sold
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
@@ -377,8 +597,7 @@ def update_sales_log_current_TicketNum(db_path, current_TicketNum, report_id, Ac
         
         row = cursor.fetchone()
         if row is None:
-            print("No matching SalesLog entry found.")
-            return
+            return "NO MATCHING SALE ENTRY FOUND.", "error"
 
         prev_TicketNum = int(row[0])
         counting_order = load_config()['ticket_order']
@@ -394,11 +613,30 @@ def update_sales_log_current_TicketNum(db_path, current_TicketNum, report_id, Ac
         """,  (current_TicketNum, sold, report_id, ActiveBookID))
         conn.commit()
     except sqlite3.Error as e:
-        print(f"Error updating sales log: {e}")
-        
-    conn.close()
+        return f"ERROR UPDATING OPEN VALUE FOR LOGGED SALES: {e}", "error"
+    finally:
+        conn.close()
 
 def update_sale_report(db_path, instant_sold, online_sold, instant_cashed, online_cashed, cash_on_hand, report_id, date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S")):
+    """
+    Updates a finalized SaleReport entry with totals for ticket sales and cash.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        instant_sold (int): Number of instant tickets sold.
+        online_sold (int): Number of online tickets sold.
+        instant_cashed (int): Number of instant tickets cashed.
+        online_cashed (int): Number of online tickets cashed.
+        cash_on_hand (float): Amount of cash on hand at the time of the report.
+        report_id (str or int): The ReportID identifying the sale report.
+        date (str, optional): Time of the report update. Defaults to current UTC time.
+
+    Returns:
+        tuple:
+            - ("ERROR UPDATING SALE REPORT for REPORTID(<report_id>): <error>", "error") on failure.
+
+    """
+    
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -416,7 +654,9 @@ def update_sale_report(db_path, instant_sold, online_sold, instant_cashed, onlin
         """, (instant_sold, online_sold, instant_cashed, online_cashed, cash_on_hand, date, report_id))
         conn.commit()
     except sqlite3.Error as e:
-        print(f"Error updating sale report: {e}")
+        return f"ERROR UPDATING SALE REPORT for REPORTID({report_id}): {e}", "error"
+    finally:
+        conn.close()
 
 def add_daily_totals(cursor, conn, daily_totals): # add_Sale_Report
     cursor.execute('''
@@ -440,17 +680,51 @@ def add_daily_totals(cursor, conn, daily_totals): # add_Sale_Report
     conn.commit()
 
 def insert_daily_totals(db_path, daily_totals):
+    """
+    Inserts a new daily total entry into the SaleReport table.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        daily_totals (dict): Dictionary containing daily total values to be inserted.
+                             Must include a 'ReportID' key.
+
+    Returns:
+        tuple:
+            - ("ERROR ADDING A SALE REPORT FOR REPORTID(<ReportID>): <error>", "error") if an error occurs.
+            - None if insertion is successful.
+
+    Description:
+        This function uses the provided `daily_totals` dictionary
+        to add a new row to the SaleReport table using the helper function `add_daily_totals`.
+    """
+    
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     try:
         add_daily_totals(cursor, conn, daily_totals)
     except sqlite3.Error as e:
-        print(f"Daily total insertion error: {e}")
-        
-    conn.close()
+        return f"ERROR ADDING A SALE REPORT FOR REPORTID({daily_totals['ReportID']}): {e}", "error"
+    finally:   
+        conn.close()
 
 def update_sale_report_instant_sold(db_path, instant_sold, report_id):
+    """
+    Updates the `InstantTicketSold` field for a specific sale report.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        instant_sold (int): The updated number of instant tickets sold.
+        report_id (str): The ReportID of the report to be updated.
+
+    Returns:
+        tuple:
+            - ("ERROR UPDATING INSTANT SOLD VALUE FOR SALES REPORTID(<report_id>): <error>", "error") on SQLite error.
+
+    Description:
+        This function updates the `InstantTicketSold` field for the specified ReportID in the SaleReport table.
+    """
+    
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -462,11 +736,27 @@ def update_sale_report_instant_sold(db_path, instant_sold, report_id):
         """,  (instant_sold, report_id))
         conn.commit()
     except sqlite3.Error as e:
-        print(f"Error updating sales report instant sold: {e}")
-        
-    conn.close()
+        return f"Error updating instant sold value for sales reportid({report_id}) : ".upper() + f"{e}", "error"
+    finally:
+        conn.close()
     
 def update_pending_TicketTimeLine_report_id(db_path, report_id):
+    """
+    Updates all pending ticket timeline entries by assigning them the specified ReportID.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        report_id (str): The ReportID to assign to all 'Pending' TicketTimeLine entries.
+
+    Returns:
+        tuple:
+            - ("ERROR ADDING REPORTID(<report_id>) TO PENDING TICKET TIMELINE ENTRIES: <error>", "error") on SQLite error.
+
+    Description:
+        This function finds all rows in the TicketTimeLine table where the ReportID is currently 'Pending'
+        and updates them with the specified ReportID, during report finalization.
+    """
+    
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -478,11 +768,27 @@ def update_pending_TicketTimeLine_report_id(db_path, report_id):
         """, (report_id,))
         conn.commit()
     except sqlite3.Error as e:
-        print(f"Error updating pending sales log: {e}")
-        
-    conn.close()
+        return f"Error adding reportID({report_id}) to pending ticket timeline entires: ".upper() + f"{e}", "error"
+    finally:
+        conn.close()
     
 def deactivate_book(db_path, book_id):
+    """
+    Removes the activation record of a book from the ActivatedBooks table.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        book_id (str or int): The ActiveBookID to deactivate (delete).
+
+    Returns:
+        tuple:
+            - ("Error deactivating book: <error>", "error") on failure.
+            - None on success.
+
+    Description:
+        Deletes the row corresponding to the given ActiveBookID from ActivatedBooks.
+    """
+    
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -490,11 +796,25 @@ def deactivate_book(db_path, book_id):
         cursor.execute("DELETE FROM ActivatedBooks WHERE ActiveBookID = ?;", (book_id,))
         conn.commit()
     except sqlite3.Error as e:
-        print(f"Error deactivating book: {e}")
-    
-    conn.close()
+        return f"Error deactivating book: ".upper() + f"{e}", "error"
+    finally: 
+        conn.close()
     
 def update_isAtTicketNumber(db_path):
+    """
+    Sets the 'isAtTicketNumber' field to the value of 'countingTicketNumber' for all activated books.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+
+    Returns:
+        tuple:
+            - ("An error occurred while setting new open values for activated books: <error>", "error") on failure.
+
+    Description:
+        This function updates every row in ActivatedBooks so that isAtTicketNumber matches countingTicketNumber.
+    """
+
     # Connect to your database
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -510,11 +830,27 @@ def update_isAtTicketNumber(db_path):
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
-        print(f"Error updating isAtTicketNumber: {e}")
-
-    conn.close()
+        return f"An error occured while setting new open values for activated books: ".upper() + f"{e}", "error"
+    finally:
+        conn.close()
     
 def update_isAtTicketNumber_val(db_path, bookID, newVal):
+    """
+    Updates the 'isAtTicketNumber' field for a single activated book.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        bookID (str or int): The ActiveBookID to update.
+        newVal (int): New value for isAtTicketNumber.
+
+    Returns:
+        tuple:
+            - ("Error updating open value to <newVal> at bookID(<bookID>): <error>", "error") on failure.
+
+    Description:
+        Updates isAtTicketNumber for the specified book with the given value.
+    """
+    
     # Connect to your database
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -531,12 +867,26 @@ def update_isAtTicketNumber_val(db_path, bookID, newVal):
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
-        print(f"Error updating isAtTicketNumber: {e}")
-
-    conn.close()
+        return f"Error updating open value to {newVal} at bookID({bookID}): ".upper() + f"{e}", "error"
+    finally:
+        conn.close()
     
 
 def clear_countingTicketNumbers(db_path):
+    """
+    Clears the 'countingTicketNumber' field (sets to NULL) for all activated books records.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+
+    Returns:
+        tuple:
+            - ("An error occurred while clearing old closing values: <error>", "error") on failure.
+
+    Description:
+        Resets countingTicketNumber to NULL in all rows of ActivatedBooks.
+    """
+    
     # Connect to your database
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -552,18 +902,53 @@ def clear_countingTicketNumbers(db_path):
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
-        print(f"Error updating isAtTicketNumber: {e}")
-
-    conn.close()
+        return f"An Error occured while clearing old closing values: ".upper() + f"{e}", "error"
+    finally:
+        conn.close()
     
 def clear_counting_ticket_number(db_path, book_id):
+    """
+    Clears the 'countingTicketNumber' field (sets to NULL) for a single activated book.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        book_id (str): The ActiveBookID whose countingTicketNumber should be cleared.
+
+    Returns:
+        tuple:
+            - ("Unable to clear closing value at bookID(<book_id>): <error>", "error") on failure.
+
+    Description:
+        Resets countingTicketNumber to NULL for the specified book.
+    """
+    
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("UPDATE ActivatedBooks SET countingTicketNumber = NULL WHERE ActiveBookID = ?", (book_id,))
-    conn.commit()
-    conn.close()
+    try:
+        cursor.execute("UPDATE ActivatedBooks SET countingTicketNumber = NULL WHERE ActiveBookID = ?", (book_id,))
+        conn.commit()
+    except sqlite3.Error as e:
+        return f"Unable to clear closing value at bookID({book_id})".upper() + f"{e}", "error"
+    finally:
+        conn.close()
     
 def insert_Ticket_name(db_path, ticket_name, ticket_gamenumber):
+    """
+    Inserts a new ticket name and its corresponding game number into the TicketNameLookup table.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        ticket_name (str): The name of the ticket.
+        ticket_gamenumber (str or int): The game number associated with the ticket.
+
+    Returns:
+        tuple:
+            - ("Ticket Name insertion error: <error>", "error") on failure.
+
+    Description:
+        Adds a new entry mapping a ticket's game number to its name.
+    """
+    
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -575,11 +960,26 @@ def insert_Ticket_name(db_path, ticket_name, ticket_gamenumber):
 
         conn.commit()
     except sqlite3.Error as e:
-        print(f"Ticket Name insertion error: {e}")
-        
-    conn.close()
+        return f"Ticket Name insertion error: ".upper() + f"{e}", "error"
+    finally: 
+        conn.close()
 
 def delete_Book(db_path, book_id):
+    """
+    Deletes a book entry from the Books table by its BookID.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        book_id (str or int): The BookID to delete.
+
+    Returns:
+        tuple:
+            - ("Book deletion error for bookID(<book_id>): <error>", "error") on failure.
+
+    Description:
+        Removes a book record permanently from the Books table.
+    """
+    
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -590,11 +990,28 @@ def delete_Book(db_path, book_id):
 
         conn.commit()
     except sqlite3.Error as e:
-        print(f"Book deletion error: {e}")
-        
-    conn.close()
+        return f"Book deletion error for bookID({book_id}): ".upper() + f"{e}", "error"
+    finally:
+        conn.close()
 
 def update_ticketTimeline_ticketnumber(db_path, reportID, bookID, ticketNumber):
+    """
+    Updates the TicketNumber for a specific entry in the TicketTimeLine table.
+
+    Parameters:
+        db_path (str): Path to the SQLite database.
+        reportID (str or int): The ReportID identifying the timeline entry.
+        bookID (str or int): The BookID identifying the timeline entry.
+        ticketNumber (int): The new ticket number to set.
+
+    Returns:
+        tuple:
+            - ("Error updating TicketNumber in Timeline for (<reportID>, <bookID>): <error>", "error") on failure.
+
+    Description:
+        Updates the ticket number associated with a specific ReportID and BookID in TicketTimeLine.
+    """
+    
     initialize_database(db_path)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -607,6 +1024,6 @@ def update_ticketTimeline_ticketnumber(db_path, reportID, bookID, ticketNumber):
 
         conn.commit()
     except sqlite3.Error as e:
-        print(f"Ticket Name insertion error: {e}")
-        
-    conn.close()
+        return f"Error updating TicketNumber in Timeline for ({reportID}, {bookID}): ".upper() + f"{e}", "error"
+    finally:   
+        conn.close()
