@@ -13,6 +13,7 @@
         <div id="header">
             <label>{% block header %} Header {% endblock %}</label>
         </div>
+        <div class="right">
             <button id="main-button">☰</button>
             <div class="slide-buttons" id="slide-buttons">
                 <button onclick="window.location.href='/edit_reports'" class="slide-btn">Edit Reports</button>
@@ -20,24 +21,25 @@
                 <button onclick="window.location.href='/scan_tickets'" class="slide-btn">Scan Tickets</button>
                 <button onclick="window.location.href='/'" class="slide-btn">Home</button>
             </div>
-     </div>
-        <script>
-            const mainBtn = document.getElementById("main-button");
-            const slideBtns = document.getElementById("slide-buttons");
-
-            mainBtn.addEventListener("click", () => {
-                slideBtns.classList.toggle("show");
-                const isVisible = slideBtns.classList.contains("show");
-
-                if (isVisible){
-                    mainBtn.innerText = "➤";
-                }else{
-                  mainBtn.innerText = "☰";  
-                }
-            });
-        </script>
-        <div class="content">
-            {% block content%}{% endblock %}
         </div>
+    </div>
+    <script>
+        const mainBtn = document.getElementById("main-button");
+        const slideBtns = document.getElementById("slide-buttons");
+
+        mainBtn.addEventListener("click", () => {
+            slideBtns.classList.toggle("show");
+            const isVisible = slideBtns.classList.contains("show");
+
+            if (isVisible){
+                mainBtn.innerText = "➤";
+            }else{
+                mainBtn.innerText = "☰";  
+            }
+        });
+    </script>
+    <div class="content">
+        {% block content%}{% endblock %}
+    </div>
 </body>
 </html>

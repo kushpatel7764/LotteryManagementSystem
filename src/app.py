@@ -364,7 +364,7 @@ def books_managment():
     for book in books:
         game_number = book["GameNumber"]
         book["TicketName"] = DatabaseQueries.get_ticket_name(db_path, game_number)
-
+    
     # Get activated books (just the BookIDs)
     activated_books = DatabaseQueries.get_activated_books(db_path)  # should return a list of dicts or a list of IDs
     activated_ids = {book['ActiveBookID'] for book in activated_books}  # Use set for faster lookup
