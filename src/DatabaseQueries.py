@@ -1,6 +1,6 @@
 import sqlite3
 import Database
-from Database_Utils import get_db_cursor
+from decorators import get_db_cursor
 
 
 def get_books(db):
@@ -88,9 +88,6 @@ def get_activated_books(db):
         with get_db_cursor(db) as cursor:
             cursor.execute("SELECT * FROM ActivatedBooks")
             activated_books = cursor.fetchall()
-
-            if not activated_books:
-                return "NO ACTIVATED BOOKS FOUND IN DATABASE.", "error"
 
             activated_books_list = []
             for book in activated_books:

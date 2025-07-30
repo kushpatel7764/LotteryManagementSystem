@@ -21,7 +21,7 @@ from config_utils import update_business_info
 from datetime import datetime
 from pathlib import Path
 from email_invoice import email_invoice
-
+from decorators import with_error_handling
 
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode="threading", cors_allowed_origins="*")  # Allow all for dev
@@ -34,13 +34,27 @@ db_path = os.path.join(project_dir, 'Lottery_Management_Database.db')
 
 DEFAULT_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
 
+def check_error(result):
+    if isinstance(result, tuple) and len(result) == 2 and result[1] == "error":
+        # You can include `context_label` in the error for debugging
+        # raise ValueError(f"{context_label} → {result[0]}")
+        raise ValueError(f"{result[0]}")
+    return result
+
+
 @app.route('/scan_tickets', methods=["GET", "POST"])
+@with_error_handling("scan_tickets.html", fallback_context={
+    "activated_books": [],
+    "instant_tickets_sold_total": 0,
+    "counting_order": "descending",
+    "activated_book_count": 0
+})
 def scan_tickets():
-    message = ""  # Initialize error message
-    message_type = ""
+    message = request.args.get("message", "") # Initialize error message
+    message_type = request.args.get("message_type", "")
     if request.method == "POST":
         # Get book ids for all the active books 
-        all_active_book_ids = DatabaseQueries.get_all_active_book_ids(db=db_path)
+        all_active_book_ids = check_error(DatabaseQueries.get_all_active_book_ids(db=db_path))
         
         # Get relevant information from the scanned code
         scanned_code = request.form['scanned_code']
@@ -56,75 +70,103 @@ def scan_tickets():
         else:
             # Insert ticket
             scanID = scanned_code
-            TicketName = DatabaseQueries.get_ticket_name(db_path, extracted_vals["game_number"])
-            insert_ticket(scanID, extracted_vals["book_id"], extracted_vals["ticket_number"], TicketName, extracted_vals["ticket_price"])
-            Database.update_counting_ticket_number(db_path, extracted_vals["book_id"], extracted_vals["ticket_number"])
+            TicketName = check_error(DatabaseQueries.get_ticket_name(db_path, extracted_vals["game_number"]))
+            check_error(insert_ticket(scanID, extracted_vals["book_id"], extracted_vals["ticket_number"], TicketName, extracted_vals["ticket_price"]))
+            check_error(Database.update_counting_ticket_number(db_path, extracted_vals["book_id"], extracted_vals["ticket_number"]))
             # Add sales log
             add_sales_log(extracted_vals["book_id"], extracted_vals["ticket_number"], extracted_vals["game_number"])
             message = "TICKET SCANNED"
             message_type = "success"
 
     # Get all the active books basically. In reality, making a table to show to the user using activated bookids.
-    activate_books = DatabaseQueries.get_scan_ticket_page_table(db=db_path)
-    
     # Instant ticket sold calculation
-    instant_tickets_sold_total = calculate_instant_tickets_sold(ReportID="Pending") 
-    
     # Get the counting order to calc sold
-    counting_order = load_config()['ticket_order']
-    #Get activated ticket count
-    activated_ticket_count = DatabaseQueries.count_activated_books(db_path)
-    return render_template('scan_tickets.html', activated_books=activate_books, instant_tickets_sold_total=instant_tickets_sold_total, counting_order=counting_order, activated_book_count=activated_ticket_count, message=message, message_type=message_type)
+    # Get activated ticket count
+    return {"activated_books": check_error(DatabaseQueries.get_scan_ticket_page_table(db=db_path)),
+            "instant_tickets_sold_total": check_error(calculate_instant_tickets_sold(ReportID="Pending")),
+            "counting_order": load_config()['ticket_order'],
+            "activated_book_count": check_error(DatabaseQueries.count_activated_books(db_path)),
+            "message": message,
+            "message_type": message_type}
 
 @app.route("/undo_scan", methods=["POST"])
 def undo_scan():
     book_id = request.form.get("book_id")
+    message = ""
+    message_type = ""
     if book_id:
         try:
             # Step 1: Delete ticket
-            Database.delete_TicketTimeLine_by_book_id(db_path, book_id)
+            check_error(Database.delete_TicketTimeLine_by_book_id(db_path, book_id))
             
             # Step 2: Delete sales log for that book and TicketTimeLine Log will be deleted automatically
-            Database.delete_sales_log_by_book_id(db_path, book_id)
+            check_error(Database.delete_sales_log_by_book_id(db_path, book_id))
 
             # Step 3: Clear the counting ticket number
-            Database.clear_counting_ticket_number(db_path, book_id)
+            check_error(Database.clear_counting_ticket_number(db_path, book_id))
             
             #Step 4: Mark Book Unsold
-            Database.update_is_sold_for_book(db_path, False, book_id)
+            check_error(Database.update_is_sold_for_book(db_path, False, book_id))
 
-            print("Undo successful.")
+            message = "UNDO SCAN SUCCESSFUL"
+            message_type = "success"
+        except ValueError as ve:
+            message = str(ve)
+            message_type = "error"
         except Exception as e:
-            print(f"Undo failed: {e}")
+            message = f"Unexpected error: {str(e)}"
+            message_type = "error"
 
-    return redirect(url_for("scan_tickets")) 
+    return redirect(url_for("scan_tickets", message=message, message_type=message_type)) 
 
 @app.route("/book_sold_out", methods=["POST", "GET"])
 def book_sold_out():
-    book_id = request.form.get("book_id")
-    # Tell Database book is sold out - sets it to be removed from activated tickets
-    Database.update_is_sold_for_book(db_path, True, book_id)
-    # Update the closing number for book
-    config = load_config()
-    book = DatabaseQueries.get_book(db_path, book_id)
-    game_number = book[1]
-    book_amount = book[3]
-    TicketPrice = book[4]
-    if config["ticket_order"] == "ascending":
-        sold_out_val = book_amount
-    elif config["ticket_order"] == "descending":
-        sold_out_val = -1
-
-    TicketNumber = sold_out_val
-    Database.update_counting_ticket_number(db_path, book_id, sold_out_val)
-    # Insert to TicketTimeline
-    TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
-    scanID = f"{game_number}{book_id}998{TicketPrice}{book_amount}" # -----TicketNumber 998 in scannID means BookSoldOut.
-    insert_ticket(scanID, book_id, -1, TicketName, TicketPrice)
-    # Add a sales log
-    add_sales_log(book_id, TicketNumber, game_number)
-    
-    return redirect(url_for("scan_tickets"))  # or your page name
+    message = ""
+    message_type = ""
+    try:
+        book_id = request.form.get("book_id")
+        if not book_id:
+            raise ValueError("No Book ID provided.")
+        # Step 1: Mark book as sold
+        # Tell Database book is sold out - sets it to be removed from activated tickets
+        check_error(Database.update_is_sold_for_book(db_path, True, book_id))
+        
+        # Step 2: Get book info
+        # Update the closing number for book
+        book = check_error(DatabaseQueries.get_book(db_path, book_id))
+        game_number = book[1]
+        book_amount = book[3]
+        TicketPrice = book[4]
+        
+        config = load_config()
+        if config["ticket_order"] == "ascending":
+            sold_out_val = book_amount
+        elif config["ticket_order"] == "descending":
+            sold_out_val = -1
+        else:
+            raise ValueError("Invalid ticket_order in config")
+        
+        # Step 4: Update counting ticket number
+        check_error(Database.update_counting_ticket_number(db_path, book_id, sold_out_val))
+        
+        # Step 5: Add ticket timeline entry
+        TicketName = check_error(DatabaseQueries.get_ticket_name(db_path, game_number))
+        scanID = f"{game_number}{book_id}998{TicketPrice}{book_amount}" # -----TicketNumber 998 in scannID means BookSoldOut.
+        check_error(insert_ticket(scanID, book_id, -1, TicketName, TicketPrice))
+        
+        # Step 6: Add sales log
+        # TicketNumber is sold_out_val here
+        add_sales_log(book_id, sold_out_val, game_number)
+        
+        message = "BOOK MARKED AS SOLD OUT"
+        message_type = "success"
+    except ValueError as ve:
+        message = str(ve)
+        message_type = "error"
+    except Exception as e:
+        message = f"Unexpected error: {str(e)}"
+        message_type = "error"
+    return redirect(url_for("scan_tickets",  message=message, message_type=message_type))
 
 def insert_ticket(scanID, BookID, TicketNumber, TicketName, TicketPrice, ReportID=None):
     ticket_info = {
@@ -137,180 +179,214 @@ def insert_ticket(scanID, BookID, TicketNumber, TicketName, TicketPrice, ReportI
     if ReportID:
         ticket_info["ReportID"] = ReportID
     # Insert this ticket in TicketTimeline
-    Database.insert_ticket_to_TicketTimeline_table(db_path, ticket_info)
+    message,message_type = Database.insert_ticket_to_TicketTimeline_table(db_path, ticket_info)
+    
+    if message_type == "error":
+        return message, "error"
+    
+    return message, "success"
     
 
 def add_sales_log(book_id, lastest_ticket_number, game_number):
     """
     Args:
-        book_id (STRING)
-        lastest_ticket_number (STRING)
-        game_number (STRING)
+        book_id (str)
+        latest_ticket_number (str or int)
+        game_number (str or int)
     """
-    # Add a sales log for this scan
-    activate_book_isAtTicketNumber = DatabaseQueries.get_activated_book_isAtTicketNumber(db_path, book_id)
-    # ---- Calulateing sold (999 will change this)
+    # Get the current state of the book
+    activate_book_isAtTicketNumber = check_error(DatabaseQueries.get_activated_book_isAtTicketNumber(db_path, book_id))
+    ticket_name = check_error(DatabaseQueries.get_ticket_name(db_path, game_number))
+    
+    # Build sales log entry
     sale_log_info = {
         "ActiveBookID": book_id,
         "prev_TicketNum": activate_book_isAtTicketNumber, # index 4 is the isAtTicketNumber
         "current_TicketNum": lastest_ticket_number,
-        "Ticket_Name": DatabaseQueries.get_ticket_name(db_path, game_number),
+        "Ticket_Name": ticket_name,
         "Ticket_GameNumber": game_number
     }
-    Database.insert_sales_log(db_path, sale_log_info)
     
+    message, message_type = Database.insert_sales_log(db_path, sale_log_info)
+    
+    if message_type == "error":
+        raise ValueError(message)
+
+    return message, message_type
+
 @app.route("/update_salesLog", methods=["GET", "POST"])
 def update_sales_log():
     updated_report_ids = []
-    data = request.get_json()
-    book_id = data.get('bookID')
-    report_id = data.get("reportID")
-    open = data.get("open")
-    close = data.get("close")
-    game_number = DatabaseQueries.get_game_num_of(db_path, book_id)
-    # prev_open = DatabaseQueries.get_sales_log_with_bookid(db_path, report_id, book_id)["open"]
-    # prev_close = DatabaseQueries.get_sales_log_with_bookid(db_path, report_id, book_id)["close"]
-    
-    
-    previous_reportID = int(report_id) - 1
-    next_reportID =  int(report_id) + 1
-    latest_reportID = int(DatabaseQueries.next_report_ID(db_path)) - 1
-    
-    is_book_sold = DatabaseQueries.is_sold(db_path, book_id)
-    
-    Database.update_sales_log_prev_TicketNum(db_path, open, report_id, book_id)
-    Database.update_sales_log_current_TicketNum(db_path, close, report_id, book_id)
-    updated_report_ids.append(report_id)
+    try:
+        data = request.get_json()
+        book_id = data.get('bookID')
+        report_id = data.get("reportID")
+        open = data.get("open")
+        close = data.get("close")
+        
+        
+        game_number = check_error(DatabaseQueries.get_game_num_of(db_path, book_id))
+        
+        previous_reportID = int(report_id) - 1
+        next_reportID =  int(report_id) + 1
+        latest_reportID = int(DatabaseQueries.next_report_ID(db_path)) - 1
+        
+        is_book_sold = check_error(DatabaseQueries.is_sold(db_path, book_id))
+        
+        check_error(Database.update_sales_log_prev_TicketNum(db_path, open, report_id, book_id))
+        check_error(Database.update_sales_log_current_TicketNum(db_path, close, report_id, book_id))
+        updated_report_ids.append(report_id)
 
-    if is_book_sold and close != "-1":
-        # Update Is_Sold attribute to not sold for this book id.
-        Database.update_is_sold_for_book(db_path, False, book_id)
-        # Update salesLog and TicketTimeline
-        int_report_id = int(report_id)
-        for id in range(int_report_id + 1, latest_reportID + 1):
-            # Add salesLog
-            sale_log_info = {
-            "ReportID": str(id), 
-            "ActiveBookID": book_id,
-            "prev_TicketNum": close, # index 4 is the isAtTicketNumber
-            "current_TicketNum": close,
-            "Ticket_Name": DatabaseQueries.get_ticket_name(db_path, game_number),
-            "Ticket_GameNumber": game_number
-            }
-            Database.insert_sales_log(db_path, sale_log_info)
-            # A update in sale log means the instant sold should also be updated
-            instant_sold = calculate_instant_tickets_sold(id)
-            Database.update_sale_report_instant_sold(db_path, instant_sold, id)
-            # Add TicketTimeline
-            book = DatabaseQueries.get_book(db_path, book_id)
+        if is_book_sold and close != "-1":
+            # Update Is_Sold attribute to not sold for this book id.
+            check_error(Database.update_is_sold_for_book(db_path, False, book_id))
+            # Update salesLog and TicketTimeline
+            int_report_id = int(report_id)
+            for id in range(int_report_id + 1, latest_reportID + 1):
+                TicketName = check_error(DatabaseQueries.get_ticket_name(db_path, game_number))
+                # Add salesLog
+                sale_log_info = {
+                "ReportID": str(id), 
+                "ActiveBookID": book_id,
+                "prev_TicketNum": close, # index 4 is the isAtTicketNumber
+                "current_TicketNum": close,
+                "Ticket_Name": TicketName,
+                "Ticket_GameNumber": game_number
+                }
+                check_error(Database.insert_sales_log(db_path, sale_log_info))
+                # A update in sale log means the instant sold should also be updated
+                instant_sold = check_error(calculate_instant_tickets_sold(id))
+                check_error(Database.update_sale_report_instant_sold(db_path, instant_sold, id))
+                # Add TicketTimeline
+                book = check_error(DatabaseQueries.get_book(db_path, book_id))
+                book_amount = book[3]
+                TicketPrice = book[4]
+                scanID = f"{game_number}{book_id}{close}{TicketPrice}{book_amount}" 
+                check_error(insert_ticket(scanID, book_id, close, TicketName, TicketPrice, str(id)))
+            # Update ActivatedBooks
+            book = check_error(DatabaseQueries.get_book(db_path, book_id))
             book_amount = book[3]
             TicketPrice = book[4]
-            TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
+            TicketName = check_error(DatabaseQueries.get_ticket_name(db_path, game_number))
             scanID = f"{game_number}{book_id}{close}{TicketPrice}{book_amount}" 
-            insert_ticket(scanID, book_id, close, TicketName, TicketPrice, str(id))
-        # Update ActivatedBooks
-        book = DatabaseQueries.get_book(db_path, book_id)
-        book_amount = book[3]
-        TicketPrice = book[4]
-        TicketName = DatabaseQueries.get_ticket_name(db_path, game_number)
-        scanID = f"{game_number}{book_id}{close}{TicketPrice}{book_amount}" 
-        activate_book_info = {
-            "ActivationID": scanID,
-            "ActiveBookID": book_id,
-            "isAtTicketNumber": close
-        }
-        Database.insert_book_to_ActivatedBook_table(database_path=db_path, active_book_info=activate_book_info)
-        
-        
+            activate_book_info = {
+                "ActivationID": scanID,
+                "ActiveBookID": book_id,
+                "isAtTicketNumber": close
+            }
+            check_error(Database.insert_book_to_ActivatedBook_table(database_path=db_path, active_book_info=activate_book_info))
 
-    if (not previous_reportID < 1):
-        Database.update_ticketTimeline_ticketnumber(db_path, previous_reportID, book_id, open)
-        Database.update_sales_log_current_TicketNum(db_path, open, previous_reportID, book_id)
-        prev_instant_sold = calculate_instant_tickets_sold(previous_reportID)
-        Database.update_sale_report_instant_sold(db_path, prev_instant_sold, previous_reportID)
-        updated_report_ids.append(previous_reportID)
+        if (not previous_reportID < 1):
+            check_error(Database.update_ticketTimeline_ticketnumber(db_path, previous_reportID, book_id, open))
+            check_error(Database.update_sales_log_current_TicketNum(db_path, open, previous_reportID, book_id))
+            prev_instant_sold = check_error(calculate_instant_tickets_sold(previous_reportID))
+            check_error(Database.update_sale_report_instant_sold(db_path, prev_instant_sold, previous_reportID))
+            updated_report_ids.append(previous_reportID)
+            
         
+        if (next_reportID <= latest_reportID):
+            check_error(Database.update_sales_log_prev_TicketNum(db_path, close, next_reportID, book_id))
+            next_instant_sold = check_error(calculate_instant_tickets_sold(next_reportID))
+            check_error(Database.update_sale_report_instant_sold(db_path, next_instant_sold, next_reportID))
+            updated_report_ids.append(next_reportID)
+
+        if (latest_reportID == report_id):
+            check_error(Database.update_isAtTicketNumber_val(db_path, book_id, close))
+
+        updated_report_ids_str = updated_report_ids.__str__()
+        # A update in sale log means the instant sold should also be updated
+        instant_sold = check_error(calculate_instant_tickets_sold(report_id))
+        check_error(Database.update_sale_report_instant_sold(db_path, instant_sold, report_id))
+        check_error(Database.update_ticketTimeline_ticketnumber(db_path, report_id, book_id, close))
+        
+        return jsonify({"redirect_url": url_for("edit_single_report", report_id=report_id, updated_report_ids=updated_report_ids_str)})
+    except ValueError as e: # TODO: Maybe remove value error?
+        return jsonify({"redirect_url": url_for("edit_single_report", report_id=report_id, updated_report_ids=updated_report_ids_str, message=str(e), message_type="error")})
     
-    if (next_reportID <= latest_reportID):
-        Database.update_sales_log_prev_TicketNum(db_path, close, next_reportID, book_id)
-        next_instant_sold = calculate_instant_tickets_sold(next_reportID)
-        Database.update_sale_report_instant_sold(db_path, next_instant_sold, next_reportID)
-        updated_report_ids.append(next_reportID)
-
-    if (latest_reportID == report_id):
-        Database.update_isAtTicketNumber_val(db_path, book_id, close)
-
-    updated_report_ids_str = updated_report_ids.__str__()
-    # A update in sale log means the instant sold should also be updated
-    instant_sold = calculate_instant_tickets_sold(report_id)
-    Database.update_sale_report_instant_sold(db_path, instant_sold, report_id)
-    Database.update_ticketTimeline_ticketnumber(db_path, report_id, book_id, close)
-    
-    return jsonify({"redirect_url": url_for("edit_single_report", report_id=report_id, updated_report_ids=updated_report_ids_str)})
 
 @app.route("/update_sale_report/<report_id>", methods=["GET","POST"])
 def update_sale_report(report_id):
-    if request.method == "POST":
-        instant_sold = request.form["instant_sold"]
-        online_sold = request.form["online_sold"]
-        instant_cashed = request.form["instant_cashed"]
-        online_cashed = request.form["online_cashed"]
-        cash_on_hand = request.form["cash_on_hand"]
-        
-        Database.update_sale_report(db_path, instant_sold, online_sold, instant_cashed, online_cashed, cash_on_hand, report_id)
-    return redirect(url_for("edit_single_report", report_id=report_id, updated_report_ids="None"))
+    try:
+        if request.method == "POST":
+            instant_sold = request.form["instant_sold"]
+            online_sold = request.form["online_sold"]
+            instant_cashed = request.form["instant_cashed"]
+            online_cashed = request.form["online_cashed"]
+            cash_on_hand = request.form["cash_on_hand"]
+            
+            Database.update_sale_report(db_path, instant_sold, online_sold, instant_cashed, online_cashed, cash_on_hand, report_id)
+        return redirect(url_for("edit_single_report", report_id=report_id, updated_report_ids="None"))
+    except ValueError as e:
+        return redirect(url_for("edit_single_report", report_id=report_id, updated_report_ids="None", message=str(e), message_type="error"))
  
-def calculate_instant_tickets_sold(ReportID):
-    instant_tickets_sold_quantanties = DatabaseQueries.get_all_instant_tickets_sold_quantity(db_path, ReportID)
-    result = 0
-    for ticket_sold in instant_tickets_sold_quantanties:
-        result += (ticket_sold["Ticket_Sold_Quantity"] * ticket_sold["TicketPrice"])
-    
-    return result
+def calculate_instant_tickets_sold(ReportID): # TODO: RETURNING ERROR MESSAGE
+    try:
+        instant_tickets_sold_quantanties = check_error(DatabaseQueries.get_all_instant_tickets_sold_quantity(db_path, ReportID))
+        result = 0
+        for ticket_sold in instant_tickets_sold_quantanties:
+            result += (ticket_sold["Ticket_Sold_Quantity"] * ticket_sold["TicketPrice"])
+        
+        return result
+    except ValueError as e:
+        return e, "error"
 
 @app.route("/submit", methods=["GET", "POST"])
 def submit():
-    if DatabaseQueries.can_Submit(db_path):
-        do_submit_procedure()
-    return redirect(url_for("scan_tickets"))
+    try:
+        if check_error(DatabaseQueries.can_Submit(db_path)):
+            result = do_submit_procedure()
+        # In case result is an error message
+        if isinstance(result, tuple) and result[1] == "error":
+            return redirect(url_for("scan_tickets", message=result[0], message_type="error"))
+        return redirect(url_for("scan_tickets"))
+    except ValueError as e:
+        return redirect(url_for("scan_tickets", message=str(e), message_type="error"))
 
 def do_submit_procedure():
-    next_ReportID = DatabaseQueries.next_report_ID(db_path) # STRING 
-    # Get form values
-    daily_totals = {
-        "ReportID": next_ReportID,
-        "instant_sold": request.form.get('instant_sold'),
-        "online_sold": request.form.get('online_sold'),
-        "instant_cashed": request.form.get('instant_cashed'),
-        "online_cashed":request.form.get('online_cashed'),
-        "cash_on_hand": request.form.get('cash_on_hand')
-    }
+    try:
+        next_ReportID = check_error(DatabaseQueries.next_report_ID(db_path)) # STRING 
+        # Get form values
+        daily_totals = {
+            "ReportID": next_ReportID,
+            "instant_sold": request.form.get('instant_sold'),
+            "online_sold": request.form.get('online_sold'),
+            "instant_cashed": request.form.get('instant_cashed'),
+            "online_cashed":request.form.get('online_cashed'),
+            "cash_on_hand": request.form.get('cash_on_hand')
+        }
+        
+        # Insert the daily_totals in the Daily_Report Database.
+        check_error(Database.insert_daily_totals(db_path, daily_totals))
+        # Update "Pending" SalesLog ReportID
+        check_error(Database.update_pending_sales_log_report_id(db_path, next_ReportID))
+        # Update "Pending" TicketTimeLine ReportID
+        check_error(Database.update_pending_TicketTimeLine_report_id(db_path, next_ReportID))
+        # Create a Invoice
+        create_daily_invoice(next_ReportID)
+        # Remove sold out books from current ActivatedBooks table using there book ids
+        sold_out_books = check_error(DatabaseQueries.get_all_sold_books(db_path, next_ReportID))
+        for book in sold_out_books:
+            check_error(Database.deactivate_book(db_path, book["BookID"]))
+        # Update Database 
+        # isAtTicketNumber in ActiviatedBooks needs to be set to current numbers from today's scans.
+        # countingTicketNumber needs to be set to None since nothing is being counted after submit.
+        check_error(Database.update_isAtTicketNumber(db_path))
+        check_error(Database.clear_countingTicketNumbers(db_path))
+        # TODO: File not found at given location error
+        now = datetime.now()
+        fileName=f"Invoice#{next_ReportID}-{now.strftime('%m-%d-%Y')}.pdf"
+        email_invoice(filename=fileName)
+        return "SCANS SUBMITTED SUCCESSFULLY","success"
+    except ValueError as e:
+        return str(e), "error"
+    except FileNotFoundError as fnf:
+        return f"Invoice not found: {str(fnf)}", "error"
     
-    # Insert the daily_totals in the Daily_Report Database.
-    Database.insert_daily_totals(db_path, daily_totals)
-    # Update "Pending" SalesLog ReportID
-    Database.update_pending_sales_log_report_id(db_path, next_ReportID)
-    # Update "Pending" TicketTimeLine ReportID
-    Database.update_pending_TicketTimeLine_report_id(db_path, next_ReportID)
-    # Create a Invoice
-    create_daily_invoice(next_ReportID)
-    # Remove sold out books from current ActivatedBooks table using there book ids
-    sold_out_books = DatabaseQueries.get_all_sold_books(db_path, next_ReportID)
-    for book in sold_out_books:
-        Database.deactivate_book(db_path, book["BookID"])
-    # Update Database 
-    # isAtTicketNumber in ActiviatedBooks needs to be set to current numbers from today's scans.
-    # countingTicketNumber needs to be set to None since nothing is being counted after submit.
-    Database.update_isAtTicketNumber(db_path)
-    Database.clear_countingTicketNumbers(db_path)
-    # TODO: File not found at given location error
-    now = datetime.now()
-    fileName=f"Invoice#{next_ReportID}-{now.strftime('%m-%d-%Y')}.pdf"
-    email_invoice(filename=fileName)
     
 
-def create_daily_invoice(ReportID):
-    invoiceLog = DatabaseQueries.get_table_for_invoice(db_path, ReportID)
+def create_daily_invoice(ReportID, return_path_only=False):
+    config = load_config()
+    invoiceLog = check_error(DatabaseQueries.get_table_for_invoice(db_path, ReportID))
     
     store_name = "Store Name" if load_config()["business_name"] is None else load_config()["business_name"] 
     address = "Store Address" if load_config()["business_address"] is None else load_config()["business_address"] 
@@ -323,8 +399,8 @@ def create_daily_invoice(ReportID):
         "Phone": phone,
         "Email": email
     }
-    daily_report = DatabaseQueries.get_daily_report(db_path, ReportID)
-    output_path = load_config()['invoice_output_path']
+    daily_report = check_error(DatabaseQueries.get_daily_report(db_path, ReportID))
+    output_path = config.get('invoice_output_path')
     # Determine output directory
     if output_path and os.path.isdir(output_path):
         save_dir = output_path
@@ -334,10 +410,17 @@ def create_daily_invoice(ReportID):
     invoice_number=f"{ReportID}"
     fileName=f"Invoice#{ReportID}-{now.strftime('%m-%d-%Y')}.pdf"
     full_path = os.path.join(save_dir, fileName)
-    
-    generate_invoice.generate_lottery_invoice_pdf(full_path, store_info, invoiceLog, invoice_number, daily_report)
-    return send_file(full_path, as_attachment=True)
-    
+    try:
+        generate_invoice.generate_lottery_invoice_pdf(full_path, store_info, invoiceLog, invoice_number, daily_report)
+        
+        if return_path_only:
+            return full_path
+        
+        return send_file(full_path, as_attachment=True)
+    except Exception as e:
+        # Log or handle error appropriately
+        print(f"Failed to generate/send invoice: {e}")
+        return f"Error generating invoice: {e}", 500
 
 @app.route('/')
 def home():
@@ -346,36 +429,39 @@ def home():
     return render_template('index.html')
 
 @app.route('/books_managment', methods=["GET", "POST"])
+@with_error_handling("books_managment.html", fallback_context={
+    "books": [],
+    "activated_ids": set()
+})
 def books_managment():
-    add_book_message = ""
-    add_book_message_type = ""
-    activate_book_message = request.args.get('activate_book_message', '') # The redirect from /activate will generate a URL like: 
+    message = request.args.get('message', '')
+    message_type = request.args.get('message_type', '')
+    # The redirect from /activate will generate a URL like: 
     # /books_managment?activate_book_message=SomeMessage&activate_book_message_type=success
     # request.args.get('activate_book_message', '') will then get these arguments
-    activate_book_message_type = request.args.get('activate_book_message_type', '')
+    
     if request.method == 'POST':
         scanned_code = request.form['add_book_code']
-        add_book_message, add_book_message_type = add_book_procedure(scanned_code)
+        message, message_type = check_error(add_book_procedure(scanned_code))
     
     # Books info for the books table to display on screen 
-    books = DatabaseQueries.get_books(db=db_path)
+    books = check_error(DatabaseQueries.get_books(db=db_path))
     
     # Setting TicketNames
     for book in books:
         game_number = book["GameNumber"]
-        book["TicketName"] = DatabaseQueries.get_ticket_name(db_path, game_number)
+        book["TicketName"] = check_error(DatabaseQueries.get_ticket_name(db_path, game_number))
     
     # Get activated books (just the BookIDs)
-    activated_books = DatabaseQueries.get_activated_books(db_path)  # should return a list of dicts or a list of IDs
+    activated_books = check_error(DatabaseQueries.get_activated_books(db_path))  # should return a list of dicts or a list of IDs
     activated_ids = {book['ActiveBookID'] for book in activated_books}  # Use set for faster lookup
         
-    return render_template('books_managment.html', 
-                           books=books, 
-                           activated_ids=activated_ids, 
-                           add_book_message=add_book_message, 
-                           add_book_message_type=add_book_message_type, 
-                           activate_book_message=activate_book_message, 
-                           activate_book_message_type=activate_book_message_type)
+    return {
+        "books": books,
+        "activated_ids": activated_ids,
+        "message": message,
+        "message_type": message_type
+    }
 
 def add_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code, db_path=db_path)
@@ -384,9 +470,13 @@ def add_book_procedure(scanned_code):
     if extracted_vals == "INVALID BARCODE":
         return "INVALID BARCODE", "error" # message, message_type
     else:
-        message = ""
-        message_type = ""
-        game_number_lookup_table.insert_new_ticket_name_to_lookup_table(db_path)
+        # TODO: SHOULD RETURN ERRORS
+        lookup_message, lookup_message_type = game_number_lookup_table.insert_new_ticket_name_to_lookup_table(db_path)
+        if lookup_message_type == "error":
+            # Log or attach a warning, but continue
+            warning_message = f"Book added, but TicketName update failed: {lookup_message}"
+        else:
+            warning_message = None
         book_info = {
             "BookID": extracted_vals["book_id"],
             "GameNumber": extracted_vals["game_number"],
@@ -394,22 +484,38 @@ def add_book_procedure(scanned_code):
             "BookAmount": extracted_vals["book_amount"],
             "TicketPrice": extracted_vals["ticket_price"]
         }
-        message, message_type = Database.insert_book_info_to_Books_table(database_path=db_path, book_info=book_info)
-        return message, message_type
+        book_insert_msg, book_insert_type = Database.insert_book_info_to_Books_table(database_path=db_path, book_info=book_info)
+        # Combine messages if needed
+        if warning_message and book_insert_type == "success":
+            return warning_message, "error"
+
+        return book_insert_msg, book_insert_type
     
 @app.route('/delete_book', methods=['POST', 'GET'])
 def delete_book():
-    data = request.get_json()
-    book_id = data.get('bookID')
-    print(f"Deleting: {book_id}")
-    Database.deactivate_book(db_path, book_id)
-    Database.delete_Book(db_path, book_id)
+    try:
+        data = request.get_json()
+        book_id = data.get('bookID')
+        print(f"Deleting: {book_id}")
+        # Deactivate first, then delete
+        Database.deactivate_book(db_path, book_id)
+        Database.delete_Book(db_path, book_id)
 
-    return jsonify({ "redirect_url": url_for('books_managment') })
+        return jsonify({ "redirect_url": url_for('books_managment'),
+                        "message": f"Book {book_id} deleted successfully.",
+                        "message_type": "success"})
+    except Exception as e:
+        print(f"Error deleting book {book_id}: {e}")
+        return jsonify({
+            "redirect_url": url_for('books_managment'),
+            "message": f"Error deleting book: {str(e)}",
+            "message_type": "error"
+        }), 500
 
 @app.route('/business_profile', methods=["GET","POST"])
 def business_profile():
-    error_message = None
+    message = None
+    message_type = "error"
     if request.method == "POST":
         config = load_config()
         
@@ -419,7 +525,10 @@ def business_profile():
         # Validate and update business info fields
         errors = validate_and_update_business_info(form_data)
         if errors:
-            error_message = errors[0]  # Only show the first error
+            message = errors[0]  # Only show the first error
+        else:
+            message = "Business profile updated successfully."
+            message_type = "success"
     
     # Load current config for rendering
     config = load_config()
@@ -431,7 +540,8 @@ def business_profile():
             "Phone": config["business_phone"],
             "Email": config["business_email"],
         },
-        errorMessage=error_message
+        message=message,
+        message_type=message_type
     )
 
 @app.route('/settings', methods=["GET","POST"])
@@ -515,58 +625,66 @@ def deactivate_book():
     data = request.get_json()
     book_id = data.get('bookID')
     print(f"Deactivating: {book_id}")
-    Database.deactivate_book(db_path, book_id)
+    try:
+        Database.deactivate_book(db_path, book_id)
+        return jsonify({ "redirect_url": url_for('books_managment') })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     
-    return jsonify({ "redirect_url": url_for('books_managment') })
 
 @app.route('/activate_book', methods=["GET", "POST"])
 def activate_book():
-    activate_book_message = ""
-    activate_book_message_type = ""
+    message = ""
+    message_type = ""
     
     if request.method == 'POST':
         scanned_code = request.form['activate_book_code']
-        activate_book_message, activate_book_message_type = activate_book_procedure(scanned_code) 
+        message, message_type = activate_book_procedure(scanned_code) 
         
-    return redirect(url_for("books_managment", activate_book_message=activate_book_message, activate_book_message_type=activate_book_message_type))
+    return redirect(url_for("books_managment", message=message, message_type=message_type))
 
 def activate_book_procedure(scanned_code):
-    scanned_info = ScannedCodeManagement(scanned_code=scanned_code, db_path=db_path)
-    extracted_vals = scanned_info.extract_all_scanned_code()
-    
-    if extracted_vals == "INVALID BARCODE":
-        return "INVALID BARCODE", "error" # message, message_type
-    # The book being activated must already be registered in the system. 
-    # So check to make sure that the book being instered is prensent in the system and is not already activated. 
-    book_exists = DatabaseQueries.is_book(db=db_path, book_id=extracted_vals["book_id"])
-    book_is_activated = DatabaseQueries.is_activated_book(db=db_path, activated_book_id=extracted_vals["book_id"])
-
-    if not book_exists:
-        return "BOOK DOES NOT EXISTS IN BOOKS DATABASE!", "error"
-
-    if book_is_activated:
-        return "BOOK HAS ALREADY BEEN ACTIVATED!", "error"
-    
-    message = ""
-    message_type = ""
-    activate_book_info = {
-        "ActivationID": scanned_code,
-        "ActiveBookID": extracted_vals["book_id"],
-        "isAtTicketNumber": extracted_vals["ticket_number"]
-    }
-    was_active_ticket_num = DatabaseQueries.was_activated(db_path, activate_book_info["ActiveBookID"])
-    # check to see if the book has been activated previosly or not
-    if was_active_ticket_num and was_active_ticket_num > -1:
-        activate_book_info["isAtTicketNumber"] = was_active_ticket_num
+    try:
+        scanned_info = ScannedCodeManagement(scanned_code=scanned_code, db_path=db_path)
+        extracted_vals = scanned_info.extract_all_scanned_code()
         
-    # Active the book
-    message, message_type= Database.insert_book_to_ActivatedBook_table(database_path=db_path, active_book_info=activate_book_info)
-    return message, message_type
+        if extracted_vals == "INVALID BARCODE":
+            return "INVALID BARCODE", "error" # message, message_type
+        # The book being activated must already be registered in the system. 
+        # So check to make sure that the book being instered is prensent in the system and is not already activated. 
+        book_exists = DatabaseQueries.is_book(db=db_path, book_id=extracted_vals["book_id"])
+        book_is_activated = DatabaseQueries.is_activated_book(db=db_path, activated_book_id=extracted_vals["book_id"])
+
+        if not book_exists:
+            return "BOOK DOES NOT EXISTS IN BOOKS DATABASE!", "error"
+
+        if book_is_activated:
+            return "BOOK HAS ALREADY BEEN ACTIVATED!", "error"
+        
+
+        activate_book_info = {
+            "ActivationID": scanned_code,
+            "ActiveBookID": extracted_vals["book_id"],
+            "isAtTicketNumber": extracted_vals["ticket_number"]
+        }
+        was_active_ticket_num = DatabaseQueries.was_activated(db_path, activate_book_info["ActiveBookID"])
+        # check to see if the book has been activated previosly or not
+        if was_active_ticket_num and was_active_ticket_num > -1:
+            activate_book_info["isAtTicketNumber"] = was_active_ticket_num
+            
+        # Active the book
+        return Database.insert_book_to_ActivatedBook_table(database_path=db_path, active_book_info=activate_book_info)
+        
+    except Exception as e:
+        return f"Unexpected Error: {str(e)}", "error"
 
 
 @app.route('/edit_reports')
+@with_error_handling("edit_reports.html", fallback_context={
+    "sales_reports":[]
+})
 def edit_reports():
-    sales_reports = DatabaseQueries.get_all_sales_reports(db_path)
+    sales_reports = check_error(DatabaseQueries.get_all_sales_reports(db_path))
     
     # Convert to local date and time and filter
     local_reports = []
@@ -595,15 +713,24 @@ def edit_reports():
 
 @app.route("/edit_report/<report_id>/<updated_report_ids>",  methods=["GET", "POST"])
 def edit_single_report(report_id, updated_report_ids):
-    message="Inside the report"
-    message_type = "success"
-    # Query the sales logs related to this report ID
-    sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
-    sale_report = DatabaseQueries.get_daily_report(db_path, report_id)
-    # Instant ticket sold recalculation
-    instant_tickets_sold_total = calculate_instant_tickets_sold(ReportID=report_id) 
-    sale_report["InstantTicketSold"] = instant_tickets_sold_total
-    
+    message = request.args.get("message", "")
+    message_type = request.args.get("message_type", "")
+    try:
+        # Query the sales logs related to this report ID
+        sales_logs = check_error(DatabaseQueries.get_sales_log(db_path, report_id))
+        sale_report = check_error(DatabaseQueries.get_daily_report(db_path, report_id))
+        # Instant ticket sold recalculation
+        instant_tickets_sold_total = check_error(calculate_instant_tickets_sold(ReportID=report_id))
+        sale_report["InstantTicketSold"] = instant_tickets_sold_total
+    except Exception as e:
+        return render_template("edit_single_report.html",
+                               report_id=report_id,
+                               sales_logs=[],
+                               sale_report={},
+                               counting_order=load_config()['ticket_order'],
+                               updated_report_ids=updated_report_ids,
+                               message=str(e),
+                               message_type="error")
     # Get the counting order to calc sold
     counting_order = load_config()['ticket_order']
     return render_template("edit_single_report.html", 
@@ -615,7 +742,7 @@ def edit_single_report(report_id, updated_report_ids):
                            message=message,
                            message_type=message_type) 
 
-@app.route('/download/<int:report_id>', methods=['POST'])
+@app.route('/download/<int:report_id>', methods=['GET']) # change to GET for easier triggering
 def download_modified_report(report_id):
     sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
     sale_report = DatabaseQueries.get_daily_report(db_path, report_id)

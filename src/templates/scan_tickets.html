@@ -133,45 +133,47 @@
             </tr>
         </thead>
         <tbody>
-        {% for book in activated_books %}
-            <tr class="row {% if book['countingTicketNumber'] is not none %}scanned{% endif %}">
-                <td>{{ book["TicketName"] }}
-                <td>{{ book['GameNumber'] }}</td>
-                <td>{{ book['ActiveBookID'] }}</td>
-                <td>{{ book['ticketPrice'] }}</td>
-                <td>{{ book['isAtTicketNumber'] }}</td>
-                <td>
-                    {% if book['countingTicketNumber'] is not none %}
-                        {{ book['countingTicketNumber'] }}
-                    {% else %}
-                    <!-- if no input for close column then show a button sold out button -->
-                        <form method="POST" action="/book_sold_out">
-                            <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
-                            <button type="submit" id="SoldOutButton">Book Sold Out</button>
-                        </form>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
-                        {% if counting_order == "descending"%}
-                            {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
+        {% if  activated_books %}
+            {% for book in activated_books %}
+                <tr class="row {% if book['countingTicketNumber'] is not none %}scanned{% endif %}">
+                    <td>{{ book["TicketName"] }}
+                    <td>{{ book['GameNumber'] }}</td>
+                    <td>{{ book['ActiveBookID'] }}</td>
+                    <td>{{ book['ticketPrice'] }}</td>
+                    <td>{{ book['isAtTicketNumber'] }}</td>
+                    <td>
+                        {% if book['countingTicketNumber'] is not none %}
+                            {{ book['countingTicketNumber'] }}
                         {% else %}
-                            {{ ( book['countingTicketNumber'] - book['isAtTicketNumber'] ) }}
+                        <!-- if no input for close column then show a button sold out button -->
+                            <form method="POST" action="/book_sold_out">
+                                <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
+                                <button type="submit" id="SoldOutButton">Book Sold Out</button>
+                            </form>
                         {% endif %}
-                    {% else %}
-                        N/A
-                    {% endif %}
-                </td>
-                <td class="x_button_container">
-                    {% if book['countingTicketNumber'] is not none %}
-                        <form method="POST" action="/undo_scan">
-                            <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
-                            <button type="Submit">X</button>
-                        </form>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
+                    </td>
+                    <td>
+                        {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
+                            {% if counting_order == "descending"%}
+                                {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
+                            {% else %}
+                                {{ ( book['countingTicketNumber'] - book['isAtTicketNumber'] ) }}
+                            {% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td class="x_button_container">
+                        {% if book['countingTicketNumber'] is not none %}
+                            <form method="POST" action="/undo_scan">
+                                <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
+                                <button type="Submit">X</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
         </tbody>
     </table>
 

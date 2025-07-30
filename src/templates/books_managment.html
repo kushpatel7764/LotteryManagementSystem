@@ -140,12 +140,24 @@
                 if (scanInput) scanInput.value = "";
             {% endif %}
             }
+
+        setTimeout(() => {
+            const msg = document.querySelector(".flash-message");
+            if (msg) {
+                msg.style.opacity = '0'; // Trigger CSS fade out
+                setTimeout(() => msg.remove(), 1000);
+            }
+        }, 4000); // Start fade after 4 seconds
     </script>
 
 {% endblock %}
-{% block header %} Books Management {% endblock %}  
+{% block header %} Books {% endblock %}  
 {% block content %}
-
+    {% if message %}
+        <div class="flash-message {{ message_type }}">
+            {{ message }}
+        </div>
+    {% endif %}
     <form method="POST" id="AddBookForm" class="scan-box">
         <label for="add_book_code"><strong>Add Book:</strong></label><br>
         <input type="text" tagName="INPUT"
@@ -157,10 +169,6 @@
         <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton"> i </button>
         <!-- Submit button is hidden since auto-submit is now enabled -->
         <button type="submit" style="display:none;">Submit</button>
-
-        {% if add_book_message %}
-            <div class="status-add_book_message {{ add_book_message_type }}">{{ add_book_message }}</div>
-        {% endif %}
     </form>
 
     <form method="POST" id="ActivateBookForm" class="scan-box">
@@ -174,10 +182,6 @@
         <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton"> i </button>
         <!-- Submit button is hidden since auto-submit is now enabled -->
         <button type="submit" style="display:none;">Submit</button>
-
-        {% if activate_book_message %}
-            <div class="status-activate_book_message {{ activate_book_message_type }}">{{ activate_book_message }}</div>
-        {% endif %}
     </form>
 
     <h2>Books</h2>

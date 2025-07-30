@@ -17,12 +17,9 @@ button {
     cursor: pointer;
 }
 
-
 button:hover {
     background-color: #4338ca;
 }
-
-
 
 table {
     width: 100%;

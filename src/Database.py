@@ -2,7 +2,7 @@ import os
 import sqlite3
 import datetime
 from config_utils import load_config
-from Database_Utils import get_db_cursor
+from decorators import get_db_cursor
 
 
 # Connect to database
@@ -12,7 +12,6 @@ def setup_database_schema_with_sql_file(cursor, sql_filename):
 
     Parameters:
         cursor (sqlite3.Cursor): The cursor object used to execute SQL commands.
-        conn (sqlite3.Connection): The active SQLite database connection.
         sql_filename (str): The filename of the SQL file containing the schema setup instructions.
 
     Description:
@@ -20,15 +19,18 @@ def setup_database_schema_with_sql_file(cursor, sql_filename):
         reads its contents, and executes the SQL script using the given database cursor.
         After execution, it commits the changes to the database.
     """
+    try:
+        setup_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sql_file_path = os.path.join(setup_dir, sql_filename)
 
-    setup_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    sql_file_path = os.path.join(setup_dir, sql_filename)
+        # Read the SQL schema file
+        with open(sql_file_path, "r") as file:
+            sql_script = file.read()
 
-    # Read the SQL schema file
-    with open(sql_file_path, "r") as file:
-        sql_script = file.read()
-
-    cursor.executescript(sql_script)
+        cursor.executescript(sql_script)
+    except Exception as e:
+        print(f"Error setting up database schema: {e}")
+        raise
 
 
 def initialize_database(database_path):

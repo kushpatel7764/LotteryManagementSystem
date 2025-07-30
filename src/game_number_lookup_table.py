@@ -35,17 +35,35 @@ def get_lottery_net_lookup_table():
     return new_df
 
 def insert_new_ticket_name_to_lookup_table(db_path, file_name="TicketNameLook_GM_Track.txt"):
-    create_empty_gm_track_file(file_name) # in case ticketNamelook_gm_track is not there
-    # make sure the database with the lookup table is present before doing anything
-    if len(compare_game_numbers(db_path, file_name)["in_file_not_in_db"]) > 0:
-        remove_TicketName_GM_Track(file_name)
-        create_empty_gm_track_file(file_name) # put it back after removing data
-    lottery_lookup_table = get_lottery_net_lookup_table()
-    for _, row in lottery_lookup_table.iterrows():
-        # make sure gm is not in the lookup table before inserting a new name
-        if not is_gm_in_lookup_table(row["Game No."], file_name):
-            Database.insert_Ticket_name(db_path, row["Game Name"], row["Game No."])
-            track_gms_in_lookup_table(db_path)
+    try:
+        create_empty_gm_track_file(file_name)  # Ensure file exists
+        # Check if we need to refresh the game number tracking file
+        comparison = compare_game_numbers(db_path, file_name)
+        if "in_file_not_in_db" not in comparison:
+                return "Failed to compare game numbers.", "error"
+        
+        if len(comparison["in_file_not_in_db"]) > 0:
+            remove_TicketName_GM_Track(file_name)
+            # put empty file back after removing data
+            create_empty_gm_track_file(file_name) 
+            
+        try:    
+            lottery_lookup_table = get_lottery_net_lookup_table()
+        except Exception as e:
+                return f"Error fetching data from lottery.net: {str(e)}", "error"
+        
+        # Insert any new ticket names
+        for _, row in lottery_lookup_table.iterrows():
+            try:
+                if not is_gm_in_lookup_table(row["Game No."], file_name):
+                    Database.insert_Ticket_name(db_path, row["Game Name"], row["Game No."])
+                    track_gms_in_lookup_table(db_path)
+            except Exception as e:
+                    return f"Failed inserting game number {row['Game No.']}: {str(e)}", "error"
+        
+        return "Game number lookup table updated successfully".upper(), "success"
+    except Exception as e:
+        return f"Unexpected error in lookup table insertion: {str(e)}", "error"
         
 def remove_TicketName_GM_Track(file_name):
     parent_dir = os.path.dirname(os.path.abspath(__file__))  # Current script directory
