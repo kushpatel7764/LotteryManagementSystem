@@ -466,6 +466,7 @@ def insert_sales_log(database_path, scanned_ticket_info):
                 add_sales_log_at_report_id(cursor, scanned_ticket_info)
             else:
                 add_sales_log(cursor, scanned_ticket_info)
+            return f"TICKET({scanned_ticket_info["ActiveBookID"]}) SALE HAS BEEN LOGGED", "success"
     except sqlite3.Error as e:
         return f"ERROR LOGGING TICKET SALE DATA: {e}", "error"
 

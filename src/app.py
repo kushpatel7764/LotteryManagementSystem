@@ -13,7 +13,7 @@ import game_number_lookup_table
 from utc_to_local_time import convert_utc_to_local
 from datetime import datetime
 import re
-
+import traceback
 from config_utils import load_config
 from config_utils import update_ticket_order
 from config_utils import update_invoice_output_path
@@ -152,7 +152,8 @@ def book_sold_out():
         # Step 5: Add ticket timeline entry
         TicketName = check_error(DatabaseQueries.get_ticket_name(db_path, game_number))
         scanID = f"{game_number}{book_id}998{TicketPrice}{book_amount}" # -----TicketNumber 998 in scannID means BookSoldOut.
-        check_error(insert_ticket(scanID, book_id, -1, TicketName, TicketPrice))
+        # A Integrety error from insert_ticket implies duplicate insertion which is ok here because of the undo button.
+        message, message_type = insert_ticket(scanID, book_id, -1, TicketName, TicketPrice)
         
         # Step 6: Add sales log
         # TicketNumber is sold_out_val here
@@ -164,7 +165,7 @@ def book_sold_out():
         message = str(ve)
         message_type = "error"
     except Exception as e:
-        message = f"Unexpected error: {str(e)}"
+        message = "Unexpected Error: ".upper() + f"{str(e)}"
         message_type = "error"
     return redirect(url_for("scan_tickets",  message=message, message_type=message_type))
 

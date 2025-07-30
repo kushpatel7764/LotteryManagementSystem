@@ -29,7 +29,6 @@
                 <tr>
                     <td>
                         <form method="post" action="/business_profile" id="businessPortfolioForm">
-                            <label>Portfolio:</label>
                             <label>Name: <input type="text" id="business_name" name="BusinessName" placeholder="e.g. Scuttlebutts Liquors" {% if business_Info["Name"] %} value="{{ business_Info["Name"] }}" {% endif %}></label>
                             <label>Address: <input type="text" id="business_address" name="BusinessAddress" placeholder="123 Main St, Springfield, IL 62704"  {% if business_Info["Address"] %} value="{{ business_Info["Address"] }}" {% endif %}></label>
                             <label>Phone: <input type="tel" id="business_phone"  placeholder="Enter 10-digit number" name="BusinessPhone" {% if business_Info["Phone"] %} value="{{ business_Info["Phone"] }}" {% endif %}></label>

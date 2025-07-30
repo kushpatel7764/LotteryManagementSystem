@@ -1,14 +1,24 @@
 form {
-    background: #ffffff;
+    background: rgb(230, 230, 230);
     padding: 30px 40px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: "Segoe UI", sans-serif;
+    font-size: 1em;
     text-align: center;
+}
+
+#profile_table{
+    margin: 0 auto;
 }
 
 label {
     display: block;
     margin-bottom: 12px;
+}
+
+#GI_Title{
+    font-size: 1.5em;
 }
 
 select {
