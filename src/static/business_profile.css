@@ -7,8 +7,6 @@ form {
 }
 
 label {
-    font-size: 1.2em;
-    font-weight: 500;
     display: block;
     margin-bottom: 12px;
 }
@@ -57,20 +55,4 @@ input{
     transition: border-color 0.3s ease;
 }
 
-#popupLabel{
-    position: absolute;
-    top: 10%;
-    right: 42.5%;
-    padding: 5px 10px;
-    color: rgb(204,51,0);
-    background-color: #ffe6e6;
-    border-radius: 5px;
-    z-index: 9999;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    pointer-events: none;
-}
 
-#popupLabel.show{
-    opacity: 1;
-}

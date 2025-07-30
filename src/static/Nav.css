@@ -109,6 +109,43 @@
     }
 }
 
+/* Error message display css */
+.flash-message {
+    position: fixed;
+    top: 80px; /* adjust depending on your header height */
+    left: 50%;
+    transform: translateX(-50%); /* center horizontally */
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 1;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    background-color: #333;
+    min-width: 250px;
+    text-align: center;
+}
+
+.flash-message.success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #10b981;
+}
+
+.flash-message.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #ef4444;
+}
+
+.flash-message.warning {
+    background-color: #fff3cd;  
+    color: #856404;             
+    border: 1px solid #ffeeba; 
+}
 
 @media (max-width: 950px) {
     .button-container {

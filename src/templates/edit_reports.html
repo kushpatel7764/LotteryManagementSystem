@@ -3,8 +3,26 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='edit_reports.css') }}">
 {% endblock %}
- {% block header %} Edit Reports {% endblock %}  
+{% block extra_js%}
+    <script>
+        setTimeout(() => {
+                const msg = document.querySelector(".flash-message");
+                if (msg) {
+                    msg.style.opacity = '0'; // Trigger CSS fade out
+                    setTimeout(() => msg.remove(), 1000);
+                }
+            }, 4000); // Start fade after 4 seconds
+    </script>
+{% endblock %}
+
+{% block header %} Edit Reports {% endblock %}  
 {% block content %}
+    {% if message %}
+        <div class="flash-message {{ message_type }}">
+            {{ message }}
+        </div>
+    {% endif %}
+
     <!-- Filter Form -->
     <form method="GET" action="/edit_reports" class="filter-form">
         <label for="date">Filter by Date:</label>

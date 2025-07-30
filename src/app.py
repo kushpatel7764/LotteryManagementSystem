@@ -546,7 +546,8 @@ def business_profile():
 
 @app.route('/settings', methods=["GET","POST"])
 def settings():
-    warning_message = None
+    message = None
+    message_type = "warning"
     if request.method == "POST":
         config = load_config()
     
@@ -558,6 +559,8 @@ def settings():
 
         # Validate and update invoice output path
         valid_output, warning_message = validate_invoice_output_path(form_data["output_path"])
+        if warning_message:
+            message = warning_message
         update_invoice_output_path(valid_output)
 
     # Load current config for rendering
@@ -566,7 +569,8 @@ def settings():
         "settings.html",
         counting_order=config["ticket_order"],
         invoice_output_path=config["invoice_output_path"],
-        warning=warning_message
+        message=message,
+        message_type=message_type
     )
 
 def extract_settingForm_data(config):

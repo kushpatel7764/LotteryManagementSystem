@@ -1,5 +1,4 @@
 form {
-    background: #ffffff;
     padding: 30px 40px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -7,8 +6,6 @@ form {
 }
 
 label {
-    font-size: 1.2em;
-    font-weight: 500;
     display: block;
     margin-bottom: 12px;
 }
@@ -35,7 +32,6 @@ select:focus {
     padding: 10px;
 }
 
-
 button {
     padding: 10px 20px;
     font-size: 16px;
@@ -56,22 +52,5 @@ input{
     border: 1px solid #ccc;
     outline: none;
     transition: border-color 0.3s ease;
-}
-#popupWarningLabel {
-    position: absolute;
-    top: 25%;
-    right: 42.5%;
-    padding: 5px 10px;
-    color: rgb(255,204,0);
-    background-color: #fffbe6;
-    border-radius: 5px;
-    z-index: 9999;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    pointer-events: none;
-}
-
-#popupWarningLabel.show { 
-    opacity: 1;
 }
 

@@ -85,10 +85,23 @@
             if (scanInput) scanInput.value = "";
         {% endif %}
         }
+        setTimeout(() => {
+            const msg = document.querySelector(".flash-message");
+            if (msg) {
+                msg.style.opacity = '0'; // Trigger CSS fade out
+                setTimeout(() => msg.remove(), 1000);
+            }
+        }, 4000); // Start fade after 4 seconds
     </script>
 {% endblock %}
 {% block header %} Daily Scans {% endblock %}  
 {% block content %}
+    {% if message %}
+        <div class="flash-message {{ message_type }}">
+            {{ message }}
+        </div>
+    {% endif %}
+
     <!-- Popup Message -->
     <div id="popupModal" class="modal">
         <div class="modal-content">
@@ -113,10 +126,6 @@
         </button>
         <!-- Submit button is hidden since auto-submit is now enabled -->
         <button type="submit" style="display:none;">Submit</button>
-
-        {% if message %}
-            <div class="status-message {{ message_type }}">{{ message }}</div>
-        {% endif %}
     </form>
 
     <h2>Activated Books: {{activated_book_count}}</h2>

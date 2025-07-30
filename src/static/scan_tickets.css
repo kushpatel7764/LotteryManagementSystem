@@ -78,20 +78,6 @@ button:hover {
     background-color: #4338ca;
 }
 
-.status-message {
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-.status-message.error {
-    color: red;
-}
-
-.status-message.success {
-    color: green;
-}
-
-
 table {
     width: 100%;
     border-collapse: collapse;

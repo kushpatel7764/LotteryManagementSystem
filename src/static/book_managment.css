@@ -234,15 +234,22 @@ tr.row {
 
 /* Error message display css */
 .flash-message {
-    margin: 20px auto;
-    padding: 12px 20px;
-    width: 90%;
-    max-width: 800px;
+    position: fixed;
+    top: 80px; /* adjust depending on your header height */
+    left: 50%;
+    transform: translateX(-50%); /* center horizontally */
+    padding: 12px 24px;
     border-radius: 8px;
+    color: white;
     font-weight: bold;
-    text-align: center;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     opacity: 1;
-    transition: opacity 1s ease-out; /* Smooth fade-out */
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    background-color: #333;
+    min-width: 250px;
+    text-align: center;
 }
 
 .flash-message.success {

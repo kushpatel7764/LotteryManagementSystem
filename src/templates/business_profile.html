@@ -6,31 +6,22 @@
 
 {% block extra_js %}
     <script>
-        function showErrorPopup(message) {
-            const popup = document.getElementById("popupLabel");
-            popup.textContent = message;
-            popup.classList.add("show");
-
-            // Hide after 2 seconds
-            setTimeout(() => {
-                popup.classList.remove("show");
-            }, 2000);
-        }
-        window.onload = function() {
-            {% if errorMessage %}
-                showErrorPopup("{{ errorMessage }}");
-            {% endif %}
-        };
+        setTimeout(() => {
+            const msg = document.querySelector(".flash-message");
+            if (msg) {
+                msg.style.opacity = '0'; // Trigger CSS fade out
+                setTimeout(() => msg.remove(), 1000);
+            }
+        }, 4000); // Start fade after 4 seconds
     </script>
 {% endblock %}
 {% block header %} Business Profile {% endblock %}  
 {% block content %}
-        <div>
-            <label id="popupLabel"></label>
-        </div>
-        <div>
-            <label id="popupWarningLabel"></label>
-        </div>
+        {% if message %}
+            <div class="flash-message {{ message_type }}">
+                {{ message }}
+            </div>
+        {% endif %}
 
 
         <div id="profile_container">

@@ -1,74 +1,65 @@
 {% extends "navButton.html" %}
 {% block title %}Settings{% endblock %}
 
-    {% block extra_css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
-    {% endblock %}
-    
-    {% block extra_js %}
-    <script>
-        function ChangeOrder(event){
-            event.preventDefault();
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
+{% endblock %}
 
-            const input = document.getElementById("ticket_order_input");
-            const button = document.getElementById("ticket_order_btn");
+{% block extra_js %}
+<script>
+    function ChangeOrder(event){
+        event.preventDefault();
 
-            if (input.value == "ascending"){
-                input.value = "descending";
-                button.innerHTML = "Descending";
-            } else {
-                input.value = "ascending";
-                button.innerHTML = "Ascending";
+        const input = document.getElementById("ticket_order_input");
+        const button = document.getElementById("ticket_order_btn");
+
+        if (input.value == "ascending"){
+            input.value = "descending";
+            button.innerHTML = "Descending";
+        } else {
+            input.value = "ascending";
+            button.innerHTML = "Ascending";
+        }
+
+        document.getElementById("orderForm").submit();
+    }
+    setTimeout(() => {
+            const msg = document.querySelector(".flash-message");
+            if (msg) {
+                msg.style.opacity = '0'; // Trigger CSS fade out
+                setTimeout(() => msg.remove(), 1000);
             }
+    }, 4000); // Start fade after 4 seconds
+</script>
+{% endblock %}
+{% block header %} Settings {% endblock %}  
 
-            document.getElementById("orderForm").submit();
-        }
-        function showWarningPopup(message) {
-            const warningpopup = document.getElementById("popupWarningLabel");
-            warningpopup.textContent = message;
-            warningpopup.classList.add("show");
-
-            // Hide after 2 seconds
-            setTimeout(() => {
-                warningpopup.classList.remove("show");
-            }, 2000);
-        }
-        window.onload = function() {
-            {% if warning %}
-                showWarningPopup("{{ warning }}");
-            {% endif %}
-        };
-    </script>
-    {% endblock %}
-    {% block header %} Settings {% endblock %}  
-    
-    {% block content%}
-        <div>
-            <label id="popupLabel"></label>
+{% block content%}
+    {% if message %}
+        <div class="flash-message {{ message_type }}">
+            {{ message }}
         </div>
-        <div>
-            <label id="popupWarningLabel"></label>
-        </div>      
-        <div id="settings_container">
-            <table id="settings_table">
-                <tr>
-                    <td>
-                        <form method="post" action="/settings" id="orderForm">
-                            <label>Ticket Order:</label>
-                            <select name="ticket_order" id="ticket_order_select" onchange="document.getElementById('orderForm').submit();">
-                                <option value="ascending" {% if counting_order == 'ascending' %}selected{% endif %}>Ascending</option>
-                                <option value="descending" {% if counting_order == 'descending' %}selected{% endif %}>Descending</option>
-                            </select>
-                        </form>
-                    </td>
-                    <td>
-                        <form method="post" action="/settings" id="invoice_output_path">
-                            <label>Invoice Output Path:</label>
-                            <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder" value="{{ invoice_output_path }}" onchange="document.getElementById('invoice_output_path').submit();">
-                            
-                        </form>
-                    <td>
-                </tr>
-            </table>
-        </div>
-    {% endblock %}
+    {% endif %}
+    <div id="settings_container">
+        <table id="settings_table">
+            <tr>
+                <td>
+                    <form method="post" action="/settings" id="orderForm">
+                        <label>Ticket Order:</label>
+                        <select name="ticket_order" id="ticket_order_select" onchange="document.getElementById('orderForm').submit();">
+                            <option value="ascending" {% if counting_order == 'ascending' %}selected{% endif %}>Ascending</option>
+                            <option value="descending" {% if counting_order == 'descending' %}selected{% endif %}>Descending</option>
+                        </select>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" action="/settings" id="invoice_output_path">
+                        <label>Invoice Output Path:</label>
+                        <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder" value="{{ invoice_output_path }}" onchange="document.getElementById('invoice_output_path').submit();">
+                        
+                    </form>
+                <td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}
