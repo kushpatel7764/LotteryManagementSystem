@@ -17,6 +17,10 @@ button {
     cursor: pointer;
 }
 
+#Back_Navigation_Button{
+    margin-right: auto;
+}
+
 button:hover {
     background-color: #4338ca;
 }
@@ -64,15 +68,17 @@ tr.row {
 
 /* Error message display css */
 .flash-message {
-    margin: 20px auto;
-    padding: 12px 20px;
-    width: 90%;
-    max-width: 800px;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
     border-radius: 8px;
+    color: white;
     font-weight: bold;
-    text-align: center;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     opacity: 1;
-    transition: opacity 1s ease-out; /* Smooth fade-out */
+    transition: opacity 0.5s ease;
 }
 
 .flash-message.success {
