@@ -743,14 +743,8 @@ def edit_single_report(report_id, updated_report_ids):
                            message_type=message_type) 
 
 @app.route('/download/<int:report_id>', methods=['GET']) # change to GET for easier triggering
-def download_modified_report(report_id):
-    sales_logs = DatabaseQueries.get_sales_log(db_path, report_id)
-    sale_report = DatabaseQueries.get_daily_report(db_path, report_id)
-    counting_order = load_config()['ticket_order']
-    
-    if request.method == "POST":
-        create_daily_invoice(report_id)
-    return render_template("edit_single_report.html", report_id=report_id, sales_logs=sales_logs, sale_report=sale_report, counting_order=counting_order) 
+def download_modified_report(report_id):   
+    return create_daily_invoice(report_id)
 
 
 @socketio.on('connect')
