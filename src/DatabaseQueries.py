@@ -599,9 +599,10 @@ def next_report_ID(db):
     try:
         with get_db_cursor(db) as cursor:
             cursor.execute(
-                "SELECT ReportID FROM SaleReport ORDER BY ReportID DESC LIMIT 1"
+                "SELECT ReportID FROM SaleReport ORDER BY CAST(ReportID AS INTEGER) DESC LIMIT 1"
             )
             row = cursor.fetchone()
+            print(row)
             return str(int(row[0]) + 1) if row else "1"
     except sqlite3.Error as e:
         return f"DATABASE ERROR IN next_report_ID: {e}", "error"
@@ -638,6 +639,7 @@ def can_Submit(db):
                     if row[0] is None:
                         return False
                 return True
+            return True
     except sqlite3.Error as e:
         return f"DATABASE ERROR IN can_Submit: {e}", "error"
 

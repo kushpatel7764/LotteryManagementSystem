@@ -68,9 +68,15 @@
         }
         function submitFormTo(actionUrl) {
             const form = document.querySelector('.daily-totals-form');
-            form.action = actionUrl;
-            closeModal();
-            form.submit();
+            // Check if all required fields are valid
+            if (form.checkValidity()) {
+                form.action = actionUrl;
+                closeModal();
+                form.submit();
+            } else {
+                // Trigger browser's built-in validation UI
+                form.reportValidity();
+            }
         }
          function showInfoImage() {
             document.getElementById('infoModal').style.display = 'flex';

@@ -336,9 +336,9 @@ def submit():
     try:
         if check_error(DatabaseQueries.can_Submit(db_path)):
             result = do_submit_procedure()
-        # In case result is an error message
-        if isinstance(result, tuple) and result[1] == "error":
-            return redirect(url_for("scan_tickets", message=result[0], message_type="error"))
+            # In case result is an error message
+            if isinstance(result, tuple) and result[1] == "error":
+                return redirect(url_for("scan_tickets", message=result[0], message_type="error"))
         return redirect(url_for("scan_tickets"))
     except ValueError as e:
         return redirect(url_for("scan_tickets", message=str(e), message_type="error"))
@@ -694,21 +694,28 @@ def edit_reports():
     # Convert to local date and time and filter
     local_reports = []
     filter_date = request.args.get("date")
-    filter_time = request.args.get("time")
+    
+    filter_time = None
+    filter_time_military = request.args.get("time")
+    if filter_time_military:
+        filter_time_obj = datetime.strptime(filter_time_military, "%H:%M")
+        # Format to regular time with AM/PM
+        filter_time = filter_time_obj.strftime("%I:%M %p")
     
     # convert sales report date and time from utc to local
     for report in sales_reports:
         utc_date = datetime.strptime(report["ReportDate"], "%Y-%m-%d").date()
         utc_time = datetime.strptime(report["ReportTime"], "%H:%M:%S").time()
         local_date = convert_utc_to_local(utc_date, 'America/New_York').strftime("%Y-%m-%d")
-        local_time = convert_utc_to_local(utc_time, 'America/New_York').strftime("%I:%M:%S %p")
-        
+        local_time = convert_utc_to_local(utc_time, 'America/New_York').strftime("%I:%M %p")
          # Filter logic
         match = True
-        if filter_date and local_date != filter_date:
-            match = False
-        if filter_time and not local_time.startswith(filter_time):
-            match = False
+        if filter_date:
+            if local_date != filter_date:
+                match = False
+        if filter_time:
+            if not local_time.startswith(filter_time):
+                match = False
 
         if match:
             report["ReportDate"] = local_date
@@ -717,7 +724,7 @@ def edit_reports():
     return render_template("edit_reports.html", sales_reports=local_reports)
 
 @app.route("/edit_report/<report_id>/<updated_report_ids>",  methods=["GET", "POST"])
-def edit_single_report(report_id, updated_report_ids):
+def edit_single_report(report_id, updated_report_ids=None):
     message = request.args.get("message", "")
     message_type = request.args.get("message_type", "")
     try:

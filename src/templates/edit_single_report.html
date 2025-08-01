@@ -219,7 +219,7 @@
         <label for="total_due">Total Due:</label>
         <input name="total_due" id="total_due" value="{{sale_report["TotalDue"]}}" readonly><br><br>
 
-        <button type="submit" formaction="/edit_report/{{report_id}}">Save</button>
+        <button type="submit" formaction="/edit_report/{{report_id}}/None?">Save</button>
 
         <button type="button" onclick="downloadInvoice({{report_id}})">Download</button>
         <br>
