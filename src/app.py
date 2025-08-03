@@ -478,6 +478,7 @@ def books_managment():
     
     # Books info for the books table to display on screen 
     books = check_error(DatabaseQueries.get_books(db=db_path), msg_data, fallback=[])
+    breakpoint()
     # Setting TicketNames
     if books:
         for book in books:
@@ -494,12 +495,12 @@ def books_managment():
         if isinstance(add_result, tuple) and add_result[1] == "error":
             msg_data["message"], msg_data["message_type"] = add_result
     
-    return {
-        "books": books,
-        "activated_ids": activated_ids,
-        "message": msg_data.get("message", ""),
-        "message_type": msg_data.get("message_type", "")
-    }
+    return render_template(
+        books=books,
+        activated_ids=activated_ids,
+        message=msg_data.get("message", ""),
+        message_type=msg_data.get("message_type", "")
+    )
 
 def add_book_procedure(scanned_code):
     scanned_info = ScannedCodeManagement(scanned_code=scanned_code, db_path=db_path)
