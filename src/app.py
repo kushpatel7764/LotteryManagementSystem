@@ -476,9 +476,14 @@ def books_managment():
     # /books_managment?activate_book_message=SomeMessage&activate_book_message_type=success
     # request.args.get('activate_book_message', '') will then get these arguments
     
+    if request.method == 'POST':
+        scanned_code = request.form['add_book_code']
+        add_result = check_error(lambda: add_book_procedure(scanned_code), msg_data)
+        if isinstance(add_result, tuple) and add_result[1] == "error":
+            msg_data["message"], msg_data["message_type"] = add_result
+            
     # Books info for the books table to display on screen 
     books = check_error(DatabaseQueries.get_books(db=db_path), msg_data, fallback=[])
-    breakpoint()
     # Setting TicketNames
     if books:
         for book in books:
@@ -489,13 +494,8 @@ def books_managment():
     activated_books = check_error(DatabaseQueries.get_activated_books(db_path), msg_data, fallback=[])  # should return a list of dicts or a list of IDs
     activated_ids = {book['ActiveBookID'] for book in activated_books}  # Use set for faster lookup
     
-    if request.method == 'POST':
-        scanned_code = request.form['add_book_code']
-        add_result = check_error(lambda: add_book_procedure(scanned_code), msg_data)
-        if isinstance(add_result, tuple) and add_result[1] == "error":
-            msg_data["message"], msg_data["message_type"] = add_result
-    
-    return render_template(
+    return render_template( 
+        "books_managment.html",
         books=books,
         activated_ids=activated_ids,
         message=msg_data.get("message", ""),
