@@ -191,6 +191,7 @@
                 <th>Game Name</th>  
                 <th>Book ID</th>
                 <th>Game Number</th>
+                <th>Ticket Price</th>
                 <th>Ticket Amount</th>
                 <th>Sold</th>
                 <th class="th_OptionsButton"></th>
@@ -202,6 +203,7 @@
                 <td>{{ book['TicketName'] }}</td>
                 <td>{{ book['BookID'] }}</td>
                 <td>{{ book['GameNumber'] }}</td>
+                <td>${{ book['TicketPrice'] }}</td>
                 <td>{{ book['BookAmount'] }}</td>
                 <td>{{ book['Is_Sold'] }}</td>
                 <td class="options_Button {% if book['BookID'] in activated_ids %}activated{% endif %}">

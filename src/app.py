@@ -354,7 +354,6 @@ def calculate_instant_tickets_sold(ReportID): # TODO: RETURNING ERROR MESSAGE
 @app.route("/submit", methods=["GET", "POST"])
 def submit():
     msg_data = {"message": "", "message_type": ""}
-
     try:
         if check_error(DatabaseQueries.can_Submit(db_path), msg_data, fallback=False):
             result = do_submit_procedure()
@@ -391,6 +390,7 @@ def do_submit_procedure():
         check_error(Database.update_pending_sales_log_report_id(db_path, next_ReportID), msg_data)
         # Update "Pending" TicketTimeLine ReportID
         check_error(Database.update_pending_TicketTimeLine_report_id(db_path, next_ReportID), msg_data)
+
         # Create a Invoice
         check_error(create_daily_invoice(next_ReportID), msg_data)
         
@@ -425,6 +425,8 @@ def create_daily_invoice(ReportID, return_path_only=False):
     msg_data = {"message": "", "message_type": ""}
     config = load_config()
     invoiceLog = check_error(DatabaseQueries.get_table_for_invoice(db_path, ReportID), msg_data)
+    if msg_data.get("message_type") == "error":
+        return "ERROR: Unable to get the invoice table", "error"
     
     store_name = "Store Name" if load_config()["business_name"] is None else load_config()["business_name"] 
     address = "Store Address" if load_config()["business_address"] is None else load_config()["business_address"] 
@@ -455,9 +457,9 @@ def create_daily_invoice(ReportID, return_path_only=False):
         generate_invoice.generate_lottery_invoice_pdf(full_path, store_info, invoiceLog, invoice_number, daily_report)
         
         if return_path_only:
-            return full_path
+            return full_path, "success"
         
-        return send_file(full_path, as_attachment=True)
+        return send_file(full_path, as_attachment=True), "success"
     except Exception as e:
         # Log or handle error appropriately
         print(f"Failed to generate/send invoice: {e}")

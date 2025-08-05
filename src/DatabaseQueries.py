@@ -18,7 +18,7 @@ def get_books(db):
     try:
         Database.initialize_database(db)
         with get_db_cursor(db) as cursor:
-            cursor.execute("SELECT * FROM Books")
+            cursor.execute("SELECT * FROM Books ORDER BY Books.TicketPrice DESC;")
             books = cursor.fetchall()
 
             if not books:
@@ -470,7 +470,7 @@ def get_all_sales_reports(db):
             query = """
                 SELECT *
                 FROM SaleReport
-                ORDER BY ReportID DESC;
+                ORDER BY CAST(ReportID AS INTEGER) DESC;
             """
             cursor.execute(query)
             rows = cursor.fetchall()
@@ -652,7 +652,7 @@ def was_activated(db, BookID):
     try:
         with get_db_cursor(db) as cursor:
             cursor.execute(
-                "SELECT TicketNumber FROM TicketTimeLine where BookID = ? ORDER BY ReportID DESC",
+                "SELECT TicketNumber FROM TicketTimeLine where BookID = ? ORDER BY CAST(ReportID AS INTEGER) DESC",
                 (BookID,),
             )
             rows = cursor.fetchall()
