@@ -79,7 +79,7 @@ def undo_scan():
             msg_data["message"] = f"Unexpected error: {str(e)}"
             msg_data["message_type"] = "error"
 
-    return redirect(url_for("scan_tickets", message=msg_data.get("message", ""), message_type=msg_data.get("message_type", ""))) 
+    return redirect(url_for("tickets.scan_tickets", message=msg_data.get("message", ""), message_type=msg_data.get("message_type", ""))) 
 
 @tickets_bp.route("/book_sold_out", methods=["POST", "GET"])
 def book_sold_out():
@@ -128,7 +128,7 @@ def book_sold_out():
     except Exception as e:
         msg_data["message"] = "Unexpected Error: ".upper() + f"{str(e)}"
         msg_data["message_type"] = "error"
-    return redirect(url_for("scan_tickets",  message=msg_data.get("message", ""), message_type=msg_data.get("message_type", "")))
+    return redirect(url_for("tickets.scan_tickets",  message=msg_data.get("message", ""), message_type=msg_data.get("message_type", "")))
 
 @tickets_bp.route("/submit", methods=["GET", "POST"])
 def submit():
@@ -142,9 +142,9 @@ def submit():
                 msg_data["message_type"] = result[1]
         # Redirect with message if any
         if msg_data["message"]:
-            return redirect(url_for("scan_tickets", **msg_data))
+            return redirect(url_for("tickets.scan_tickets", **msg_data))
         else:
-            return redirect(url_for("scan_tickets"))    
+            return redirect(url_for("tickets.scan_tickets"))    
         
     except ValueError as e:
-        return redirect(url_for("scan_tickets", message=str(e), message_type="error"))
+        return redirect(url_for("tickets.scan_tickets", message=str(e), message_type="error"))

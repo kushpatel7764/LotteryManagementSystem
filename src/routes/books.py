@@ -55,19 +55,19 @@ def delete_book():
 
         if msg_data["message_type"] == "error":
             return jsonify({
-                "redirect_url": url_for('books_managment'),
+                "redirect_url": url_for('books.books_managment'),
                 "message": msg_data["message"],
                 "message_type": msg_data["message_type"]
             }), 500
 
         
-        return jsonify({ "redirect_url": url_for('books_managment'),
+        return jsonify({ "redirect_url": url_for('books.books_managment'),
                         "message": f"Book {book_id} deleted successfully.",
                         "message_type": "success"})
     except Exception as e:
         print(f"Error deleting book {book_id}: {e}")
         return jsonify({
-            "redirect_url": url_for('books_managment'),
+            "redirect_url": url_for('books.books_managment'),
             "message": f"Error deleting book: {str(e)}",
             "message_type": "error"
         }), 500
@@ -83,15 +83,15 @@ def deactivate_book():
         check_error(Database.deactivate_book(db_path, book_id), msg_data)
         if msg_data["message_type"] == "error":
             return jsonify({
-                "redirect_url": url_for('books_managment'),
+                "redirect_url": url_for('books.books_managment'),
                 "message": msg_data["message"],
                 "message_type": msg_data["message_type"]
             }), 500
-        return jsonify({ "redirect_url": url_for('books_managment') })
+        return jsonify({ "redirect_url": url_for('books.books_managment') })
     except Exception as e:
         print(f"Unexpected error while deactivating book {book_id}: {e}")
         return jsonify({
-            "redirect_url": url_for('books_managment'),
+            "redirect_url": url_for('books.books_managment'),
             "message": f"Unexpected error deactivating book: {e}",
             "message_type": "error"
         }), 500
@@ -106,5 +106,5 @@ def activate_book():
         scanned_code = request.form.get('activate_book_code')
         message, message_type = activate_book_procedure(scanned_code) 
         
-    return redirect(url_for("books_managment", message=message, message_type=message_type))
+    return redirect(url_for("books.books_managment", message=message, message_type=message_type))
 

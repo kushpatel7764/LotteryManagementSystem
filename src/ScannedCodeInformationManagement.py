@@ -1,4 +1,4 @@
-from config_utils import load_config
+from utils.config import load_config
 import game_number_lookup_table
 
 class ScannedCodeManagement:

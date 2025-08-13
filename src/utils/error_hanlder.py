@@ -26,3 +26,4 @@ def check_error(result_or_callable, message_holder=None, fallback=None):
             message_holder["message"] = f"Unexpected Error: {e}"
             message_holder["message_type"] = "error"
         return fallback
+
