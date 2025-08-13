@@ -4,36 +4,22 @@
     <meta charset="UTF-8">
     <title>Lottery Ticket App - Home</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
-    <style>
-        #settings_btn{
-            background-color: rgb(180, 180, 180);
-        
-            margin-top: 10%;
-            padding-left: 40px;
-            padding-right: 40px;
-        }
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-        #business_profile_btn{
-            background: rgb(180, 180, 180);
-
-            padding-left: 20px;
-            padding-right: 20px;
-        }
-
-    </style>
 </head>
 <body>
-
     <div class="home-container">
-        <h1>Welcome to the Lottery Ticket App</h1>
-        <div class="nav-buttons">
-            <a href="{{ url_for('scan_tickets') }}"><button class="button">Scan Tickets</button></a>
-            <a href="{{ url_for('books_managment') }}"><button class="button">Books Managment</button></a>
-            <a href="{{ url_for('edit_reports') }}"><button class="button">Edit Reports</button></a>
-        </div>
-        <div class="user_edit_buttons">
-            <a href="{{ url_for('settings') }}"><button class="button" id="settings_btn">Settings</button></a>
-            <a href="{{ url_for('business_profile') }}"><button class="button" id="business_profile_btn">Business Profile</button></a>
+        <h1>Lottery Management System</h1>
+        <div class="card">
+            <div class="nav-buttons">
+                <a href="{{ url_for('tickets.scan_tickets') }}"><button class="button">📷 Scan Tickets</button></a>
+                <a href="{{ url_for('books.books_managment') }}"><button class="button">📚 Books Management</button></a>
+                <a href="{{ url_for('reports.edit_reports') }}"><button class="button">📝 Edit Reports</button></a>
+            </div>
+            <div class="user_edit_buttons">
+                <a href="{{ url_for('settings.settings') }}"><button class="button" id="settings_btn">⚙ Settings</button></a>
+                <a href="{{ url_for('business_profile.business_profile') }}"><button class="button" id="business_profile_btn">🏢 Business Profile</button></a>
+            </div>
         </div>
     </div>
 </body>

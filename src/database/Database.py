@@ -20,7 +20,7 @@ def setup_database_schema_with_sql_file(cursor, sql_filename):
         After execution, it commits the changes to the database.
     """
     try:
-        setup_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        setup_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         sql_file_path = os.path.join(setup_dir, sql_filename)
 
         # Read the SQL schema file

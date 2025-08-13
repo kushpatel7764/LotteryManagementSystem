@@ -1,5 +1,5 @@
 import sqlite3
-import Database
+from database import Database
 from decorators import get_db_cursor
 
 

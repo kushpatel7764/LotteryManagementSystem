@@ -1,8 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-import Database
-import DatabaseQueries
+from database import Database, DatabaseQueries
 import os
 
 
