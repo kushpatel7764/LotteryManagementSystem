@@ -8,7 +8,7 @@ print("35600949981000515070000000091".__len__())
 # print(datetime.date.today().strftime("%d/%m/%Y"))
 print(datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S"))
 
-from config_utils import load_config
+from utils.config import load_config
 import game_number_lookup_table
 
 def validate_scanned_code(game_num, ticket_price, book_amount):

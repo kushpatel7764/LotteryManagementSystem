@@ -3,14 +3,14 @@ import smtplib
 import ssl
 from datetime import datetime
 from email.message import EmailMessage
-import config_utils
+from utils.config import load_config
 
 def email_invoice(filename):
     # CONFIGURATION
     EMAIL_SENDER = 'kushpatelrp1234@gmail.com'
     EMAIL_PASSWORD = 'kuon pyps cxqk agft'  # Use App Password if 2FA is enabled
-    EMAIL_RECEIVER = config_utils.load_config()["business_email"]
-    FOLDER_PATH = config_utils.load_config()["invoice_output_path"]
+    EMAIL_RECEIVER = load_config()["business_email"]
+    FOLDER_PATH = load_config()["invoice_output_path"]
 
     # Get today's date string (e.g., 07-08-2024)
     today_str = datetime.today().strftime('%m-%d-%Y')

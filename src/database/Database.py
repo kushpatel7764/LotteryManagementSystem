@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import datetime
-from config_utils import load_config
+from utils.config import load_config
 from decorators import get_db_cursor
 
 
