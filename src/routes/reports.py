@@ -167,12 +167,12 @@ def update_sales_log():
         check_error(Database.update_sale_report_instant_sold(db_path, instant_sold, report_id), msg_data)
         check_error(Database.update_ticketTimeline_ticketnumber(db_path, report_id, book_id, close), msg_data)
         
-        return jsonify({"redirect_url": url_for("edit_single_report", report_id=report_id, updated_report_ids=updated_report_ids.__str__(),  message=msg_data.get("message", ""), message_type=msg_data.get("message_type", ""))})
+        return jsonify({"redirect_url": url_for("reports.edit_single_report", report_id=report_id, updated_report_ids=updated_report_ids.__str__(),  message=msg_data.get("message", ""), message_type=msg_data.get("message_type", ""))})
     except Exception as e: 
         msg_data["message"] = str(e)
         msg_data["message_type"] = "error"
         safe_report_id = report_id if 'report_id' in locals() else "unknown"
-        return jsonify({"redirect_url": url_for("edit_single_report", report_id=safe_report_id, updated_report_ids=updated_report_ids.__str__(), message=str(e), message_type="error")})
+        return jsonify({"redirect_url": url_for("reports.edit_single_report", report_id=safe_report_id, updated_report_ids=updated_report_ids.__str__(), message=str(e), message_type="error")})
     
 
 @report_bp.route("/update_sale_report/<report_id>", methods=["GET","POST"])
@@ -187,9 +187,9 @@ def update_sale_report(report_id):
             cash_on_hand = request.form["cash_on_hand"]
             
             check_error(Database.update_sale_report(db_path, instant_sold, online_sold, instant_cashed, online_cashed, cash_on_hand, report_id), message_holder=msg_data)
-        return redirect(url_for("edit_single_report", report_id=report_id, updated_report_ids="None"), message=msg_data.get("message", ""), message_type=msg_data.get("message_type", ""))
+        return redirect(url_for("reports.edit_single_report", report_id=report_id, updated_report_ids="None"), message=msg_data.get("message", ""), message_type=msg_data.get("message_type", ""))
     except ValueError as e:
-        return redirect(url_for("edit_single_report", report_id=report_id, updated_report_ids="None", message=str(e), message_type="error"))
+        return redirect(url_for("reports.edit_single_report", report_id=report_id, updated_report_ids="None", message=str(e), message_type="error"))
  
 
 @report_bp.route('/download/<int:report_id>', methods=['GET']) # change to GET for easier triggering

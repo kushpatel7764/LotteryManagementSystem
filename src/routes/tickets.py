@@ -33,14 +33,26 @@ def scan_tickets():
         else:
             # Insert ticket
             scanID = scanned_code
-            TicketName = check_error(DatabaseQueries.get_ticket_name(db_path, extracted_vals["game_number"]), message_holder=msg_data)
-            check_error(insert_ticket(scanID, extracted_vals["book_id"], extracted_vals["ticket_number"], TicketName, extracted_vals["ticket_price"]), message_holder=msg_data)
-            check_error(Database.update_counting_ticket_number(db_path, extracted_vals["book_id"], extracted_vals["ticket_number"]), message_holder=msg_data)
-            # Add sales log
-            check_error(add_sales_log(extracted_vals["book_id"], extracted_vals["ticket_number"], extracted_vals["game_number"]), message_holder=msg_data)
             msg_data["message"] = "TICKET SCANNED"
             msg_data["message_type"] = "success"
-
+            # check the a ticket for this book_id has not already been scanned
+            if check_error(DatabaseQueries.is_counting_ticket_number_set(db_path, extracted_vals["book_id"]), message_holder=msg_data, fallback=False):
+                msg_data["message"] = "A ticket from this book has already been scanned. Please use the UNDO button if you want to rescan.".upper()
+                msg_data["message_type"] = "error"
+                return render_template("scan_tickets.html",activated_books=check_error(DatabaseQueries.get_scan_ticket_page_table(db=db_path), message_holder=msg_data),
+                    instant_tickets_sold_total=check_error(calculate_instant_tickets_sold(ReportID="Pending"), message_holder=msg_data),
+                    counting_order=load_config()['ticket_order'],
+                    activated_book_count=check_error(DatabaseQueries.count_activated_books(db_path), message_holder=msg_data, fallback=0),
+                    message=msg_data.get("message", ""),
+                    message_type=msg_data.get("message_type", ""))
+            
+            TicketName = check_error(DatabaseQueries.get_ticket_name(db_path, extracted_vals["game_number"]), message_holder=msg_data)
+            check_error(insert_ticket(scanID, extracted_vals["book_id"], extracted_vals["ticket_number"], TicketName, extracted_vals["ticket_price"]), message_holder=msg_data)
+            # Add sales log
+            check_error(add_sales_log(extracted_vals["book_id"], extracted_vals["ticket_number"], extracted_vals["game_number"]), message_holder=msg_data)
+            # Update counting ticket number to show the new change to the user
+            check_error(Database.update_counting_ticket_number(db_path, extracted_vals["book_id"], extracted_vals["ticket_number"]), message_holder=msg_data)
+            
     # Get all the active books basically. In reality, making a table to show to the user using activated bookids.
     # Instant ticket sold calculation
     # Get the counting order to calc sold
