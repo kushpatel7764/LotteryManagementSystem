@@ -10,8 +10,6 @@ print("35600949981000515070000000091".__len__())
 print(datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S"))
 
 
-
-
 def validate_scanned_code(game_num, ticket_price, book_amount):
     """
     Validates the scanned code:

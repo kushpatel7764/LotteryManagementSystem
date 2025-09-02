@@ -302,8 +302,8 @@ def get_scan_ticket_page_table(db):
         with get_db_cursor(db) as cursor:
             cursor.execute(
                 """
-                SELECT TicketNameLookup.TicketName, ActivatedBooks.ActiveBookID, Books.TicketPrice, Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber 
-                FROM ActivatedBooks 
+                SELECT TicketNameLookup.TicketName, ActivatedBooks.ActiveBookID, Books.TicketPrice, Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber
+                FROM ActivatedBooks
                 Join Books ON ActiveBookID = BookID
                 Left Join TicketNameLookup ON Books.GameNumber = TicketNameLookup.GameNumber
                 ORDER BY Books.TicketPrice DESC;
@@ -364,9 +364,9 @@ def get_all_instant_tickets_sold_quantity(db, ReportID):
     try:
         with get_db_cursor(db) as cursor:
             query = """
-                SELECT SalesLog.ActiveBookID, SalesLog.Ticket_Sold_Quantity, Books.TicketPrice 
-                FROM SalesLog 
-                JOIN Books ON ActiveBookID = BookID 
+                SELECT SalesLog.ActiveBookID, SalesLog.Ticket_Sold_Quantity, Books.TicketPrice
+                FROM SalesLog
+                JOIN Books ON ActiveBookID = BookID
                 WHERE SalesLog.ReportID = ?;
             """
             cursor.execute(query, (ReportID,))
@@ -392,9 +392,9 @@ def get_all_sold_books(db, ReportID):
     try:
         with get_db_cursor(db) as cursor:
             query = """
-                SELECT ActiveBookID, Ticket_Sold_Quantity, Books.TicketPrice 
-                FROM SalesLog 
-                JOIN Books ON ActiveBookID = BookID 
+                SELECT ActiveBookID, Ticket_Sold_Quantity, Books.TicketPrice
+                FROM SalesLog
+                JOIN Books ON ActiveBookID = BookID
                 WHERE ReportID = ? and Is_Sold = True;
             """
             cursor.execute(query, (ReportID,))
@@ -412,8 +412,8 @@ def is_sold(db, book_id):
     try:
         with get_db_cursor(db) as cursor:
             query = """
-                SELECT Is_Sold 
-                FROM Books 
+                SELECT Is_Sold
+                FROM Books
                 WHERE BookID = ?;
             """
             cursor.execute(query, (book_id,))

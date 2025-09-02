@@ -1,3 +1,6 @@
+from app import app
+from unittest.mock import patch
+import pytest
 import sys
 import os
 
@@ -5,11 +8,8 @@ sys.path.append(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 )  # Add project root
 
-import pytest
-from unittest.mock import patch
 
 # Assuming your Flask app is created in app.py
-from app import app
 
 
 @pytest.fixture

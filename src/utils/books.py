@@ -14,7 +14,8 @@ def activate_book_procedure(scanned_code):
         if extracted_vals == "INVALID BARCODE":
             return "INVALID BARCODE", "error"  # message, message_type
         # The book being activated must already be registered in the system.
-        # So check to make sure that the book being instered is prensent in the system and is not already activated.
+        # So check to make sure that the book being instered is prensent in the
+        # system and is not already activated.
         book_exists = DatabaseQueries.is_book(
             db=db_path, book_id=extracted_vals["book_id"]
         )

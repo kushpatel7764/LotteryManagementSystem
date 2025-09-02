@@ -143,7 +143,8 @@ def undo_scan():
                 message_holder=msg_data,
             )
 
-            # Step 2: Delete sales log for that book and TicketTimeLine Log will be deleted automatically
+            # Step 2: Delete sales log for that book and TicketTimeLine Log will be
+            # deleted automatically
             check_error(
                 Database.delete_sales_log_by_book_id(db_path, book_id),
                 message_holder=msg_data,
@@ -221,8 +222,10 @@ def book_sold_out():
             DatabaseQueries.get_ticket_name(db_path, game_number),
             message_holder=msg_data,
         )
-        scanID = f"{game_number}{book_id}998{TicketPrice}{book_amount}"  # -----TicketNumber 998 in scannID means BookSoldOut.
-        # A Integrety error from insert_ticket implies duplicate insertion which is ok here because of the undo button.
+        # -----TicketNumber 998 in scannID means BookSoldOut.
+        scanID = f"{game_number}{book_id}998{TicketPrice}{book_amount}"
+        # A Integrety error from insert_ticket implies duplicate insertion which
+        # is ok here because of the undo button.
         check_error(
             insert_ticket(scanID, book_id, -1, TicketName, TicketPrice),
             message_holder=msg_data,

@@ -4,8 +4,6 @@ from functools import wraps
 from flask import render_template
 
 
-
-
 def with_error_handling(template_name, fallback_context=None):
     def decorator(view_func):
         @wraps(view_func)
