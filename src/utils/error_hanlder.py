@@ -11,7 +11,9 @@ def check_error(result_or_callable, message_holder=None, fallback=None):
         The original result if successful, or fallback if error is detected.
     """
     try:
-        result = result_or_callable() if callable(result_or_callable) else result_or_callable
+        result = (
+            result_or_callable() if callable(result_or_callable) else result_or_callable
+        )
 
         if isinstance(result, tuple) and len(result) == 2:
             msg, msg_type = result
@@ -26,4 +28,3 @@ def check_error(result_or_callable, message_holder=None, fallback=None):
             message_holder["message"] = f"Unexpected Error: {e}"
             message_holder["message_type"] = "error"
         return fallback
-

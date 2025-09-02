@@ -4,8 +4,7 @@ from functools import wraps
 from flask import render_template
 
 
-from functools import wraps
-from flask import render_template
+
 
 def with_error_handling(template_name, fallback_context=None):
     def decorator(view_func):
@@ -17,16 +16,14 @@ def with_error_handling(template_name, fallback_context=None):
                     return render_template(template_name, **context)
                 return context  # e.g., redirect
             except ValueError as ve:
-                context = {
-                    "message": str(ve),
-                    "message_type": "error"
-                }
+                context = {"message": str(ve), "message_type": "error"}
                 if fallback_context:
                     context.update(fallback_context)
                 return render_template(template_name, **context)
-        return wrapped_view
-    return decorator
 
+        return wrapped_view
+
+    return decorator
 
 
 @contextmanager
@@ -45,5 +42,3 @@ def get_db_cursor(db_path):
         raise e
     finally:
         conn.close()
-        
-

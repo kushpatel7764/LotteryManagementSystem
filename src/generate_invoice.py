@@ -1,9 +1,11 @@
 from reportlab.lib.pagesizes import LETTER
 from reportlab.pdfgen import canvas
-from reportlab.lib import colors
 from datetime import datetime
 
-def generate_lottery_invoice_pdf(filename, store_info, invoice_log, invoice_number, daily_report):
+
+def generate_lottery_invoice_pdf(
+    filename, store_info, invoice_log, invoice_number, daily_report
+):
     c = canvas.Canvas(filename, pagesize=LETTER)
     width, height = LETTER
 
@@ -76,6 +78,10 @@ def generate_lottery_invoice_pdf(filename, store_info, invoice_log, invoice_numb
     # Footer
     y -= 40
     c.setFont("Helvetica-Oblique", 9)
-    c.drawString(50, y, "Note: Thank you for your business! Please contact us for any questions or concerns.")
+    c.drawString(
+        50,
+        y,
+        "Note: Thank you for your business! Please contact us for any questions or concerns.",
+    )
 
     c.save()

@@ -325,6 +325,7 @@ def get_scan_ticket_page_table(db):
     except sqlite3.Error as e:
         return f"DATABASE ERROR IN get_scan_ticket_page_table: {e}", "error"
 
+
 def is_counting_ticket_number_set(db, activated_book_id):
     """
     Checks if the countingTicketNumber is set for a given activated book.
@@ -352,6 +353,7 @@ def is_counting_ticket_number_set(db, activated_book_id):
                 return False
     except Exception as e:
         return f"ERROR CHECKING countingTicketNumber: {e}", "error"
+
 
 def get_all_instant_tickets_sold_quantity(db, ReportID):
     """
