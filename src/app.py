@@ -1,5 +1,3 @@
-import eventlet
-eventlet.monkey_patch()
 from flask_socketio import SocketIO
 from flask import Flask,request
 from routes.home import home_bp
@@ -30,8 +28,3 @@ def receive():
     with app.app_context():
         socketio.emit("barcode_scanned", {"barcode": barcode})
     return "Received"
-
-
-if __name__ == '__main__':
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
-    

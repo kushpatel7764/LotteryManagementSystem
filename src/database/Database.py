@@ -571,7 +571,7 @@ def update_sales_log_prev_TicketNum(
 
             row = cursor.fetchone()
             if row is None:
-                return "NO MATCHING SALE ENTRY FOUND.", "error"
+                return "OPENING REPORT NOT UPDATED AS IT IS NOT NECESSARY", "warning"
 
             current_TicketNum = int(row[0])
             counting_order = load_config()["ticket_order"]
@@ -633,7 +633,7 @@ def update_sales_log_current_TicketNum(
 
             row = cursor.fetchone()
             if row is None:
-                return "NO MATCHING SALE ENTRY FOUND.", "error"
+                return "CLOSING REPORT NOT UPDATED AS IT IS NOT NECESSARY", "warning"
 
             prev_TicketNum = int(row[0])
             counting_order = load_config()["ticket_order"]

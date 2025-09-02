@@ -91,6 +91,11 @@ button:hover {
     color: green;
 }
 
+.status-message.warning {
+    background-color: #fff3cd;  
+    color: #856404;             
+    border: 1px solid #ffeeba;
+}
 
 table {
     width: 100%;

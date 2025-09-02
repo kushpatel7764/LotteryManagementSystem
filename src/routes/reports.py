@@ -96,19 +96,20 @@ def update_sales_log():
         report_id_int = int(report_id)
         previous_reportID = report_id_int - 1
         next_reportID = report_id_int + 1
-        latest_reportID = int(check_error(lambda: DatabaseQueries.next_report_ID(db_path), msg_data))
+        latest_reportID = int(check_error(lambda: DatabaseQueries.next_report_ID(db_path), msg_data)) - 1
         
         game_number = check_error(DatabaseQueries.get_game_num_of(db_path, book_id), msg_data)
         is_book_sold = check_error(DatabaseQueries.is_sold(db_path, book_id), msg_data)
         
         book = check_error(DatabaseQueries.get_book(db_path, book_id), msg_data)
         TicketName = check_error(DatabaseQueries.get_ticket_name(db_path, game_number), msg_data)
-        scanID = f"{game_number}{book_id}{close}{TicketPrice}{book_amount}" 
         book_amount = book[3]
         TicketPrice = book[4]
+        scanID = f"{game_number}{book_id}{close}{TicketPrice}{book_amount}" 
+        
         
         # Main update for current report
-        check_error(Database.update_sales_log_prev_TicketNum(db_path, open, report_id, book_id), msg_data)
+        check_error(Database.update_sales_log_prev_TicketNum(db_path, open, report_id, book_id), msg_data) 
         check_error(Database.update_sales_log_current_TicketNum(db_path, close, report_id, book_id), msg_data)
         updated_report_ids.append(report_id_int)
 

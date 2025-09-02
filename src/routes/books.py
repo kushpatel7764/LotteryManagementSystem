@@ -89,7 +89,7 @@ def deactivate_book():
             }), 500
         return jsonify({ "redirect_url": url_for('books.books_managment') })
     except Exception as e:
-        print(f"Unexpected error while deactivating book {book_id}: {e}")
+        print(f"Unexpected error while deactivating book: {e}")
         return jsonify({
             "redirect_url": url_for('books.books_managment'),
             "message": f"Unexpected error deactivating book: {e}",

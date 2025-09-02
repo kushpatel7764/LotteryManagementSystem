@@ -62,7 +62,7 @@
         function closeModal() {
             document.getElementById("popupModal").style.display = "none";
         }
-        function canSubmit() {
+        function canSubmit(e) {
             event.preventDefault();
             document.getElementById("popupModal").style.display = "block";
         }
@@ -109,11 +109,12 @@
     {% endif %}
 
     <!-- Popup Message -->
-    <div id="popupModal" class="modal">
+    <div id="popupModal" class="modal" class="modal" aria-hidden="true" style="display:none">
         <div class="modal-content">
+            <button class="modal-close-btn" onclick="closeModal()">×</button>
             <p>Did you make sure your newly activated books are also activated in this system?</p>
-            <button onclick="submitFormTo('/submit')" type="submit">YES</button>
-            <button onclick="closeModal()">NO</button>
+            <button class="modal-option-btn" onclick="submitFormTo('/submit')" type="submit">YES</button>
+            <button class="modal-option-btn" onclick="closeModal()">NO</button>
         </div>
     </div>
 
@@ -249,7 +250,7 @@
         </div>
         <br><br>
 
-        <button onclick="canSubmit()">Submit</button>
+        <button type="button" onclick="canSubmit(event)">Submit</button>
         <!-- Modal for Image -->
         <div id="infoModal">
             <div style="position: relative; background: white; padding: 10px; border-radius: 8px;">

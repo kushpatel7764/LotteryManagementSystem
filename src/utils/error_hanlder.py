@@ -15,7 +15,7 @@ def check_error(result_or_callable, message_holder=None, fallback=None):
 
         if isinstance(result, tuple) and len(result) == 2:
             msg, msg_type = result
-            if msg_type == "error":
+            if msg_type == "error" or msg_type == "warning":
                 if message_holder is not None:
                     message_holder["message"] = msg
                     message_holder["message_type"] = msg_type

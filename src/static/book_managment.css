@@ -264,3 +264,9 @@ tr.row {
     border: 1px solid #ef4444;
 }
 
+.flash-message.warning {
+    background-color: #fff3cd;  
+    color: #856404;             
+    border: 1px solid #ffeeba; 
+}
+
