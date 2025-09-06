@@ -96,10 +96,7 @@ def insert_new_ticket_name_to_lookup_table(
                     )
                     track_gms_in_lookup_table(db_path)
             except (OSError, KeyError, TypeError) as e:
-                return (
-                    f"Failed inserting game number {
-                        row['Game No.']}: {
-                        str(e)}",
+                return ( f"Failed inserting game number {row['Game No.']}: {str(e)}",
                     "error",
                 )
 
