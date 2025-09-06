@@ -9,13 +9,14 @@ import sqlite3
 from src.database.setup_database import initialize_database
 from src.decorators import get_db_cursor
 
-# pylint: disable=too-many-positional-arguments
+
 def update_sale_report( # pylint: disable=too-many-arguments
     database_path,
     instant_sold,
     online_sold,
     instant_cashed,
     online_cashed,
+    *, # everything after this must be passed by name
     cash_on_hand,
     report_id,
     date=datetime.datetime.now(

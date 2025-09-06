@@ -7,13 +7,13 @@ from src.utils.config import db_path
 from src.utils.error_hanlder import check_error
 
 # pylint: disable=too-many-arguments
-# pylint: disable=too-many-positional-arguments
 def insert_ticket(
         scan_id,
         book_id,
         ticket_number,
         ticket_name,
         ticket_price,
+        *, # everything after this must be passed by name
         report_id=None):
     """
     Inserts a ticket into the TicketTimeline table.

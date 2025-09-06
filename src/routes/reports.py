@@ -312,7 +312,7 @@ def _handle_sold_book_reactivation(book_info, report_id_int, latest_report_id, c
                     msg_data)
 
         check_error(insert_ticket(scan_id, book_id, close_ticket_num, ticket_name, ticket_price,
-                                  str(rid)), msg_data)
+                                  report_id=str(rid)), msg_data)
 
     activate_book_info = {
         "ActivationID": scan_id,
@@ -344,8 +344,8 @@ def update_sale_reports(report_id):
                     online_sold,
                     instant_cashed,
                     online_cashed,
-                    cash_on_hand,
-                    report_id,
+                    cash_on_hand=cash_on_hand,
+                    report_id=report_id,
                 ),
                 message_holder=msg_data,
             )
