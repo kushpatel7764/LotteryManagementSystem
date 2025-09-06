@@ -2,7 +2,7 @@ beautifulsoup4==4.13.4
 decorator==5.1.1
 dockerflow==2024.4.2
 etelemetry==0.3.1
-eventlet==0.40.1
+eventlet==0.39.1
 Flask==3.1.0
 Flask-SocketIO==5.5.1
 pandas==2.2.3
