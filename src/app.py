@@ -1,11 +1,19 @@
-from flask_socketio import SocketIO
+"""
+Main Flask application entry point.
+
+This module initializes the Flask app, sets up Socket.IO for real-time events,
+and registers all the blueprints for different routes.
+"""
+
 from flask import Flask, request
-from routes.home import home_bp
-from routes.reports import report_bp
-from routes.tickets import tickets_bp
-from routes.books import books_bp
-from routes.settings import settings_bp
-from routes.business_profile import business_profile_bp
+from flask_socketio import SocketIO
+
+from src.routes.books import books_bp
+from src.routes.business_profile import business_profile_bp
+from src.routes.home import home_bp
+from src.routes.reports import report_bp
+from src.routes.settings import settings_bp
+from src.routes.tickets import tickets_bp
 
 app = Flask(__name__)
 socketio = SocketIO(
@@ -23,11 +31,20 @@ app.register_blueprint(business_profile_bp)
 
 @socketio.on("connect")
 def on_connect():
+    """
+    Handles a new client connection to the Socket.IO server.
+    """
     print("Client connected")
 
 
 @app.route("/receive", methods=["POST"])
 def receive():
+    """
+    Receives a barcode via POST request and emits it to connected clients.
+
+    Returns:
+        str: A simple confirmation message.
+    """
     barcode = request.form.get("barcode")
     print(f"Received barcode: {barcode}")
     with app.app_context():

@@ -1,14 +1,49 @@
+"""
+Module for generating invoices.
+
+This module provides functions to create invoices, populate them with client
+and product data, and export them in desired formats (e.g., PDF or Excel).
+"""
+
+from datetime import datetime
+
 from reportlab.lib.pagesizes import LETTER
 from reportlab.pdfgen import canvas
-from datetime import datetime
 
 
 def generate_lottery_invoice_pdf(
     filename, store_info, invoice_log, invoice_number, daily_report
 ):
-    c = canvas.Canvas(filename, pagesize=LETTER)
-    width, height = LETTER
+    """
+    Generate a lottery ticket sale invoice as a PDF.
 
+    Args:
+        filename (str): Output PDF filename.
+        store_info (dict): Store details to include in the header.
+        invoice_log (list[dict]): List of ticket sales records.
+        invoice_number (str): Unique invoice number.
+        daily_report (dict): Daily financial summary including totals.
+
+    Returns:
+        None
+    """
+    c = canvas.Canvas(filename, pagesize=LETTER)
+    _, height = LETTER
+
+    y = _draw_store_info(c, store_info, height)
+
+    _draw_invoice_header(c, invoice_number, height, datetime.now())
+
+    y = _draw_ticket_table(c, y, invoice_log)
+
+    y = _draw_daily_summary(c, y, daily_report)
+
+    y = _draw_footer(c, y)
+
+    c.save()
+
+
+def _draw_store_info(c, store_info, height):
     # Store Info
     c.setFont("Helvetica-Bold", 14)
     c.drawString(50, height - 50, "🎟️ LOTTERY TICKET SALE INVOICE")
@@ -18,13 +53,16 @@ def generate_lottery_invoice_pdf(
     for key, value in store_info.items():
         c.drawString(50, y, f"{key}: {value}")
         y -= 14
+    return y
 
-    # Invoice & Date
-    now = datetime.now()
+
+def _draw_invoice_header(c, invoice_number, height, now):
     c.drawString(400, height - 80, f"Invoice No.: {invoice_number}")
     c.drawString(400, height - 95, f"Date: {now.strftime('%m/%d/%Y')}")
     c.drawString(400, height - 110, f"Time: {now.strftime('%I:%M %p')}")
 
+
+def _draw_ticket_table(c, y, invoice_log):
     # Table Headers
     y -= 30
     c.setFont("Helvetica-Bold", 10)
@@ -54,6 +92,10 @@ def generate_lottery_invoice_pdf(
     else:
         print("Error: Invoice log is None")
 
+    return y
+
+
+def _draw_daily_summary(c, y, daily_report):
     # daily Summary
     y -= 20
     c.setFont("Helvetica-Bold", 10)
@@ -74,7 +116,10 @@ def generate_lottery_invoice_pdf(
     y -= 15
     c.drawString(50, y, "Total Due:")
     c.drawString(140, y, f"${str(daily_report['TotalDue'])}")
+    return y
 
+
+def _draw_footer(c, y):
     # Footer
     y -= 40
     c.setFont("Helvetica-Oblique", 9)
@@ -83,5 +128,4 @@ def generate_lottery_invoice_pdf(
         y,
         "Note: Thank you for your business! Please contact us for any questions or concerns.",
     )
-
-    c.save()
+    return y

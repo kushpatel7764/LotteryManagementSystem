@@ -1,8 +1,23 @@
-from utils.config import load_config
-import game_number_lookup_table
+"""
+Module for managing scanned lottery code information.
+
+This module validates scanned barcodes, extracts relevant lottery ticket details,
+and ensures they conform to expected formats and game rules.
+"""
+from pandas import DataFrame
+from src import game_number_lookup_table
+from src.utils.config import load_config
+
 
 
 class ScannedCodeManagement:
+    """
+    Manages validation and extraction of scanned lottery barcode data.
+
+    Attributes:
+        scanned_code (str): The scanned barcode string.
+        db_path (str): Path to the database.
+    """
     def __init__(self, scanned_code, db_path):
         self.scanned_code = scanned_code
         self.db_path = db_path
@@ -25,8 +40,8 @@ class ScannedCodeManagement:
         )  # Converting to int for easier comparison
         book_amount = self.get_book_amount()
 
-        lottery_lookup_table = game_number_lookup_table.get_lottery_net_lookup_table()
-        distinct_prices = lottery_lookup_table["Price"].unique()
+        lottery_lookup_table: DataFrame = game_number_lookup_table.get_lottery_net_lookup_table()
+        distinct_prices = lottery_lookup_table.get("Price").unique()
         cleaned_prices = [
             int(price.replace("$", "")) for price in distinct_prices
         ]  # because ticket_price is int
@@ -34,9 +49,10 @@ class ScannedCodeManagement:
             # is valid game_number
             if row["Game No."] == game_num:
                 rmv_dollar_sign = row["Price"].replace("$", "")
-                # is valid price for gm
-                # to do this convert two ticket_price and rmv_dollar_sign price from the lottery website to int so easy comparision.
-                # This way we can avoid the string comparison issue of "02" != "2"
+                # IS valid price for gm?
+                # to check this convert both "2"'s from ticket_price and rmv_dollar_sign price
+                # to int so a comparison can occur. This way we can avoid the string comparison
+                # issue of "02" != "2"
                 int_web_price = int(rmv_dollar_sign)
                 if int_web_price == ticket_price:
                     output = True
@@ -51,7 +67,8 @@ class ScannedCodeManagement:
         min_book_amount = book_sizes[ticket_price]
         max_book_amount = 700
 
-        if max_book_amount < int(book_amount) or int(book_amount) < min_book_amount:
+        if max_book_amount < int(book_amount) or int(
+                book_amount) < min_book_amount:
             return False
 
         return output
@@ -82,9 +99,10 @@ class ScannedCodeManagement:
 
         if tick_num == "999":
             config_file = load_config()
-            descending = True if config_file["ticket_order"] == "descending" else False
+            descending = config_file["ticket_order"] == "descending"
 
-            tick_num = str((int(self.get_book_amount()) - 1) if descending else 0)
+            tick_num = str((int(self.get_book_amount()) - 1)
+                           if descending else 0)
 
         return tick_num
 
@@ -105,6 +123,13 @@ class ScannedCodeManagement:
         return book_amount
 
     def extract_all_scanned_code(self):
+        """
+        Extracts all relevant data from the scanned barcode.
+
+        Returns:
+            dict | str: Dictionary of extracted values if valid,
+                        otherwise "INVALID BARCODE".
+        """
         if ScannedCodeManagement.validate_scanned_code(self):
             codes = {
                 "game_number": self.get_game_num(),
@@ -114,5 +139,5 @@ class ScannedCodeManagement:
                 "book_amount": self.get_book_amount(),
             }
             return codes
-        else:
-            return "INVALID BARCODE"
+
+        return "INVALID BARCODE"

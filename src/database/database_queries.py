@@ -1,6 +1,13 @@
+"""
+DatabaseQueries module: Handles interactions with Books, ActivatedBooks, SalesLog, 
+and SaleReport tables. Provides standardized database operations and error handling
+for the lottery system.
+"""
+
 import sqlite3
-from database import Database
-from decorators import get_db_cursor
+
+from src.database import setup_database
+from src.decorators import get_db_cursor
 
 
 def get_books(db):
@@ -16,9 +23,10 @@ def get_books(db):
     """
 
     try:
-        Database.initialize_database(db)
+        setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
-            cursor.execute("SELECT * FROM Books ORDER BY Books.TicketPrice DESC;")
+            cursor.execute(
+                "SELECT * FROM Books ORDER BY Books.TicketPrice DESC;")
             books = cursor.fetchall()
 
             if not books:
@@ -39,10 +47,12 @@ def get_books(db):
                 )
 
             return books_list
-    except sqlite3.Error as e:
-        return f"ERROR FETCHING BOOKS: {e}", "error"
-    except Exception as e:
-        return f"UNEXPECTED ERROR WHILE FETCHING BOOKS: {e}", "error"
+    except sqlite3.OperationalError as e:  # Database is locked, malformed, etc.
+        return f"DATABASE OPERATION ERROR WHILE FETCHING BOOKS: {e}", "error"
+    except sqlite3.DatabaseError as e:  # General DB errors
+        return f"DATABASE ERROR WHILE FETCHING BOOKS: {e}", "error"
+    except (ValueError, TypeError) as e:  # Data processing errors
+        return f"DATA PROCESSING ERROR WHILE FETCHING BOOKS: {e}", "error"
 
 
 def count_activated_books(db):
@@ -54,21 +64,22 @@ def count_activated_books(db):
 
     Returns:
         int: The number of activated books if successful.
-        tuple: ("ERROR FETCHING ACTIVATED BOOK COUNT: <error>", "error") on SQLite or unexpected error.
+        tuple: ("ERROR FETCHING ACTIVATED BOOK COUNT: <error>", "error")
+        on SQLite or unexpected error.
     """
     try:
-        Database.initialize_database(db)
+        setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
             cursor.execute("SELECT COUNT(ActiveBookID)  FROM ActivatedBooks;")
             activated_book_id_count = cursor.fetchone()
 
             if activated_book_id_count:
                 return activated_book_id_count[0]
-            else:
-                return "COULD NOT RETRIEVE ACTIVATED BOOKS COUNT!", "error"
+
+            return "COULD NOT RETRIEVE ACTIVATED BOOKS COUNT!", "error"
     except sqlite3.Error as e:
         return f"ERROR FETCHING ACTIVATED BOOK COUNT: {e}", "error"
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return f"UNEXPECTED ERROR WHILE COUNTING ACTIVATED BOOKS: {e}", "error"
 
 
@@ -84,7 +95,7 @@ def get_activated_books(db):
         tuple: ("ERROR FETCHING ACTIVATED BOOKS: <error>", "error") on SQLite or unexpected error.
     """
     try:
-        Database.initialize_database(db)
+        setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
             cursor.execute("SELECT * FROM ActivatedBooks")
             activated_books = cursor.fetchall()
@@ -103,13 +114,14 @@ def get_activated_books(db):
             return activated_books_list
     except sqlite3.Error as e:
         return f"ERROR FETCHING ACTIVATED BOOKS: {e}", "error"
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return f"UNEXPECTED ERROR WHILE FETCHING ACTIVATED BOOKS: {e}", "error"
 
 
 def is_book(db, book_id):
     """
-    Checks if a book with the given BookID exists in the Books table. If a book exists then all information for that book is returned.
+    Checks if a book with the given BookID exists in the Books table. If a book 
+    exists then all information for that book is returned.
 
     Parameters:
         db (str): Path to the SQLite database.
@@ -120,16 +132,16 @@ def is_book(db, book_id):
         tuple: ("ERROR CHECKING BOOK EXISTENCE: <error>", "error") on failure.
     """
     try:
-        Database.initialize_database(db)
+        setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
-            cursor.execute("SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
+            cursor.execute(
+                "SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
             book = cursor.fetchone() is not None
 
             if book:
                 return book
-            else:
-                return False
-    except Exception as e:
+            return False
+    except (ValueError, TypeError) as e:
         return f"ERROR CHECKING BOOK EXISTENCE: {e}", "error"
 
 
@@ -146,7 +158,7 @@ def is_activated_book(db, activated_book_id):
         tuple: ("ERROR CHECKING ACTIVATED BOOK EXISTENCE: <error>", "error") on failure.
     """
     try:
-        Database.initialize_database(db)
+        setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
             cursor.execute(
                 "SELECT * FROM ActivatedBooks WHERE ActiveBookID = ? LIMIT 1;",
@@ -156,13 +168,12 @@ def is_activated_book(db, activated_book_id):
 
             if activated_book_id_exist:
                 return activated_book_id_exist
-            else:
-                return False
-    except Exception as e:
+            return False
+    except (ValueError, TypeError) as e:
         return f"ERROR CHECKING ACTIVATED BOOK EXISTENCE: {e}", "error"
 
 
-def get_activated_book_isAtTicketNumber(db, activated_book_id):
+def get_activated_book_is_at_ticketnumber(db, activated_book_id):
     """
     Retrieves the isAtTicketNumber(OPEN) value for a given activated book.
 
@@ -175,20 +186,20 @@ def get_activated_book_isAtTicketNumber(db, activated_book_id):
         tuple: ("ERROR FETCHING isAtTicketNumber: <error>", "error") on failure.
     """
     try:
-        Database.initialize_database(db)
+        setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
             cursor.execute(
                 "SELECT isAtTicketNumber FROM ActivatedBooks WHERE ActiveBookID = ? LIMIT 1;",
                 (activated_book_id,),
             )
-            activated_book_isAtTicketNumber = cursor.fetchone()
+            activated_book_is_at_ticketnumber = cursor.fetchone()
 
             return (
-                activated_book_isAtTicketNumber[0]
-                if activated_book_isAtTicketNumber
+                activated_book_is_at_ticketnumber[0]
+                if activated_book_is_at_ticketnumber
                 else None
             )
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return f"ERROR FETCHING isAtTicketNumber: {e}", "error"
 
 
@@ -205,7 +216,7 @@ def get_activated_book(db, activated_book_id):
         tuple: ("ERROR FETCHING ACTIVATED BOOK: <error>", "error") on failure.
     """
     try:
-        Database.initialize_database(db)
+        setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
             cursor.execute(
                 "SELECT * FROM ActivatedBooks WHERE ActiveBookID = ? LIMIT 1;",
@@ -214,7 +225,7 @@ def get_activated_book(db, activated_book_id):
             activated_book = cursor.fetchone()
 
             return activated_book
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return f"ERROR FETCHING ACTIVATED BOOK: {e}", "error"
 
 
@@ -231,13 +242,14 @@ def get_book(db, book_id):
         tuple: ("ERROR FETCHING BOOK: <error>", "error") on failure.
     """
     try:
-        Database.initialize_database(db)
+        setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
-            cursor.execute("SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
+            cursor.execute(
+                "SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
             book = cursor.fetchone()
 
             return book
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return f"ERROR FETCHING BOOK: {e}", "error"
 
 
@@ -254,15 +266,14 @@ def get_ticket_with_bookid(db, book_id):
         tuple: ("ERROR FETCHING TICKET TIMELINE: <error>", "error") on failure.
     """
     try:
-        Database.initialize_database(db)
+        setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
             cursor.execute(
-                "SELECT * FROM TicketTimeLine WHERE BookID = ? LIMIT 1;", (book_id,)
-            )
+                "SELECT * FROM TicketTimeLine WHERE BookID = ? LIMIT 1;", (book_id,))
             ticket = cursor.fetchone()
 
             return ticket
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return f"ERROR FETCHING TICKET TIMELINE: {e}", "error"
 
 
@@ -278,7 +289,7 @@ def get_all_active_book_ids(db):
         tuple: ("ERROR FETCHING ACTIVE BOOK IDS: <error>", "error") if a database error occurs.
     """
     try:
-        Database.initialize_database(db)
+        setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
             cursor.execute("SELECT ActiveBookID FROM ActivatedBooks")
             # Fetch all results
@@ -289,7 +300,7 @@ def get_all_active_book_ids(db):
             return active_book_ids
     except sqlite3.Error as e:
         return f"ERROR FETCHING ACTIVE BOOK IDS: {e}", "error"
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return f"UNEXPECTED ERROR WHILE FETCHING ACTIVE BOOK IDS: {e}", "error"
 
 
@@ -297,12 +308,14 @@ def get_scan_ticket_page_table(db):
     """
     Returns a list of active books along with their ticket info, sorted by ticket price (desc).
     """
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             cursor.execute(
                 """
-                SELECT TicketNameLookup.TicketName, ActivatedBooks.ActiveBookID, Books.TicketPrice, Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber, ActivatedBooks.countingTicketNumber
+                SELECT TicketNameLookup.TicketName, ActivatedBooks.ActiveBookID, Books.TicketPrice,
+                Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber, 
+                ActivatedBooks.countingTicketNumber
                 FROM ActivatedBooks
                 Join Books ON ActiveBookID = BookID
                 Left Join TicketNameLookup ON Books.GameNumber = TicketNameLookup.GameNumber
@@ -339,7 +352,7 @@ def is_counting_ticket_number_set(db, activated_book_id):
         tuple: ("ERROR CHECKING countingTicketNumber: <error>", "error") on failure.
     """
     try:
-        Database.initialize_database(db)
+        setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
             cursor.execute(
                 "SELECT countingTicketNumber FROM ActivatedBooks WHERE ActiveBookID = ? LIMIT 1;",
@@ -349,18 +362,17 @@ def is_counting_ticket_number_set(db, activated_book_id):
 
             if result and result[0] is not None:
                 return True
-            else:
-                return False
-    except Exception as e:
+            return False
+    except (ValueError, TypeError) as e:
         return f"ERROR CHECKING countingTicketNumber: {e}", "error"
 
 
-def get_all_instant_tickets_sold_quantity(db, ReportID):
+def get_all_instant_tickets_sold_quantity(db, report_id):
     """
     Returns all ticket sales for a specific report.
     """
 
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             query = """
@@ -369,7 +381,7 @@ def get_all_instant_tickets_sold_quantity(db, ReportID):
                 JOIN Books ON ActiveBookID = BookID
                 WHERE SalesLog.ReportID = ?;
             """
-            cursor.execute(query, (ReportID,))
+            cursor.execute(query, (report_id,))
             rows = cursor.fetchall()
             return [
                 {
@@ -383,12 +395,12 @@ def get_all_instant_tickets_sold_quantity(db, ReportID):
         return f"DATABASE ERROR IN get_all_instant_tickets_sold_quantity: {e}", "error"
 
 
-def get_all_sold_books(db, ReportID):
+def get_all_sold_books(db, report_id):
     """
     Returns only books marked as sold for a specific report.
     """
 
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             query = """
@@ -397,7 +409,7 @@ def get_all_sold_books(db, ReportID):
                 JOIN Books ON ActiveBookID = BookID
                 WHERE ReportID = ? and Is_Sold = True;
             """
-            cursor.execute(query, (ReportID,))
+            cursor.execute(query, (report_id,))
             rows = cursor.fetchall()
             return [{"BookID": row[0]} for row in rows]
     except sqlite3.Error as e:
@@ -408,7 +420,7 @@ def is_sold(db, book_id):
     """
     Returns True or False if the book is sold. Returns error on failure.
     """
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             query = """
@@ -423,22 +435,24 @@ def is_sold(db, book_id):
         return f"DATABASE ERROR IN FETCHING is_sold: {e}", "error"
 
 
-def get_table_for_invoice(db, ReportID):
+def get_table_for_invoice(db, report_id):
     """
     Returns ticket details needed for invoice generation for a report.
     """
 
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             query = """
-                SELECT SalesLog.Ticket_Name, SalesLog.Ticket_GameNumber, SalesLog.ActiveBookID, Books.TicketPrice, SalesLog.prev_TicketNum, SalesLog.current_TicketNum, SalesLog.Ticket_Sold_Quantity
+                SELECT SalesLog.Ticket_Name, SalesLog.Ticket_GameNumber, SalesLog.ActiveBookID,
+                Books.TicketPrice, SalesLog.prev_TicketNum, SalesLog.current_TicketNum,
+                SalesLog.Ticket_Sold_Quantity
                 FROM SalesLog
                 Join Books ON ActiveBookID = BookID
                 Where ReportID = ?
                 ORDER BY Books.TicketPrice DESC;
             """
-            cursor.execute(query, (ReportID,))
+            cursor.execute(query, (report_id,))
             rows = cursor.fetchall()
             return [
                 {
@@ -456,12 +470,12 @@ def get_table_for_invoice(db, ReportID):
         return f"DATABASE ERROR IN get_table_for_invoice: {e}", "error"
 
 
-def get_daily_report(db, ReportID):
+def get_daily_report(db, report_id):
     """
     Returns the full sale report (aka session report) by ReportID.
     """
 
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             query = """
@@ -469,7 +483,7 @@ def get_daily_report(db, ReportID):
                 FROM SaleReport
                 Where ReportID = ?;
             """
-            cursor.execute(query, (ReportID,))
+            cursor.execute(query, (report_id,))
             row = cursor.fetchone()
             if row:
                 return {
@@ -483,7 +497,7 @@ def get_daily_report(db, ReportID):
                     "CashOnHand": row[7],
                     "TotalDue": row[8],
                 }
-            return f"NO DAILY REPORT FOUND FOR ReportID({ReportID})", "error"
+            return f"NO DAILY REPORT FOUND FOR ReportID({report_id})", "error"
     except sqlite3.Error as e:
         return f"DATABASE ERROR IN get_daily_report: {e}", "error"
 
@@ -492,7 +506,7 @@ def get_all_sales_reports(db):
     """
     Returns all sale reports sorted by ReportID descending.
     """
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     # Not really daily report but a session report
     try:
         with get_db_cursor(db) as cursor:
@@ -518,14 +532,14 @@ def get_all_sales_reports(db):
                 for row in rows
             ]
     except sqlite3.Error as e:
-        return f"DATABASE ERROR IN get_all_sales_reports: {e}", "error"
+        raise RuntimeError(f"DATABASE ERROR IN get_all_sales_reports: {e}") from e
 
 
-def get_sales_log(db, ReportID):
+def get_sales_log(db, report_id):
     """
     Returns a list of all ticket sales for the given ReportID.
     """
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             query = """
@@ -533,7 +547,7 @@ def get_sales_log(db, ReportID):
                 FROM SalesLog
                 Where ReportID = ?;
             """
-            cursor.execute(query, (ReportID,))
+            cursor.execute(query, (report_id,))
             rows = cursor.fetchall()
             return [
                 {
@@ -550,12 +564,12 @@ def get_sales_log(db, ReportID):
         return f"Database ERROR IN get_sales_log: {e}", "error"
 
 
-def get_sales_log_with_bookid(db, ReportID, book_id):
+def get_sales_log_with_bookid(db, report_id, book_id):
     """
     Returns the sales log entry for a given ReportID and book_id.
     """
 
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             query = """
@@ -563,7 +577,7 @@ def get_sales_log_with_bookid(db, ReportID, book_id):
                 FROM SalesLog
                 Where ReportID = ? and ActiveBookID = ?;
             """
-            cursor.execute(query, (ReportID, book_id))
+            cursor.execute(query, (report_id, book_id))
             row = cursor.fetchone()
             if row:
                 return {
@@ -574,11 +588,10 @@ def get_sales_log_with_bookid(db, ReportID, book_id):
                     "Game Name": row[7],
                     "Game #": row[8],
                 }
-            else:
-                return (
-                    f"No entry found for ReportID {ReportID} and BookID {book_id}".upper(),
-                    "error",
-                )
+            return (
+                f"No entry found for ReportID {report_id} and BookID {book_id}".upper(),
+                "error",
+            )
     except sqlite3.Error as e:
         return f"DATABASE ERROR IN get_sales_log_with_bookid: {e}", "error"
 
@@ -587,7 +600,7 @@ def get_gm_from_lookup(db):
     """
     Returns a set of all game numbers in the TicketNameLookup table.
     """
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             query = """
@@ -605,7 +618,7 @@ def get_ticket_name(db, game_number):
     Returns the ticket name for the given game number.
     Returns 'N/A' if not found.
     """
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             query = """
@@ -620,11 +633,11 @@ def get_ticket_name(db, game_number):
         return f"DATABASE ERROR IN get_ticket_name: {e}", "error"
 
 
-def next_report_ID(db):
+def next_report_id(db):
     """
     Returns the next ReportID (as a string). Starts from '1' if no reports exist.
     """
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             cursor.execute(
@@ -641,24 +654,23 @@ def get_game_num_of(db, book_id):
     """
     Returns the GameNumber for a given BookID.
     """
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             cursor.execute(
-                "SELECT GameNumber FROM Books Where BookID = ? LIMIT 1", (book_id,)
-            )
+                "SELECT GameNumber FROM Books Where BookID = ? LIMIT 1", (book_id,))
             row = cursor.fetchone()
             return row[0] if row else None
     except sqlite3.Error as e:
         return f"DATABASE ERROR IN get_game_num_of: {e}", "error"
 
 
-def can_Submit(db):
+def can_submit(db):
     """
     Returns True if all activated books have a countingTicketNumber set.
     Returns False if any are missing.
     """
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             cursor.execute("SELECT countingTicketNumber FROM ActivatedBooks")
@@ -673,22 +685,22 @@ def can_Submit(db):
         return f"DATABASE ERROR IN can_Submit: {e}", "error"
 
 
-def was_activated(db, BookID):
+def was_activated(db, book_id):
     """
     Returns the latest TicketNumber from the TicketTimeline table for a given BookID.
     """
-    Database.initialize_database(db)
+    setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
             cursor.execute(
-                "SELECT TicketNumber FROM TicketTimeLine where BookID = ? ORDER BY CAST(ReportID AS INTEGER) DESC",
-                (BookID,),
+                """SELECT TicketNumber FROM TicketTimeLine where BookID = ? 
+                ORDER BY CAST(ReportID AS INTEGER) DESC""",
+                (book_id,),
             )
             rows = cursor.fetchall()
 
             if rows:
                 return rows[0][0]
-            else:
-                return None
+            return None
     except sqlite3.Error as e:
         return f"DATABASE ERROR IN was_activated: {e}", "error"

@@ -1,19 +1,35 @@
-from flask import Blueprint, request, render_template
-from utils.config import load_config, update_business_info
+"""
+Business Profile Route
+
+This module provides the Flask route and helper functions for managing
+the business profile information (name, address, phone, email).
+"""
+
+
 import re
+
+from flask import Blueprint, render_template, request
+
+from src.utils.config import load_config, update_business_info
 
 business_profile_bp = Blueprint("business_profile", __name__)
 
 
 @business_profile_bp.route("/business_profile", methods=["GET", "POST"])
 def business_profile():
+    """
+    Handle the business profile page.
+
+    - On GET: Renders the business profile with current configuration values.
+    - On POST: Processes submitted form data, validates it, and updates the configuration.
+    """
     message = None
     message_type = "error"
     if request.method == "POST":
         config = load_config()
 
         # Process form input with fallback to config
-        form_data = extract_businessProfileForm_data(config)
+        form_data = extract_business_profile_form_data(config)
 
         # Validate and update business info fields
         errors = validate_and_update_business_info(form_data)
@@ -38,7 +54,16 @@ def business_profile():
     )
 
 
-def extract_businessProfileForm_data(config):
+def extract_business_profile_form_data(config):
+    """
+    Extracts business profile form data, falling back to existing config values.
+
+    Args:
+        config (dict): The current business configuration.
+
+    Returns:
+        dict: A dictionary containing the form data for name, address, phone, and email.
+    """
     return {
         "business_name": request.form.get("BusinessName") or config["business_name"],
         "business_address": request.form.get("BusinessAddress")
@@ -49,6 +74,15 @@ def extract_businessProfileForm_data(config):
 
 
 def validate_and_update_business_info(data):
+    """
+    Validates and updates business profile information.
+
+    Args:
+        data (dict): The business profile fields to validate.
+
+    Returns:
+        list: A list of error messages, empty if all fields are valid.
+    """
     errors = []
 
     # Business Name (always updated without validation)
@@ -57,8 +91,8 @@ def validate_and_update_business_info(data):
     # Address validation
     address = data["business_address"]
     if address == "" or re.match(
-        "^(\\d{1,}) [a-zA-Z0-9\\s]+(\\,)? [a-zA-Z]+(\\,)? [A-Z]{2} [0-9]{5,6}$", address
-    ):
+        "^(\\d{1,}) [a-zA-Z0-9\\s]+(\\,)? [a-zA-Z]+(\\,)? [A-Z]{2} [0-9]{5,6}$",
+            address):
         update_business_info(name="business_address", value=address)
     else:
         update_business_info(name="business_address", value="")

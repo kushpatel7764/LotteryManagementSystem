@@ -1,45 +1,79 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from database import Database, DatabaseQueries
-from utils.config import db_path
-from utils.error_hanlder import check_error
-from utils.books import activate_book_procedure, add_book_procedure
+"""
+Books management routes.
+
+This module provides routes for managing books, including listing,
+adding, activating, deactivating, and deleting books in the system.
+"""
+
+
+import sqlite3
+from flask import (Blueprint, jsonify, redirect, render_template, request,
+                   url_for)
+
+from src.database import database_queries
+from src.database import update_books, update_activated_books
+from src.utils.books import activate_book_procedure, add_book_procedure
+from src.utils.config import db_path
+from src.utils.error_hanlder import check_error
+
 
 books_bp = Blueprint("books", __name__)
 
 
 @books_bp.route("/books_managment", methods=["GET", "POST"])
 def books_managment():
+    """
+    Display and manage books.
+
+    Handles both GET and POST:
+    - GET: Renders the book management page.
+    - POST: Adds a new book using the scanned code.
+    """
     msg_data = {
         "message": request.args.get("message", ""),
         "message_type": request.args.get("message_type", ""),
     }
     # The redirect from /activate will generate a URL like:
     # /books_managment?activate_book_message=SomeMessage&activate_book_message_type=success
-    # request.args.get('activate_book_message', '') will then get these arguments
+    # request.args.get('activate_book_message', '') will then get these
+    # arguments
 
     if request.method == "POST":
         scanned_code = request.form["add_book_code"]
-        add_result = check_error(lambda: add_book_procedure(scanned_code), msg_data)
+        add_result = check_error(
+            lambda: add_book_procedure(scanned_code), msg_data)
         if isinstance(add_result, tuple) and add_result[1] == "error":
             msg_data["message"], msg_data["message_type"] = add_result
 
     # Books info for the books table to display on screen
-    books = check_error(DatabaseQueries.get_books(db=db_path), msg_data, fallback=[])
+    books_result = check_error(
+        database_queries.get_books(
+            db=db_path),
+        msg_data,
+        fallback=[])
+
+    books = books_result if isinstance(books_result, list) else []
+
     # Setting TicketNames
     if books:
         for book in books:
-            game_number = book["GameNumber"]
-            book["TicketName"] = check_error(
-                DatabaseQueries.get_ticket_name(db_path, game_number), fallback="N/A"
-            )
+            if isinstance(book, dict):
+                # Convert to dict from sqlite3.Row in case needed
+                book = dict(book)
+                game_number = book.get("GameNumber")
+                ticket_name = check_error(
+                    database_queries.get_ticket_name(
+                        db_path, game_number), fallback="N/A")
+                book["TicketName"] = ticket_name
 
     # Get activated books (just the BookIDs)
     activated_books = check_error(
-        DatabaseQueries.get_activated_books(db_path), msg_data, fallback=[]
+        database_queries.get_activated_books(db_path), msg_data, fallback=[]
     )  # should return a list of dicts or a list of IDs
-    activated_ids = {
-        book["ActiveBookID"] for book in activated_books
-    }  # Use set for faster lookup
+    activated_ids = set()
+    for book in activated_books:
+        if isinstance(book, dict):
+            activated_ids.add(book.get("ActiveBookID"))
 
     return render_template(
         "books_managment.html",
@@ -52,6 +86,12 @@ def books_managment():
 
 @books_bp.route("/delete_book", methods=["POST", "GET"])
 def delete_book():
+    """
+    Deletes a book after deactivating it.
+
+    Expects JSON data with a 'bookID' field.
+    Returns a JSON response with redirect URL, message, and status.
+    """
     msg_data = {"message": "", "message_type": ""}
     try:
         data = request.get_json()
@@ -61,8 +101,10 @@ def delete_book():
         print(f"Deleting: {book_id}")
         # Deactivate first, then delete
         # Safely run deactivation and deletion with error checking
-        check_error(lambda: Database.deactivate_book(db_path, book_id), msg_data)
-        check_error(lambda: Database.delete_Book(db_path, book_id), msg_data)
+        check_error(
+            lambda: update_activated_books.deactivate_book(
+                db_path, book_id), msg_data)
+        check_error(lambda: update_books.delete_book(db_path, book_id), msg_data)
 
         if msg_data["message_type"] == "error":
             return jsonify(
@@ -80,26 +122,46 @@ def delete_book():
                 "message_type": "success",
             }
         )
-    except Exception as e:
-        print(f"Error deleting book {book_id}: {e}")
-        return jsonify(
-            {
-                "redirect_url": url_for("books.books_managment"),
-                "message": f"Error deleting book: {str(e)}",
-                "message_type": "error",
-            }
-        ), 500
+    except (ValueError, KeyError, TypeError) as e:
+        # Handle invalid request or missing keys
+        return (
+            jsonify(
+                {
+                    "redirect_url": url_for("books.books_managment"),
+                    "message": f"Invalid request: {str(e)}",
+                    "message_type": "error",
+                }
+            ),
+            400,
+        )
+    except (RuntimeError, sqlite3.Error) as e:
+        # Handle database or runtime errors
+        return (
+            jsonify(
+                {
+                    "redirect_url": url_for("books.books_managment"),
+                    "message": f"Database or runtime error: {str(e)}",
+                    "message_type": "error",
+                }
+            ),
+            500,
+        )
 
 
 @books_bp.route("/deactivate_book", methods=["POST", "GET"])
 def deactivate_book():
+    """
+    Deactivate a book by its ID.
+
+    Expects JSON data with a 'bookID' field.
+    Returns a JSON response with redirect URL and status message.
+    """
     msg_data = {"message": "", "message_type": ""}
     try:
         data = request.get_json()
         book_id = data.get("bookID")
-        print(f"Deactivating: {book_id}")
 
-        check_error(Database.deactivate_book(db_path, book_id), msg_data)
+        check_error(update_activated_books.deactivate_book(db_path, book_id), msg_data)
         if msg_data["message_type"] == "error":
             return jsonify(
                 {
@@ -109,19 +171,48 @@ def deactivate_book():
                 }
             ), 500
         return jsonify({"redirect_url": url_for("books.books_managment")})
-    except Exception as e:
-        print(f"Unexpected error while deactivating book: {e}")
-        return jsonify(
-            {
-                "redirect_url": url_for("books.books_managment"),
-                "message": f"Unexpected error deactivating book: {e}",
-                "message_type": "error",
-            }
-        ), 500
+    except (ValueError, KeyError, TypeError) as e:
+        return (
+            jsonify(
+                {
+                    "redirect_url": url_for("books.books_managment"),
+                    "message": f"Invalid request: {e}",
+                    "message_type": "error",
+                }
+            ),
+            400,
+        )
+    except sqlite3.Error as e:
+        return (
+            jsonify(
+                {
+                    "redirect_url": url_for("books.books_managment"),
+                    "message": f"Database error: {e}",
+                    "message_type": "error",
+                }
+            ),
+            500,
+        )
+    except RuntimeError as e:
+        return (
+            jsonify(
+                {
+                    "redirect_url": url_for("books.books_managment"),
+                    "message": f"Runtime error: {e}",
+                    "message_type": "error",
+                }
+            ),
+            500,
+        )
 
 
 @books_bp.route("/activate_book", methods=["GET", "POST"])
 def activate_book():
+    """
+    Activate a book by its scanned code.
+
+    Expects a form with 'activate_book_code'.
+    """
     message = ""
     message_type = ""
 
@@ -130,5 +221,7 @@ def activate_book():
         message, message_type = activate_book_procedure(scanned_code)
 
     return redirect(
-        url_for("books.books_managment", message=message, message_type=message_type)
-    )
+        url_for(
+            "books.books_managment",
+            message=message,
+            message_type=message_type))

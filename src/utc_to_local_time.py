@@ -1,4 +1,8 @@
-from datetime import datetime, date, time, timezone
+"""
+Utility module for converting UTC timestamps to local time.
+"""
+
+from datetime import date, datetime, time, timezone
 from zoneinfo import ZoneInfo
 
 
@@ -21,15 +25,14 @@ def convert_utc_to_local(utc_input, local_timezone_str="America/New_York"):
             utc_input = utc_input.replace(tzinfo=timezone.utc)
         return utc_input.astimezone(local_tz)
 
-    elif isinstance(utc_input, date):
+    if isinstance(utc_input, date):
         utc_dt = datetime.combine(utc_input, time.min, tzinfo=timezone.utc)
         return utc_dt.astimezone(local_tz)
 
-    elif isinstance(utc_input, time):
+    if isinstance(utc_input, time):
         # Combine with today's date to convert time properly
         today_utc = datetime.now(timezone.utc).date()
         utc_dt = datetime.combine(today_utc, utc_input, tzinfo=timezone.utc)
         return utc_dt.astimezone(local_tz).time()
 
-    else:
-        raise ValueError("Input must be a datetime, date, or time object.")
+    raise ValueError("Input must be a datetime, date, or time object.")
