@@ -58,13 +58,11 @@ def books_managment():
     if books:
         for book in books:
             if isinstance(book, dict):
-                # Convert to dict from sqlite3.Row in case needed
-                book = dict(book)
+                # pylint: disable=unsupported-assignment-operation
                 game_number = book.get("GameNumber")
-                ticket_name = check_error(
+                book["TicketName"] = check_error(
                     database_queries.get_ticket_name(
                         db_path, game_number), fallback="N/A")
-                book["TicketName"] = ticket_name
 
     # Get activated books (just the BookIDs)
     activated_books = check_error(
