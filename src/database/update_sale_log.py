@@ -143,7 +143,7 @@ def delete_sales_log_by_book_id(database_path, book_id):
     except sqlite3.Error as e:
         return f"ERROR DELETING LOGGED SALE DATA FOR BOOKID({book_id}): {e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED SALES LOG TABLE", "success"
 
 
 def update_pending_sales_log_report_id(database_path, report_id):
@@ -178,7 +178,7 @@ def update_pending_sales_log_report_id(database_path, report_id):
     except sqlite3.Error as e:
         return f"ERROR SETTING REPORTID FOR PENDING SALE LOG: {e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED SALES LOG TABLE", "success"
 
 
 def update_sales_log_prev_ticketnum(
@@ -240,7 +240,7 @@ def update_sales_log_prev_ticketnum(
     except sqlite3.Error as e:
         return f"ERROR UPDATING OPEN VALUE FOR LOGGED SALES: {e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED SALES LOG TABLE", "success"
 
 
 def update_sales_log_current_ticketnum(
@@ -304,4 +304,4 @@ def update_sales_log_current_ticketnum(
     except sqlite3.Error as e:
         return f"ERROR UPDATING OPEN VALUE FOR LOGGED SALES: {e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED SALES LOG TABLE", "success"

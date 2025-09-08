@@ -22,6 +22,7 @@ def add_book(cursor, book_info):
             - isAtTicketNumber
             - TicketPrice
     """
+    breakpoint()
     cursor.execute(
         """
         INSERT INTO Books (BookID, GameNumber, Is_Sold, BookAmount, TicketPrice)
@@ -62,7 +63,7 @@ def insert_book_info_to_books_table(database_path, book_info):
             return "BOOK IS ALREADY IN THE DATABASE", "error"
         return f"BOOK INSERTION ERROR: {e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED BOOKS TABLE", "success"
 
 
 def book_is_sold(
@@ -123,7 +124,7 @@ def update_is_sold_for_book(database_path, is_sold, book_id):
     except sqlite3.Error as e:
         return f"ERROR UPDATING SOLD VALUE TO {is_sold}: {e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED BOOKS TABLE", "success"
 
 
 def delete_book(database_path, book_id):
@@ -156,4 +157,4 @@ def delete_book(database_path, book_id):
         return f"Book deletion error for bookID({book_id}): ".upper(
         ) + f"{e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED BOOKS TABLE", "success"

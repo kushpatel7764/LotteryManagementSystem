@@ -68,7 +68,7 @@ def update_sale_report( # pylint: disable=too-many-arguments
     except sqlite3.Error as e:
         return f"ERROR UPDATING SALE REPORT for REPORTID({report_id}): {e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED SALE REPORT TABLE", "success"
 
 
 def add_daily_totals(cursor, daily_totals):  # add_Sale_Report
@@ -126,7 +126,7 @@ def insert_daily_totals(database_path, daily_totals):
         return (
             f"ERROR ADDING A SALE REPORT FOR REPORTID({daily_totals['ReportID']}): {e}", "error", )
 
-    return None
+    return "SUCCESSFULLY UPDATED SALE REPORT TABLE", "success"
 
 
 def update_sale_report_instant_sold(database_path, instant_sold, report_id):
@@ -167,4 +167,4 @@ def update_sale_report_instant_sold(database_path, instant_sold, report_id):
             "error",
         )
 
-    return None
+    return "SUCCESSFULLY UPDATED SALE REPORT TABLE", "success"

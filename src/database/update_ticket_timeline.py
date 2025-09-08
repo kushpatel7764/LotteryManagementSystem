@@ -126,7 +126,7 @@ def delete_ticket_timeline_by_book_id(database_path, book_id):
     except sqlite3.Error as e:
         return f"ERROR DELETING TICKETTIMELINE BOOKID({book_id}): {e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED TICKET TIMELINE TABLE", "success"
 
 
 def update_pending_ticket_timeline_report_id(database_path, report_id):
@@ -167,7 +167,7 @@ def update_pending_ticket_timeline_report_id(database_path, report_id):
             "error",
         )
 
-    return None
+    return "SUCCESSFULLY UPDATED TICKET TIMELINE TABLE", "success"
 
 
 def update_ticket_timeline_ticketnumber(
@@ -209,4 +209,4 @@ def update_ticket_timeline_ticketnumber(
             "error",
         )
 
-    return None
+    return "SUCCESSFULLY UPDATED TICKET TIMELINE TABLE", "success"

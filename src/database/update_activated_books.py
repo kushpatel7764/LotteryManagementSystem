@@ -60,7 +60,7 @@ def insert_book_to_activated_book_table(database_path, active_book_info):
     except sqlite3.Error as e:
         return f"ERROR ACTIVATING BOOK: {e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED ACTIVATED BOOK TABLE", "success"
 
 
 def update_counting_ticket_number_for_book_id_query(
@@ -116,7 +116,7 @@ def update_counting_ticket_number(database_path, book_id, new_ticket_number):
     except sqlite3.Error as e:
         return f"ERROR UPDATING CLOSE VALUE: {e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED ACTIVATED BOOK TABLE", "success"
 
 
 def deactivate_book(database_path, book_id):
@@ -145,7 +145,7 @@ def deactivate_book(database_path, book_id):
     except sqlite3.Error as e:
         return "Error deactivating book: ".upper() + f"{e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED ACTIVATED BOOK TABLE", "success"
 
 
 def update_is_at_ticketnumbers(database_path):
@@ -178,7 +178,7 @@ def update_is_at_ticketnumbers(database_path):
             "error",
         )
 
-    return None
+    return "SUCCESSFULLY UPDATED ACTIVATED BOOK TABLE", "success"
 
 
 def update_is_at_ticketnumber_val(database_path, book_id, new_val):
@@ -216,7 +216,7 @@ def update_is_at_ticketnumber_val(database_path, book_id, new_val):
             "error",
         )
 
-    return None
+    return "SUCCESSFULLY UPDATED ACTIVATED BOOK TABLE", "success"
 
 
 def clear_counting_ticket_numbers(database_path):
@@ -248,7 +248,7 @@ def clear_counting_ticket_numbers(database_path):
             "error",
         )
 
-    return None
+    return "SUCCESSFULLY UPDATED ACTIVATED BOOK TABLE", "success"
 
 
 def clear_counting_ticket_number(database_path, book_id):
@@ -281,4 +281,4 @@ def clear_counting_ticket_number(database_path, book_id):
             "error",
         )
 
-    return None
+    return "SUCCESSFULLY UPDATED ACTIVATED BOOK TABLE", "success"

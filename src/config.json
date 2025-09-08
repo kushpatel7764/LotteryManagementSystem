@@ -1,5 +1,5 @@
 {
-    "ticket_order": "descending",
+    "ticket_order": "ascending",
     "invoice_output_path": "/Users/kushpatel/Downloads",
     "business_name": "Scuttlebutts Liquor",
     "business_address": "2 Ryle st, Fairhaven, MA 02719",

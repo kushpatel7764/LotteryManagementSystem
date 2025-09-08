@@ -41,7 +41,7 @@ def books_managment():
     if request.method == "POST":
         scanned_code = request.form["add_book_code"]
         add_result = check_error(
-            lambda: add_book_procedure(scanned_code), msg_data)
+            add_book_procedure(scanned_code), msg_data)
         if isinstance(add_result, tuple) and add_result[1] == "error":
             msg_data["message"], msg_data["message_type"] = add_result
 

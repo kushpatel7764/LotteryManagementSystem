@@ -39,4 +39,4 @@ def insert_ticket_name(database_path, ticket_name, ticket_gamenumber):
     except sqlite3.Error as e:
         return "Ticket Name insertion error: ".upper() + f"{e}", "error"
 
-    return None
+    return "SUCCESSFULLY UPDATED TICKET NAME TABLE", "success"
