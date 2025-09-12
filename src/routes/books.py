@@ -5,7 +5,6 @@ This module provides routes for managing books, including listing,
 adding, activating, deactivating, and deleting books in the system.
 """
 
-
 import sqlite3
 from flask import (Blueprint, jsonify, redirect, render_template, request,
                    url_for)
@@ -40,9 +39,10 @@ def books_managment():
 
     if request.method == "POST":
         scanned_code = request.form["add_book_code"]
+
         add_result = check_error(
             add_book_procedure(scanned_code), msg_data)
-        if isinstance(add_result, tuple) and add_result[1] == "error":
+        if isinstance(add_result, tuple):
             msg_data["message"], msg_data["message_type"] = add_result
 
     # Books info for the books table to display on screen

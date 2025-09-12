@@ -20,7 +20,7 @@ from src.utils.tickets import insert_ticket
 
 report_bp = Blueprint("reports", __name__)
 
-
+# pylint: disable=too-many-locals
 @report_bp.route("/edit_reports", methods=["GET", "POST"])
 def edit_reports():
     """
@@ -165,7 +165,7 @@ def update_sales_log():
         next_report_id = report_id_int + 1
         latest_report_id = _get_latest_report_id(msg_data)
         game_number, book, _ = _get_book_metadata(book_id, msg_data)
-        book_info = { # book[4] is ticket price, book[3] is book amount
+        book_info = { # book[4] is ticket price, book[3] is book amount and is type int
             "book_id": book_id,
             "game_number": game_number,
             "ticket_price": book[4],
@@ -175,11 +175,27 @@ def update_sales_log():
             database_queries.is_sold(
                 db_path, book_id), msg_data)
 
+        # Make the open_ticket and close_ticket values that are being set,
+        # are not greater than or equal to book amount.
+        if int(open_ticket) >= book[3] or int(close_ticket) >= book[3]:
+            return jsonify(
+            {
+                "redirect_url": url_for(
+                    "reports.edit_single_report",
+                    report_id=report_id,
+                    message="Ticket number cannot exceed or equal book amount.",
+                    message_type="error"
+                )
+            }
+        )
+
         # Main update for current report
         _update_current_report(report_id, book_id, open_ticket, close_ticket, msg_data)
 
-        # Book is sold and user now closes it (removing sold status)
-        if is_book_sold and close_ticket != "-1":
+        # Book is sold and closing value is not the sold out value than
+        # the book can be reactivated (removing sold status)
+        sold_out_val = "-1" if load_config()["ticket_order"] == "descending" else str(book[3])
+        if is_book_sold and close_ticket != sold_out_val:
             _handle_sold_book_reactivation(book_info, report_id_int, latest_report_id, close_ticket,
                                            msg_data)
 
@@ -227,7 +243,7 @@ def update_sales_log():
 
 
 def _update_current_report(report_id, book_id, open_ticket, close_ticket, msg_data):
-    """Helper function that applies updates to the current report sales log."""
+    """Helper function that applies updates to the given report id sales log."""
     check_error(update_sale_log.update_sales_log_prev_ticketnum(
         db_path, open_ticket, report_id, book_id
     ), msg_data)

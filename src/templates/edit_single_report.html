@@ -131,6 +131,23 @@
             }
         }, 4000); // Start fade after 4 seconds
 
+        // Wait until the entire page content is loaded
+        document.addEventListener("DOMContentLoaded", function () {
+            function calculateCashDue() {
+                const instantSold = parseFloat(document.getElementById("instant_sold").value) || 0;
+                const instantCashed = parseFloat(document.getElementById("instant_cashed").value) || 0;
+                const onlineCashed = parseFloat(document.getElementById("online_cashed").value) || 0;
+                const onlineSold = parseFloat(document.getElementById("online_sold").value) || 0;
+
+                const totalDue = (instantSold + onlineSold) - (instantCashed + onlineCashed);
+
+                document.getElementById("total_due").value = totalDue.toFixed(2);
+            }
+            document.getElementById("online_sold").addEventListener("input", calculateCashDue);
+            document.getElementById("instant_cashed").addEventListener("input", calculateCashDue);
+            document.getElementById("online_cashed").addEventListener("input", calculateCashDue);
+        });
+
         function downloadInvoice(report_id) {
             // Trigger download in new tab
             const downloadUrl = `/download/${report_id}`;
@@ -219,10 +236,11 @@
         <label for="total_due">Total Due:</label>
         <input name="total_due" id="total_due" value="{{sale_report["TotalDue"]}}" readonly><br><br>
 
-        <button type="submit" formaction="/edit_report/{{report_id}}/None?">Save</button>
+        <button type="submit" formaction="/update_sale_report/{{report_id}}">Save</button>
 
         <button type="button" onclick="downloadInvoice({{report_id}})">Download</button>
         <br>
         <br>
     </form>
+    <br><label> Updating this report may trigger automatic updates to other reports and real-time database changes. </label>
 {%endblock%}

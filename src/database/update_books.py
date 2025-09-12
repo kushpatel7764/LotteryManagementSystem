@@ -22,7 +22,6 @@ def add_book(cursor, book_info):
             - isAtTicketNumber
             - TicketPrice
     """
-    breakpoint()
     cursor.execute(
         """
         INSERT INTO Books (BookID, GameNumber, Is_Sold, BookAmount, TicketPrice)
