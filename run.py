@@ -1,6 +1,6 @@
 """
-This module serves as the entry point for the application.
-It initializes the Flask app and starts the server.
+Development entry point for the Flask-SocketIO app.
+Runs with socketio.run() for hot reloads & debugging.
 """
 
 

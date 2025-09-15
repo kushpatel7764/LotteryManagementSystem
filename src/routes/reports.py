@@ -177,7 +177,7 @@ def update_sales_log():
 
         # Make the open_ticket and close_ticket values that are being set,
         # are not greater than or equal to book amount.
-        if int(open_ticket) >= book[3] or int(close_ticket) >= book[3]:
+        if int(open_ticket) >= book[3] or int(close_ticket) > book[3]:
             return jsonify(
             {
                 "redirect_url": url_for(
