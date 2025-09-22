@@ -12,7 +12,8 @@ import os
 from flask import Blueprint, render_template, request
 
 from src.utils.config import (DEFAULT_DOWNLOADS_PATH, load_config,
-                          update_invoice_output_path, update_ticket_order)
+                          update_invoice_output_path, update_ticket_order,
+                          update_should_poll)
 
 settings_bp = Blueprint("settings", __name__)
 
@@ -44,6 +45,8 @@ def settings():
         if warning_message:
             message = warning_message
         update_invoice_output_path(valid_output)
+        
+        update_should_poll(form_data["should_poll"])
 
     # Load current config for rendering
     config = load_config()
@@ -51,6 +54,7 @@ def settings():
         "settings.html",
         counting_order=config["ticket_order"],
         invoice_output_path=config["invoice_output_path"],
+        should_poll=config["should_poll"],
         message=message,
         message_type=message_type,
     )
@@ -69,6 +73,7 @@ def extract_setting_form_data(config):
     return {
         "ticket_order": request.form.get("ticket_order") or config["ticket_order"],
         "output_path": request.form.get("outputPath") or config["invoice_output_path"],
+        "should_poll": request.form.get("polling_state") or config["should_poll"]
     }
 
 

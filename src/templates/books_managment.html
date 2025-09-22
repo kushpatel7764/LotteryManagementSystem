@@ -8,30 +8,63 @@
     <!-- Socket.IO client library -->
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
     <script>
-        const socket = io();
-        socket.on("barcode_scanned", function(data) {
-            const activeElement = document.activeElement;
+        let pollingInterval = null;
+        let isProcessing = false;
 
-            // Only insert if the focused element is an input or textarea
-            if (activeElement && (activeElement.tagName === "INPUT")) {
-                // Append or set barcode value
-                activeElement.value = data.barcode;
+        async function processBarcode() {
+            if (isProcessing) return; // Skip if still processing
+            isProcessing = true;
+            try {
+                const response = await fetch('/check_barcode_stack');
+                // Check for successful response
+                if (response.ok) {
+                    const data = await response.json();
+                    // Check for barcode presence
+                    if (data.barcode) {
+                        const activeElement = document.activeElement;
 
-                // Simulate input event so browser recognizes value change
-                activeElement.dispatchEvent(new Event("input", { bubbles: true }));
-                
-                // Store the ID of the last-focused input
-                sessionStorage.setItem("lastFocusedInput", activeElement.id);
+                        // Only insert if the focused element is an input field.
+                        if (activeElement && (activeElement.tagName === "INPUT")) {
 
-                const form = activeElement.form;
-                if (form) {
-                    form.requestSubmit(); // Modern way (better than form.submit())
+                            // Set barcode value
+                            activeElement.value = data.barcode;
+
+                            // Simulate input event so browser recognizes value change
+                            activeElement.dispatchEvent(new Event("input", { bubbles: true }));
+                            
+                            // Store the ID of the last-focused input
+                            sessionStorage.setItem("lastFocusedInput", activeElement.id);
+
+                            const form = activeElement.form;
+                            if (form) {
+                                form.requestSubmit(); // Modern way (better than form.submit())
+                            }
+                        } else {
+                            console.warn("No input field is focused; barcode not inserted.");
+                        }
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return null;
                 }
-
-            } else {
-                console.warn("No input field is focused; barcode not inserted.");
+            } catch (error) {
+                return null;
+            } finally {
+                isProcessing = false;
             }
-        });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+        let pollingEnabled = {{ 'true' if should_poll == "true" else 'false' }} === true;
+
+        if (pollingEnabled) {
+            pollingInterval = setInterval(processBarcode, 500);
+            console.log("Polling started based on settings");
+        } else {
+            console.log("Polling is disabled in settings");
+        }
+    });
     </script>
     <script>
             function checkLengthAndSubmitAddBook() {

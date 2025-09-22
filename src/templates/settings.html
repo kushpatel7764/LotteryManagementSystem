@@ -7,6 +7,25 @@
 
 {% block extra_js %}
 <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Access elements
+        const btn = document.getElementById("togglePollingBtn");
+        const form = document.getElementById("pollingForm");
+        const input = document.getElementById("pollingStateInput");
+        // Set initial label on button
+        let pollingEnabled = {{ 'true' if should_poll == "true" else 'false' }} === true;
+        btn.textContent = pollingEnabled ? "Disable" : "Enable";
+        // Handle button click
+        btn.addEventListener("click", () => {
+            pollingEnabled = !pollingEnabled; // Toggle state
+            // Update hidden input and button label
+            input.value = pollingEnabled ? 'true' : 'false';
+            btn.textContent = pollingEnabled ? "Disable" : "Enable";
+            form.submit(); // will only submit input value.
+        });
+    });
+</script>
+<script>
     function ChangeOrder(event){
         event.preventDefault();
 
@@ -59,6 +78,11 @@
                         
                     </form>
                 <td>
+                    <form method="post" action="/settings" id="pollingForm">
+                        <label>Polling:</label>
+                        <input type="hidden" name="polling_state" id="pollingStateInput" value="{{ 'true' if should_poll == 'true' else 'false' }}">
+                        <button name="togglePollingBtn" id="togglePollingBtn"></button>
+                    </form>
             </tr>
         </table>
     </div>

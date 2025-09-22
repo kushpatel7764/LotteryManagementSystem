@@ -131,6 +131,7 @@ def _render_scan_tickets(msg_data):
             message_holder=msg_data,
             fallback=0,
         ),
+        should_poll=load_config().get("should_poll", False),
         message=msg_data.get("message", ""),
         message_type=msg_data.get("message_type", ""),
     )

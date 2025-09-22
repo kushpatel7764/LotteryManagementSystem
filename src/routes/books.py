@@ -12,7 +12,7 @@ from flask import (Blueprint, jsonify, redirect, render_template, request,
 from src.database import database_queries
 from src.database import update_books, update_activated_books
 from src.utils.books import activate_book_procedure, add_book_procedure
-from src.utils.config import db_path
+from src.utils.config import db_path, load_config
 from src.utils.error_hanlder import check_error
 
 
@@ -72,12 +72,16 @@ def books_managment():
     for book in activated_books:
         if isinstance(book, dict):
             activated_ids.add(book.get("ActiveBookID"))
+            
+    should_poll = load_config().get("should_poll", False)
 
     return render_template(
         "books_managment.html",
         books=books,
         activated_ids=activated_ids,
+        should_poll=should_poll,
         message=msg_data.get("message", ""),
+        
         message_type=msg_data.get("message_type", ""),
     )
 

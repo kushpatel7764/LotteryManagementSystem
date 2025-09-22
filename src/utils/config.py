@@ -16,6 +16,7 @@ DEFAULT_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
 CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.json"
 )
+BARCODE_STACK = [] 
 
 
 def load_config():
@@ -67,5 +68,20 @@ def update_business_info(name, value):
     # Value is the value it should be changed to
     config = load_config()
     config[name] = value
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=4)
+
+def update_should_poll(set_val):
+    """
+    Updates a specific business information field in the configuration file.
+
+    Args:
+        name (str): The configuration field to update.
+        value (str): The new value for the field.
+    """
+    # Name of the business info you want to change in the config file
+    # Value is the value it should be changed to
+    config = load_config()
+    config["should_poll"] = set_val
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)
