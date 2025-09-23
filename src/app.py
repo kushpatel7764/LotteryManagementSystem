@@ -5,6 +5,7 @@ This module initializes the Flask app, sets up Socket.IO for real-time events,
 and registers all the blueprints for different routes.
 """
 
+from threading import Lock
 from flask import Flask, request, jsonify
 
 from src.routes.books import books_bp
@@ -15,7 +16,7 @@ from src.routes.settings import settings_bp
 from src.routes.tickets import tickets_bp
 
 from src.utils.config import BARCODE_STACK
-from threading import Lock
+
 from src.utils.config import load_config
 
 BARCODE_LOCK = Lock()

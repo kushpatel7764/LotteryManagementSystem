@@ -45,7 +45,6 @@ def settings():
         if warning_message:
             message = warning_message
         update_invoice_output_path(valid_output)
-        
         update_should_poll(form_data["should_poll"])
 
     # Load current config for rendering

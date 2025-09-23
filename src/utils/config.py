@@ -16,7 +16,7 @@ DEFAULT_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
 CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.json"
 )
-BARCODE_STACK = [] 
+BARCODE_STACK = []
 
 
 def load_config():

@@ -72,7 +72,7 @@ def books_managment():
     for book in activated_books:
         if isinstance(book, dict):
             activated_ids.add(book.get("ActiveBookID"))
-            
+
     should_poll = load_config().get("should_poll", False)
 
     return render_template(
@@ -81,7 +81,6 @@ def books_managment():
         activated_ids=activated_ids,
         should_poll=should_poll,
         message=msg_data.get("message", ""),
-        
         message_type=msg_data.get("message_type", ""),
     )
 

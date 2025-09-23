@@ -3,7 +3,11 @@ Development entry point for the Flask-SocketIO app.
 Runs with socketio.run() for hot reloads & debugging.
 
 Pyinstaller Command: 
-pyinstaller --onefile --noconsole --hidden-import=dns --hidden-import=dns.e164 --hidden-import=dns.dnssec --hidden-import=dns.asyncbackend --hidden-import=dns.rdtypes.dnskeybase --hidden-import=dns.rdtypes.CH --hidden-import=dns.rdtypes --hidden-import=dns.rdtypes.ANY --hidden-import=dns.rdtypes.IN run.py --additional-hooks-dir=hooks
+pyinstaller --onefile --noconsole --hidden-import=dns --hidden-import=dns.e164 
+--hidden-import=dns.dnssec --hidden-import=dns.asyncbackend 
+--hidden-import=dns.rdtypes.dnskeybase --hidden-import=dns.rdtypes.CH 
+--hidden-import=dns.rdtypes --hidden-import=dns.rdtypes.ANY 
+--hidden-import=dns.rdtypes.IN run.py --additional-hooks-dir=hooks
 
 --------------------------------
 Removing the socketio.
@@ -22,4 +26,3 @@ from src.app import app
 if __name__ == "__main__":
     webbrowser.open("http://127.0.0.1:5000")
     app.run(host='0.0.0.0', port=5000, debug=True)
-    
