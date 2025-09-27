@@ -15,7 +15,7 @@ setup(
         "pytest",
         "reportlab",
         "requests==2.31.0",
-        "Gunicorn==21.2.0",
+        "Gunicorn==23.0.0",
         "ruff",
         "simplejson",
         "urllib3",
