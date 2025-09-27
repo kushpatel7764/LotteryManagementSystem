@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: lottery_app
+Version: 0.1
+Requires-Dist: beautifulsoup4==4.13.4
+Requires-Dist: decorator==5.1.1
+Requires-Dist: etelemetry==0.3.1
+Requires-Dist: Flask==3.0.3
+Requires-Dist: pandas
+Requires-Dist: pytest
+Requires-Dist: reportlab
+Requires-Dist: requests==2.31.0
+Requires-Dist: Gunicorn==21.2.0
+Requires-Dist: ruff
+Requires-Dist: simplejson
+Requires-Dist: urllib3
+Requires-Dist: util-functions
+Dynamic: requires-dist

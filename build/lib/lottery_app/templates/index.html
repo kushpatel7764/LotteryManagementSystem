@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lottery Ticket App - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <div class="home-container">
+        <h1>Lottery Management System</h1>
+        <div class="card">
+            <div class="nav-buttons">
+                <a href="{{ url_for('tickets.scan_tickets') }}"><button class="button">📷 Scan Tickets</button></a>
+                <a href="{{ url_for('books.books_managment') }}"><button class="button">📚 Books Management</button></a>
+                <a href="{{ url_for('reports.edit_reports') }}"><button class="button">📝 Edit Reports</button></a>
+            </div>
+            <div class="user_edit_buttons">
+                <a href="{{ url_for('settings.settings') }}"><button class="button" id="settings_btn">⚙ Settings</button></a>
+                <a href="{{ url_for('business_profile.business_profile') }}"><button class="button" id="business_profile_btn">🏢 Business Profile</button></a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

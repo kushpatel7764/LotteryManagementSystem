@@ -1,3 +1,0 @@
-([('run',
-   '/Users/kushpatel/Documents/LotteryManagmentSystem_Project/LotteryManagementSystem/dist/run',
-   'EXECUTABLE')],)

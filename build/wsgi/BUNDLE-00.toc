@@ -1,3 +1,0 @@
-([('wsgi',
-   '/Users/kushpatel/Documents/LotteryManagmentSystem_Project/LotteryManagementSystem/dist/wsgi',
-   'EXECUTABLE')],)

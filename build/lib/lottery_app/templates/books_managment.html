@@ -1,0 +1,266 @@
+{% extends "navButton.html" %}
+{% block title %}Books Management{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='book_managment.css') }}">
+{% endblock %}
+   
+{% block extra_js %}
+    <!-- Socket.IO client library -->
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+    <script>
+        let pollingInterval = null;
+        let isProcessing = false;
+
+        async function processBarcode() {
+            if (isProcessing) return; // Skip if still processing
+            isProcessing = true;
+            try {
+                const response = await fetch('/check_barcode_stack');
+                // Check for successful response
+                if (response.ok) {
+                    const data = await response.json();
+                    // Check for barcode presence
+                    if (data.barcode) {
+                        const activeElement = document.activeElement;
+
+                        // Only insert if the focused element is an input field.
+                        if (activeElement && (activeElement.tagName === "INPUT")) {
+
+                            // Set barcode value
+                            activeElement.value = data.barcode;
+
+                            // Simulate input event so browser recognizes value change
+                            activeElement.dispatchEvent(new Event("input", { bubbles: true }));
+                            
+                            // Store the ID of the last-focused input
+                            sessionStorage.setItem("lastFocusedInput", activeElement.id);
+
+                            const form = activeElement.form;
+                            if (form) {
+                                form.requestSubmit(); // Modern way (better than form.submit())
+                            }
+                        } else {
+                            console.warn("No input field is focused; barcode not inserted.");
+                        }
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            } catch (error) {
+                return null;
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+        let pollingEnabled = {{ 'true' if should_poll == "true" else 'false' }} === true;
+
+        if (pollingEnabled) {
+            pollingInterval = setInterval(processBarcode, 500);
+            console.log("Polling started based on settings");
+        } else {
+            console.log("Polling is disabled in settings");
+        }
+    });
+    </script>
+    <script>
+            function checkLengthAndSubmitAddBook() {
+                const func_route = "/books_managment"
+                const input = document.getElementById('add_book_code');
+
+                const isValid = /^\d{29}$/.test(input.value);
+
+                if (isValid) { // add more security to ensure that book being added is a real ticket book. 
+                    const form = document.getElementById('AddBookForm');
+                    form.action = func_route;
+                    form.submit();
+                }
+            }
+            function checkLengthAndSubmitActivateBook() {
+                const func_route = "/activate_book"
+                const input = document.getElementById('activate_book_code');
+
+                const isValid = /^\d{29}$/.test(input.value);
+
+                if (isValid) { // add more security to ensure that book being added is a real ticket book. 
+                    const form = document.getElementById('ActivateBookForm');
+                    form.action = func_route;
+                    form.submit();
+                }
+            }
+            //DropDown Functions
+            function toggleDropdown(event) {
+            event.stopPropagation(); // Stop the click from closing immediately
+            closeAllDropdowns();     // Close others
+            const dropdown = event.currentTarget.closest(".dropdown-container");
+            dropdown.classList.toggle("show");
+            }
+
+            function closeAllDropdowns() {
+            document.querySelectorAll(".dropdown-container").forEach(el => {
+                el.classList.remove("show");
+            });
+            }
+
+            // Close dropdown if clicked anywhere else
+            document.addEventListener("click", () => {
+            closeAllDropdowns();
+            });
+
+            // Your actual button functions
+            function handleDeactivate(bookID) {
+                fetch('/deactivate_book', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ bookID: bookID })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.redirect_url) {
+                            window.location.href = data.redirect_url;  // Manual redirect
+                    }
+                });
+            }
+
+            function handleDelete(bookID) {
+                if (confirm(`Are you sure you want to delete book ${bookID}?`)) {
+                    fetch('/delete_book', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ bookID: bookID })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;  // Manual redirect
+                        }
+                    });
+                }
+            }
+            function showInfoImage() {
+                document.getElementById('infoModal').style.display = 'flex';
+            }
+
+            function hideInfoImage() {
+                document.getElementById('infoModal').style.display = 'none';
+            }
+
+            window.addEventListener("DOMContentLoaded", function () {
+                const lastFocusedID = sessionStorage.getItem("lastFocusedInput");
+
+                if (lastFocusedID) {
+                    const input = document.getElementById(lastFocusedID);
+                    if (input) {
+                        input.focus();
+                    }
+                }
+            });
+
+            window.onload = function() {
+            {% if add_book_message %}
+                const scanInput = document.querySelector('[name="add_book_code"]');
+                if (scanInput) scanInput.value = "";
+            {% endif %}
+            {% if activate_book_message %}
+                const scanInput = document.querySelector('[name="activate_book_code"]');
+                if (scanInput) scanInput.value = "";
+            {% endif %}
+            }
+
+        setTimeout(() => {
+            const msg = document.querySelector(".flash-message");
+            if (msg) {
+                msg.style.opacity = '0'; // Trigger CSS fade out
+                setTimeout(() => msg.remove(), 1000);
+            }
+        }, 4000); // Start fade after 4 seconds
+    </script>
+
+{% endblock %}
+{% block header %} Books {% endblock %}  
+{% block content %}
+    {% if message %}
+        <div class="flash-message {{ message_type }}">
+            {{ message }}
+        </div>
+    {% endif %}
+    <form method="POST" id="AddBookForm" class="scan-box">
+        <label for="add_book_code"><strong>Add Book:</strong></label><br>
+        <input type="text" tagName="INPUT"
+               name="add_book_code"
+               id="add_book_code"
+               placeholder="Scan book or ticket to add to the system"
+               required
+               oninput="checkLengthAndSubmitAddBook()">
+        <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton"> i </button>
+        <!-- Submit button is hidden since auto-submit is now enabled -->
+        <button type="submit" style="display:none;">Submit</button>
+    </form>
+
+    <form method="POST" id="ActivateBookForm" class="scan-box">
+        <label for="activate_book_code"><strong>Activate Book:</strong></label><br>
+        <input type="text"  tagName="INPUT"
+               name="activate_book_code"
+               id="activate_book_code"
+               placeholder="Scan book or ticket to activate it"
+               required
+               oninput="checkLengthAndSubmitActivateBook()">
+        <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton"> i </button>
+        <!-- Submit button is hidden since auto-submit is now enabled -->
+        <button type="submit" style="display:none;">Submit</button>
+    </form>
+
+    <h2>Books</h2>
+    <table>
+        <thead>
+            <tr class="header">
+                <th>Game Name</th>  
+                <th>Book ID</th>
+                <th>Game Number</th>
+                <th>Ticket Price</th>
+                <th>Ticket Amount</th>
+                <th>Sold</th>
+                <th class="th_OptionsButton"></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for book in books %}
+            <tr class="row">
+                <td>{{ book['TicketName'] }}</td>
+                <td>{{ book['BookID'] }}</td>
+                <td>{{ book['GameNumber'] }}</td>
+                <td>${{ book['TicketPrice'] }}</td>
+                <td>{{ book['BookAmount'] }}</td>
+                <td>{{ book['Is_Sold'] }}</td>
+                <td class="options_Button {% if book['BookID'] in activated_ids %}activated{% endif %}">
+                    <div class="dropdown-container">
+                        <button class="dropbtn" onclick="toggleDropdown(event)">⋯</button>
+                        <div class="dropdown-content">
+                            {% if book['BookID'] in activated_ids %}
+                                <button onclick="handleDeactivate('{{ book['BookID'] }}')">Deactivate</button> <!-- Should only show up with the given book is already activated-->
+                            {% endif %}
+                            <button onclick="handleDelete('{{ book['BookID'] }}')">Delete</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <!-- Modal for Image -->
+    <div id="infoModal">
+        <div style="position: relative; background: white; padding: 10px; border-radius: 8px;">
+            <img src="{{ url_for('static', filename='BookManagementInfoImg.JPG') }}" 
+                alt="Info Image" 
+                style="max-width: 90vw; max-height: 80vh; display: block; margin: auto;">
+            <button onclick="hideInfoImage()" id="InfoModalCloseBtn" onmouseover="this.style.backgroundColor='#f2f2f2'" onmouseout="this.style.backgroundColor='#ff3d3d'">×</button>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,300 @@
+{% extends "navButton.html" %}
+{% block title %}Scan Tickets Page{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+    <script>
+        let pollingInterval = null;
+        let isProcessing = false;
+        async function processBarcode() {
+            if (isProcessing ) return; // Skip if still processing
+            isProcessing = true;
+            try {
+                const response = await fetch('/check_barcode_stack');
+                // Check for successful response
+                if (response.ok) {
+                    const data = await response.json();
+                    // Check for barcode presence
+                    if (data.barcode) {
+                        const activeElement = document.activeElement;
+
+                        // Only insert if the focused element is an input field.
+                        if (activeElement && (activeElement.tagName === "INPUT")) {
+
+                            // Set barcode value
+                            activeElement.value = data.barcode;
+
+                            // Simulate input event so browser recognizes value change
+                            activeElement.dispatchEvent(new Event("input", { bubbles: true }));
+                            
+                            // Store the ID of the last-focused input
+                            sessionStorage.setItem("lastFocusedInput", activeElement.id);
+
+                            const form = activeElement.form;
+                            if (form) {
+                                form.requestSubmit(); // Modern way (better than form.submit())
+                            }
+                        } else {
+                            console.warn("No input field is focused; barcode not inserted.");
+                        }
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            } catch (error) {
+                return null;
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+        // Check localStorage polling preference
+        let pollingEnabled = {{ 'true' if should_poll == "true" else 'false' }} === true;
+
+        if (pollingEnabled) {
+            pollingInterval = setInterval(processBarcode, 500);
+            console.log("Polling started based on settings");
+        } else {
+            console.log("Polling is disabled in settings");
+        }
+    });
+    </script>
+    <script>
+        function checkLengthAndSubmit() {
+            const func_route = "/scan_tickets"
+            const input = document.getElementById('scanned_code');
+            
+            const isValid = /^\d{29}$/.test(input.value);
+
+            if (isValid) {
+                const form = document.getElementById('scanForm');
+                form.action = func_route;
+                form.submit();
+            }
+        }
+        // Wait until the entire page content is loaded
+        document.addEventListener("DOMContentLoaded", function () {
+            function calculateCashDue() {
+                const instantSold = parseFloat(document.getElementById("instant_sold").value) || 0;
+                const instantCashed = parseFloat(document.getElementById("instant_cashed").value) || 0;
+                const onlineCashed = parseFloat(document.getElementById("online_cashed").value) || 0;
+                const onlineSold = parseFloat(document.getElementById("online_sold").value) || 0;
+
+                const totalDue = (instantSold + onlineSold) - (instantCashed + onlineCashed);
+
+                document.getElementById("total_due").value = totalDue.toFixed(2);
+            }
+            document.getElementById("online_sold").addEventListener("input", calculateCashDue);
+            document.getElementById("instant_cashed").addEventListener("input", calculateCashDue);
+            document.getElementById("online_cashed").addEventListener("input", calculateCashDue);
+        });
+
+        function closeModal() {
+            document.getElementById("popupModal").style.display = "none";
+        }
+        function canSubmit(e) {
+            event.preventDefault();
+            document.getElementById("popupModal").style.display = "block";
+        }
+        function submitFormTo(actionUrl) {
+            const form = document.querySelector('.daily-totals-form');
+            // Check if all required fields are valid
+            if (form.checkValidity()) {
+                form.action = actionUrl;
+                closeModal();
+                form.submit();
+            } else {
+                // Trigger browser's built-in validation UI
+                form.reportValidity();
+            }
+        }
+         function showInfoImage() {
+            document.getElementById('infoModal').style.display = 'flex';
+        }
+
+        function hideInfoImage() {
+            document.getElementById('infoModal').style.display = 'none';
+        }
+        window.onload = function() {
+        {% if message %}
+            const scanInput = document.querySelector('[name="scanned_code"]');
+            if (scanInput) scanInput.value = "";
+        {% endif %}
+        }
+        setTimeout(() => {
+            const msg = document.querySelector(".flash-message");
+            if (msg) {
+                msg.style.opacity = '0'; // Trigger CSS fade out
+                setTimeout(() => msg.remove(), 1000);
+            }
+        }, 4000); // Start fade after 4 seconds
+    </script>
+{% endblock %}
+{% block header %} Daily Scans {% endblock %}  
+{% block content %}
+    {% if message %}
+        <div class="flash-message {{ message_type }}">
+            {{ message }}
+        </div>
+    {% endif %}
+
+    <!-- Popup Message -->
+    <div id="popupModal" class="modal" class="modal" aria-hidden="true" style="display:none">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="closeModal()">×</button>
+            <p>Did you make sure your newly activated books are also activated in this system?</p>
+            <button class="modal-option-btn" onclick="submitFormTo('/submit')" type="submit">YES</button>
+            <button class="modal-option-btn" onclick="closeModal()">NO</button>
+        </div>
+    </div>
+
+    <form method="POST" id="scanForm" class="scan-box">
+        <label for="scanned_code"><strong>Scan Ticket: </strong></label><br>
+        <input type="text" tagName="INPUT"
+               name="scanned_code"
+               id="scanned_code"
+               placeholder="Scan ticket..."
+               autofocus
+               required
+               oninput="checkLengthAndSubmit()">
+
+        <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton">
+            i
+        </button>
+        <!-- Submit button is hidden since auto-submit is now enabled -->
+        <button type="submit" style="display:none;">Submit</button>
+    </form>
+
+    <h2>Activated Books: {{activated_book_count}}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>GAME NAME</th>
+                <th>GAME #</th>
+                <th>BOOK ID</th>
+                <th>PRICE</th>
+                <th>OPEN</th>
+                <th>CLOSE</th>
+                <th>SOLD</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% if  activated_books %}
+            {% for book in activated_books %}
+                <tr class="row {% if book['countingTicketNumber'] is not none %}scanned{% endif %}">
+                    <td>{{ book["TicketName"] }}
+                    <td>{{ book['GameNumber'] }}</td>
+                    <td>{{ book['ActiveBookID'] }}</td>
+                    <td>{{ book['ticketPrice'] }}</td>
+                    <td>{{ book['isAtTicketNumber'] }}</td>
+                    <td>
+                        {% if book['countingTicketNumber'] is not none %}
+                            {{ book['countingTicketNumber'] }}
+                        {% else %}
+                        <!-- if no input for close column then show a button sold out button -->
+                            <form method="POST" action="/book_sold_out">
+                                <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
+                                <button type="submit" id="SoldOutButton">Book Sold Out</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
+                            {% if counting_order == "descending"%}
+                                {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
+                            {% else %}
+                                {{ ( book['countingTicketNumber'] - book['isAtTicketNumber'] ) }}
+                            {% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td class="x_button_container">
+                        {% if book['countingTicketNumber'] is not none %}
+                            <form method="POST" action="/undo_scan">
+                                <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
+                                <button type="Submit">X</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+        </tbody>
+    </table>
+
+    <h2>Report Totals</h2>
+    <form method="POST" action="/submit" class="daily-totals-form">
+        <label for="instant_sold">Instant Tickets Sold:</label>
+        <div style="position: relative; display: inline-block;">
+            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+            <input name="instant_sold" id="instant_sold" 
+                type="number" inputmode="decimal" min="0" step="0.01" 
+                value="{{instant_tickets_sold_total}}" readonly
+                style="padding-left: 20px;">
+        </div>
+        <br><br>
+
+        <label for="online_sold">Online Tickets Sold:</label>
+        <div style="position: relative; display: inline-block;">
+            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+            <input type="number" name="online_sold" id="online_sold" 
+                inputmode="decimal" min="0" step="0.01" required
+                style="padding-left: 20px;">
+        </div>
+        <br><br>
+
+        <label for="instant_cashed">Instant Tickets Cashed:</label>
+        <div style="position: relative; display: inline-block;">
+            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+            <input type="number" name="instant_cashed" id="instant_cashed"
+                inputmode="decimal" min="0" step="0.01" required
+                style="padding-left: 20px;">
+        </div>
+        <br><br>
+
+        <label for="online_cashed">Online Tickets Cashed:</label>
+        <div style="position: relative; display: inline-block;">
+            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+            <input type="number" name="online_cashed" id="online_cashed"
+                inputmode="decimal" min="0" step="0.01" required
+                style="padding-left: 20px;">
+        </div>
+        <br><br>
+
+        <label for="cash_on_hand">Cash On Hand:</label>
+        <div style="position: relative; display: inline-block;">
+            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+            <input type="number" name="cash_on_hand" id="cash_on_hand"
+                inputmode="decimal" min="0" step="0.01" required
+                style="padding-left: 20px;">
+        </div>
+        <br><br>
+
+        <label for="total_due">Total Due:</label>
+        <div style="position: relative; display: inline-block;">
+            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+            <input name="total_due" id="total_due"
+                type="number" inputmode="decimal" min="0" step="0.01" readonly
+                style="padding-left: 20px;">
+        </div>
+        <br><br>
+
+        <button type="button" onclick="canSubmit(event)">Submit</button>
+        <!-- Modal for Image -->
+        <div id="infoModal">
+            <div style="position: relative; background: white; padding: 10px; border-radius: 8px;">
+                <img src="{{ url_for('static', filename='BarcodeImg.JPG') }}" 
+                    alt="Info Image" 
+                    style="max-width: 90vw; max-height: 80vh; display: block; margin: auto;">
+                <button onclick="hideInfoImage()" id="InfoModalCloseBtn" onmouseover="this.style.backgroundColor='#f2f2f2'" onmouseout="this.style.backgroundColor='#ff3d3d'">×</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}

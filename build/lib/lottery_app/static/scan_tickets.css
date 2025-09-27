@@ -1,0 +1,210 @@
+#scanInfoButton{
+    position: relative;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    font-size: 10px;
+    text-align: center;
+    line-height: 16px;
+    padding: 0;
+    cursor: pointer;
+}
+
+#infoModal{
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+#InfoModalCloseBtn{
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #ff3d3d;
+    color: #333;
+    border: 1px solid #ff5e5e;
+    border-radius: 20%;
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: bold;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.scan-box {
+    margin-bottom: 30px;
+}
+
+input[type="text"] {
+    padding: 10px;
+    width: 300px;
+    font-size: 16px;
+    border: 1px solid rgb(204, 204, 204);
+    border-radius: 6px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.SoldOutButton{
+    padding: 5px 10px;
+    margin-left: 5px;
+}
+
+button:hover {
+    background-color: #4338ca;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #ddd;
+}
+
+/*X Button for Scan Tickets Page*/
+.x_button_container{
+    border: none;
+    background-color: rgb(249, 250, 251);
+}
+
+tr.row.scanned {
+    background-color: #10b953a7;
+}
+
+.x_button_container button{
+    background-color: red;
+}
+
+.x_button_container button:hover{
+    background-color: rgb(199, 0, 0);
+}
+
+
+th {
+    background-color: rgb(230, 230, 230);
+}
+
+tr.row {
+    background-color: rgb(243, 244, 246); 
+    font-weight: bold;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.5);
+    display: flex; /* Enable centering */
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    position: relative;
+    margin: 15% auto;
+    background-color: #ffffff;
+    padding: 25px 30px;
+    border-radius: 8px;
+    width: 320px;
+    max-width: 90vw;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    font-size: 16px;
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Close Button (top-right corner) */
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.modal-close-btn:hover {
+    color: #ffffff;
+    background-color: rgb(202, 56, 56);
+}
+
+.modal-content p {
+    margin-top: 40px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    color: #333;
+}
+
+.modal-content button {
+    padding: 10px 18px;
+    font-size: 16px;
+    border-radius: 6px;
+    margin: 5px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.modal-option-btn:hover{
+    background-color: #382fdb;
+}
+.modal-content button:hover {
+    size: 20px;
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+    from { background-color: rgba(0,0,0,0); }
+    to { background-color: rgba(0,0,0,0.5); }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+
+.barcode-highlight {
+    border: 2px solid limegreen;
+    box-shadow: 0 0 5px limegreen;
+}

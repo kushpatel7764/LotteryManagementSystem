@@ -1,0 +1,42 @@
+{% extends "navButton.html" %}
+{% block title %}Business Profile{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='business_profile.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        setTimeout(() => {
+            const msg = document.querySelector(".flash-message");
+            if (msg) {
+                msg.style.opacity = '0'; // Trigger CSS fade out
+                setTimeout(() => msg.remove(), 1000);
+            }
+        }, 4000); // Start fade after 4 seconds
+    </script>
+{% endblock %}
+{% block header %} Business Profile {% endblock %}  
+{% block content %}
+        {% if message %}
+            <div class="flash-message {{ message_type }}">
+                {{ message }}
+            </div>
+        {% endif %}
+
+
+        <div id="profile_container">
+            <table id="profile_table">
+                <tr>
+                    <td>
+                        <form method="post" action="/business_profile" id="businessPortfolioForm">
+                            <label>Name: <input type="text" id="business_name" name="BusinessName" placeholder="e.g. Scuttlebutts Liquors" {% if business_Info["Name"] %} value="{{ business_Info["Name"] }}" {% endif %}></label>
+                            <label>Address: <input type="text" id="business_address" name="BusinessAddress" placeholder="123 Main St, Springfield, IL 62704"  {% if business_Info["Address"] %} value="{{ business_Info["Address"] }}" {% endif %}></label>
+                            <label>Phone: <input type="tel" id="business_phone"  placeholder="Enter 10-digit number" name="BusinessPhone" {% if business_Info["Phone"] %} value="{{ business_Info["Phone"] }}" {% endif %}></label>
+                            <label>Email: <input type="text" id="business_email" name="BusinessEmail" placeholder="e.g. johndoe@example.com" {% if business_Info["Email"] %} value="{{ business_Info["Email"] }}" {% endif %}></label>
+                            <button type="submit">Save</button>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </div>
+{% endblock %}

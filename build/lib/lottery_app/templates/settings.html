@@ -1,0 +1,89 @@
+{% extends "navButton.html" %}
+{% block title %}Settings{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Access elements
+        const btn = document.getElementById("togglePollingBtn");
+        const form = document.getElementById("pollingForm");
+        const input = document.getElementById("pollingStateInput");
+        // Set initial label on button
+        let pollingEnabled = {{ 'true' if should_poll == "true" else 'false' }} === true;
+        btn.textContent = pollingEnabled ? "Disable" : "Enable";
+        // Handle button click
+        btn.addEventListener("click", () => {
+            pollingEnabled = !pollingEnabled; // Toggle state
+            // Update hidden input and button label
+            input.value = pollingEnabled ? 'true' : 'false';
+            btn.textContent = pollingEnabled ? "Disable" : "Enable";
+            form.submit(); // will only submit input value.
+        });
+    });
+</script>
+<script>
+    function ChangeOrder(event){
+        event.preventDefault();
+
+        const input = document.getElementById("ticket_order_input");
+        const button = document.getElementById("ticket_order_btn");
+
+        if (input.value == "ascending"){
+            input.value = "descending";
+            button.innerHTML = "Descending";
+        } else {
+            input.value = "ascending";
+            button.innerHTML = "Ascending";
+        }
+
+        document.getElementById("orderForm").submit();
+    }
+    setTimeout(() => {
+            const msg = document.querySelector(".flash-message");
+            if (msg) {
+                msg.style.opacity = '0'; // Trigger CSS fade out
+                setTimeout(() => msg.remove(), 1000);
+            }
+    }, 4000); // Start fade after 4 seconds
+</script>
+{% endblock %}
+{% block header %} Settings {% endblock %}  
+
+{% block content%}
+    {% if message %}
+        <div class="flash-message {{ message_type }}">
+            {{ message }}
+        </div>
+    {% endif %}
+    <div id="settings_container">
+        <table id="settings_table">
+            <tr>
+                <td>
+                    <form method="post" action="/settings" id="orderForm">
+                        <label>Ticket Order:</label>
+                        <select name="ticket_order" id="ticket_order_select" onchange="document.getElementById('orderForm').submit();">
+                            <option value="ascending" {% if counting_order == 'ascending' %}selected{% endif %}>Ascending</option>
+                            <option value="descending" {% if counting_order == 'descending' %}selected{% endif %}>Descending</option>
+                        </select>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" action="/settings" id="invoice_output_path">
+                        <label>Invoice Output Path:</label>
+                        <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder" value="{{ invoice_output_path }}" onchange="document.getElementById('invoice_output_path').submit();">
+                        
+                    </form>
+                <td>
+                    <form method="post" action="/settings" id="pollingForm">
+                        <label>Polling:</label>
+                        <input type="hidden" name="polling_state" id="pollingStateInput" value="{{ 'true' if should_poll == 'true' else 'false' }}">
+                        <button name="togglePollingBtn" id="togglePollingBtn"></button>
+                    </form>
+            </tr>
+        </table>
+    </div>
+{% endblock %}

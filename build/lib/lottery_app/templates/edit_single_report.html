@@ -1,0 +1,246 @@
+{% extends "navButton.html" %}
+{% block title %}Edit Report Page {% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='edit_single_report.css') }}">
+{% endblock %}
+{% block extra_js %}
+    <script>
+        function getOpenCellByBookId(bookId) {
+            const rows = document.querySelectorAll("tr");
+
+            for (let row of rows) {
+                const cells = row.querySelectorAll("td");
+                if (cells.length < 3) continue;
+
+                const currentBookId = cells[2].textContent.trim();  // Assuming ActiveBookID is in column 3
+                if (currentBookId === bookId) {
+                    const openCell = row.querySelector(".Open");
+                    return openCell;
+                }
+            }
+
+            return null; // Not found
+        }
+
+        function getCloseCellByBookId(bookId) {
+            const rows = document.querySelectorAll("tr");
+
+            for (let row of rows) {
+                const cells = row.querySelectorAll("td");
+                if (cells.length < 3) continue;
+
+                const currentBookId = cells[2].textContent.trim();  // Assuming ActiveBookID is in column 3
+                if (currentBookId === bookId) {
+                    const closeCell = row.querySelector(".Close");
+                    return closeCell;
+                }
+            }
+
+            return null; // Not found
+        }
+
+        function EditMode(button, bookID){
+            const img = button.querySelector('img');
+            const allEditButtons = document.getElementsByClassName("edit_button");
+            const openCell = getOpenCellByBookId(bookID);
+            const closeCell = getCloseCellByBookId(bookID);
+
+
+            if (img.src.includes('Check_Mark.png') && (openCell.firstChild.value >= "0" && closeCell.firstChild.value >= "0")){
+                img.src = "{{ url_for('static', filename='Edit_Icon.png') }}";
+                button.style.backgroundColor = "#4f46e5";
+                openCell.innerHTML = openCell.firstChild.value;
+                closeCell.innerHTML = closeCell.firstChild.value;
+                const instant_sold = document.getElementById('instant_sold').value
+
+                // Now send the new values to be updated at this bookID and reportID 
+                fetch('/update_salesLog', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ bookID: bookID, reportID: {{report_id}}, open: openCell.innerHTML, close: closeCell.innerHTML, instant_sold: instant_sold})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;  // Manual redirect
+                    }
+                });
+
+            } else {    
+                
+                for (i=0; i<allEditButtons.length; i++){
+                    if (allEditButtons[i].children[0].src.includes('Check_Mark.png')){
+                        return;
+                    }
+                }
+
+                if (!openCell || !closeCell) {
+                    console.log("Book ID not found.");
+                    return;
+                }
+
+                // Optional: Prevent duplicate inputs
+                if (openCell.querySelector("input") || closeCell.querySelector("input")) return;
+                
+                // Save original value if needed
+                const originalOpenValue = openCell.textContent.trim();
+                const originalCloseValue = closeCell.textContent.trim();
+                openCell.innerHTML = '';  // Clear existing text
+                closeCell.innerHTML = ''; 
+
+                // Create input element
+                const Openinput = document.createElement("input");
+                Openinput.type = "number";
+                Openinput.style.width = "60px";   // or any other value like "4em", "40%", etc.
+                Openinput.style.padding = "5px";
+                Openinput.style.fontSize = "15px"; // Optional, adjust text size
+
+                Openinput.value = originalOpenValue;
+                Openinput.classList.add("open-input");  // Optional styling class
+                
+
+                const Closeinput = document.createElement("input");
+                Closeinput.type = "number";
+                Closeinput.style.width = "60px";   // or any other value like "4em", "40%", etc.
+                Closeinput.style.padding = "5px";
+                Closeinput.style.fontSize = "15px"; // Optional, adjust text size
+
+                Closeinput.value = originalCloseValue;
+                Closeinput.classList.add("open-input");  // Optional styling class
+
+                openCell.appendChild(Openinput);
+                closeCell.appendChild(Closeinput);
+                
+                Openinput.focus();
+                Closeinput.focus();
+
+                img.src = "{{ url_for('static', filename='Check_Mark.png') }}";
+                button.style.backgroundColor = "green";
+            }
+            
+            img.style.filter = 'invert(1)';
+        }
+        
+        setTimeout(() => {
+            const msg = document.querySelector(".flash-message");
+            if (msg) {
+                msg.style.opacity = '0'; // Trigger CSS fade out
+                setTimeout(() => msg.remove(), 1000);
+            }
+        }, 4000); // Start fade after 4 seconds
+
+        // Wait until the entire page content is loaded
+        document.addEventListener("DOMContentLoaded", function () {
+            function calculateCashDue() {
+                const instantSold = parseFloat(document.getElementById("instant_sold").value) || 0;
+                const instantCashed = parseFloat(document.getElementById("instant_cashed").value) || 0;
+                const onlineCashed = parseFloat(document.getElementById("online_cashed").value) || 0;
+                const onlineSold = parseFloat(document.getElementById("online_sold").value) || 0;
+
+                const totalDue = (instantSold + onlineSold) - (instantCashed + onlineCashed);
+
+                document.getElementById("total_due").value = totalDue.toFixed(2);
+            }
+            document.getElementById("online_sold").addEventListener("input", calculateCashDue);
+            document.getElementById("instant_cashed").addEventListener("input", calculateCashDue);
+            document.getElementById("online_cashed").addEventListener("input", calculateCashDue);
+        });
+
+        function downloadInvoice(report_id) {
+            // Trigger download in new tab
+            const downloadUrl = `/download/${report_id}`;
+            window.open(downloadUrl, '_blank');
+
+            // Show popup or success alert
+            setTimeout(() => {
+                alert("Invoice download started!");
+            }, 300);  // slight delay for better UX
+        }
+    </script>
+{% endblock %}
+{% block header %} Edit Report {{report_id}} {% endblock %}  
+{% block content %}
+    {% if message %}
+        <div class="flash-message {{ message_type }}">
+            {{ message }}
+        </div>
+    {% endif %}
+    <div class="Back_Navigation_Div">
+            <button id="Back_Navigation_Button" onclick="window.location.href='/edit_reports'">← Back to Reports</button>
+    </div>
+    <h2>Sale Entries</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Game Name</th>
+                <th>Game #</th>
+                <th>Book ID</th>
+                <th>Open</th>
+                <th>Close</th>
+                <th>Sold</th>
+                <!-- Add more columns as needed -->
+            </tr>
+        </thead>
+        <tbody>
+        {% for log in sales_logs %}
+            <tr>
+                <td>{{ log["Game Name"] }}</td>
+                <td>{{ log["Game #"] }}</td>
+                <td class="BookID">{{ log["ActiveBookID"] }}</td>
+                <td class="Open" >{{ log['Open'] }}</td>
+                <td class="Close">{{ log["Close"] }}</td>
+                <td>
+                    {% if log['Open'] is not none and log['Close'] is not none %}
+                        {% if counting_order == "descending"%}
+                            {{ (log['Open'] - log['Close']) }}
+                        {% else %}
+                            {{ (log['Close'] - log['Open']) }}
+                        {% endif %}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td class="edit_button_row">
+                    <button class="edit_button" onclick="EditMode(this, '{{log['ActiveBookID']}}')">
+                        <img src="{{ url_for('static', filename='Edit_Icon.png') }}" alt="Edit">
+                    </button>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5" style="text-align:center;">No sales logs found for this report.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Report Totals</h2>
+    <form method="POST" action="/update_sale_report/{{report_id}}" class="daily-totals-form">
+        <label for="instant_sold">Instant Tickets Sold:</label> $
+        <input name="instant_sold" id="instant_sold" value="{{sale_report["InstantTicketSold"]}}" readonly><br><br>
+
+        <label for="online_sold">Online Tickets Sold:</label>
+        <input type="number" name="online_sold" id="online_sold" value="{{sale_report["OnlineTicketSold"]}}" ><br><br>
+
+        <label for="instant_cashed">Instant Tickets Cashed:</label>
+        <input type="number" name="instant_cashed" id="instant_cashed" value="{{sale_report["InstantTicketCashed"]}}" ><br><br>
+
+        <label for="online_cashed">Online Tickets Cashed:</label>
+        <input type="number" name="online_cashed" id="online_cashed" value="{{sale_report["OnlineTicketCashed"]}}" ><br><br>
+
+        <label for="cash_on_hand">Cash On Hand:</label>
+        <input type="number" name="cash_on_hand" id="cash_on_hand" value="{{sale_report["CashOnHand"]}}" ><br><br>
+
+        <label for="total_due">Total Due:</label>
+        <input name="total_due" id="total_due" value="{{sale_report["TotalDue"]}}" readonly><br><br>
+
+        <button type="submit" formaction="/update_sale_report/{{report_id}}">Save</button>
+
+        <button type="button" onclick="downloadInvoice({{report_id}})">Download</button>
+        <br>
+        <br>
+    </form>
+    <br><label> Updating this report may trigger automatic updates to other reports and real-time database changes. </label>
+{%endblock%}

@@ -1,0 +1,45 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='Nav.css') }}">
+    {% block extra_css %}{% endblock %}
+    {% block extra_js %}{% endblock %}
+    
+</head>
+<body>
+    <div class="button-container">
+        <div id="header">
+            <label>{% block header %} Header {% endblock %}</label>
+        </div>
+        <div class="right">
+            <button id="main-button">☰</button>
+            <div class="slide-buttons" id="slide-buttons">
+                <button onclick="window.location.href='/edit_reports'" class="slide-btn">Edit Reports</button>
+                <button onclick="window.location.href='/books_managment'" class="slide-btn">Books Management</button>
+                <button onclick="window.location.href='/scan_tickets'" class="slide-btn">Scan Tickets</button>
+                <button onclick="window.location.href='/'" class="slide-btn">Home</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const mainBtn = document.getElementById("main-button");
+        const slideBtns = document.getElementById("slide-buttons");
+
+        mainBtn.addEventListener("click", () => {
+            slideBtns.classList.toggle("show");
+            const isVisible = slideBtns.classList.contains("show");
+
+            if (isVisible){
+                mainBtn.innerText = "➤";
+            }else{
+                mainBtn.innerText = "☰";  
+            }
+        });
+    </script>
+    <div class="content">
+        {% block content%}{% endblock %}
+    </div>
+</body>
+</html>

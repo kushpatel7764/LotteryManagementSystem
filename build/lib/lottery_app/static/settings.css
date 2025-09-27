@@ -1,0 +1,59 @@
+form {
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 1em;
+    background-color: rgb(230, 230, 230);
+}
+
+label {
+    display: block;
+    margin-bottom: 12px;
+}
+
+select {
+    padding: 10px 15px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+select:focus {
+    border-color: #007BFF;
+}
+
+#settings_table{
+    border-spacing: 2%;
+    margin: 0 auto;
+}
+#settings_table td {
+    text-align: center;
+    padding: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #4338ca;
+}
+
+input{
+    padding: 10px 15px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: 1px solid #c2c2c2;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
