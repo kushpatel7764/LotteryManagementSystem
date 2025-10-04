@@ -1,190 +1,217 @@
-/* Ensure button-container stretches full width */
-.button-container {
-    position: sticky;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%; /* Full viewport width */
-    padding: 12px 16px;
-    box-sizing: border-box;
-
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-
-    background-color: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    font-weight: bold;
-    z-index: 1000;
-}
-
-
-.right{
-    display: flex;            /* Lay out buttons side by side */
-    flex-direction: row;      /* Make sure it's horizontal */
-    gap: 10px;                /* Space between buttons */
-    margin-top: 10px; 
-    margin-left: auto;
-}
-
-#main-button {
-    padding: 10px 18px;
-    font-size: 18px;
-    cursor: pointer;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-#header{
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    margin-left: 0;
-    padding-left: 0;
-
-    font-family: "Segoe UI", sans-serif;
-    text-align: center;
-    font-size: 2.5em;
-    font-weight: bold;
-    margin-bottom: 40px;
-    color: #333;
+/* --- Color Palette & Typography --- */
+:root {
+    --color-primary: #4f46e5;      /* Base Indigo - Used for general links/theme/focus */
+    --color-primary-dark: #4338ca; 
+    --color-action-button: #1D4ED8; /* NEW: Darker Royal Blue for primary actions (Save) */
+    --color-action-hover: #1E40AF;  /* NEW: Slightly darker for hover */
+    --color-background: #f5f7fa;   /* Very Light Grey/Blue */
+    --color-nav-links-settings-buttons: #696d78; /* Bright Blue for Nav Links and Settings Buttons */
+    --color-nav-links-settings-buttons-hover: #383a40;
+    --color-text-dark: #1f2937;    /* Dark Text */
+    --color-success: #10b981;      /* Emerald Green */
+    --color-error: #ef4444;        /* Red */
 }
 
 .content{
-    margin-top: 50px;
-    margin-left: 10px;
-    margin-right: 10px;
+  margin-top: 25px;
 }
 
-.slide-buttons {
+#header label {
+    display: block;
+    margin-bottom: unset;
+    font-weight: 600;
+    text-align: left;
+    color: #374151; /* Slightly softer dark text */
+    margin: 5px 0px 0px 0px
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--color-background), #e4e9f2);
+    color: var(--color-text-dark);
+    margin: 0;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 20px;
+    min-height: 100vh;
+}
+
+/* Navbar container */
+.navbar {
+  position: sticky;
+  z-index: 1000;
+  max-height: 100px;
+
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  transition: max-height 0.5s ease, padding 0.5s ease;
+  overflow: hidden;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
+  padding-bottom: 5px;
+  
+}
+
+.nav-indicator {
+  font-size: 0.7em;
+  margin-left: 8px;
+  color: #555;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+/* Rotate when navbar expands */
+.navbar:hover .nav-indicator {
+  transform: rotate(180deg); /* ▼ becomes ▲ */
+  color: var(--color-primary);
+}
+
+/* Header (always visible) */
+#header {
+  font-family: "Segoe UI", sans-serif;
+  height: 50px;
+  font-size: 2em;
+  font-weight: bold;
+  color: #333;
+  margin: 5px 0;
+}
+
+.nav-links {
+  display: flex;
+  height: auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  opacity: 1;
+  overflow-y: scroll;
+  transition: opacity 0.4s ease, height 0.5s ease, padding 0.5s ease;
+  width: 100%;
+}
+
+/* Hide text until hover */
+.nav-text {
+  display: none;
+  margin-left: 6px;
+}
+
+/* Nav links container */
+.nav-links-pages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.nav-links-settings {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 10px;
+  
+}
+
+.nav-links a i {
+  font-size: 14px;
+  color: white;
+}
+
+.navbar .nav-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;  /* small square buttons */
+  height: 30px;
+  padding: 0;
+  border-radius: 25%;
+}
+
+/* When hovered — expand and show labels */
+.navbar:hover {
+  max-height: 225px;
+}
+
+.navbar:hover .nav-links a {
+  width: auto;
+  padding: 8px 14px;
+  border-radius: 6px;
+}
+
+.navbar:hover .nav-text {
+  display: inline;
+}
+
+/* Show links when hovered */
+.navbar:hover .nav-links {
+  opacity: 1;
+  padding-bottom: 5px;
+  height: auto;
+  transition: opacity 0.4s ease, height 0.5s ease, padding 0.5s ease;
+}
+
+/* Individual nav links */
+.nav-links-pages a {
+  text-decoration: none;
+  font-size: 16px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background-color: #1D4ED8;;
+  color: white;
+  transition: background-color 0.3s, transform 0.2s ease;
+}
+
+.nav-links-pages a:hover {
+  background-color: #1E40AF;
+  transform: scale(1.05);
+}
+
+/* Highlight active tab */
+.nav-links-pages a.active {
+  background-color: #333;
+  border: 1px solid white;
+  font-weight: bold;
+}
+
+.nav-links-settings a {
+  text-decoration: none;
+  font-size: 16px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background-color: var(--color-nav-links-settings-buttons);
+  color: white;
+  transition: background-color 0.3s, transform 0.2s ease;
+}
+
+.nav-links-settings a:hover {
+  background-color: var(--color-nav-links-settings-buttons-hover);
+  transform: scale(1.05);
+}
+
+/* Highlight active tab */
+.nav-links-settings a.active {
+  background-color: #333;
+  border: 1px solid white;
+  font-weight: bold;
+}
+
+@media (max-width: 250px) {
+    .nav-links-settings {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
-    max-width: 0;
-    opacity: 0;
-    transition: max-width 0.5s ease, opacity 0.5s ease;
-    overflow-x: hidden;
-}
-
-.slide-buttons.show {
-    max-width: 500px;
-    opacity: 1;
-}
-
-.slide-btn {
-    height: 40px;
-    line-height: 40px;
-    font-size: 16px;
-    padding: 0px 15px;
-    background-color: rgb(96, 53, 252);
-    border: none;
-    color: white;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: transform 0.3s ease;
-    white-space: nowrap;
-    overflow: hidden;
-    display: inline-block;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-.slide-btn:hover {
-    transform: scale(1.1);
-}
-
-.button-container {
-    max-height: 80px;
-    animation: fadeSlide 0.6s ease-in-out;
-}
-
-@keyframes fadeSlide {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Error message display css */
-.flash-message {
-    position: fixed;
-    top: 80px; /* adjust depending on your header height */
-    left: 50%;
-    transform: translateX(-50%); /* center horizontally */
-    padding: 12px 24px;
-    border-radius: 8px;
-    color: white;
-    font-weight: bold;
-    z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    opacity: 1;
     transition: opacity 0.4s ease;
-    pointer-events: none;
-    background-color: #333;
-    min-width: 250px;
-    text-align: center;
-}
-
-.flash-message.success {
-    background-color: #d1fae5;
-    color: #065f46;
-    border: 1px solid #10b981;
-}
-
-.flash-message.error {
-    background-color: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #ef4444;
-}
-
-.flash-message.warning {
-    background-color: #fff3cd;  
-    color: #856404;             
-    border: 1px solid #ffeeba; 
-}
-
-@media (max-width: 950px) {
-    .button-container {
-        flex-direction: column;
-        align-items: center;
-        padding: 12px 16px;
-        background-color: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    }
-    
-    #main-button {
-        padding: 8px 12px; /* Restore original balanced padding */
-        align-self: flex-start; /* Optional: keeps button aligned to the right */
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    }
-    .slide-buttons {
-        flex-direction: column;
-        width: 100%;
-        padding: 10px 15px;
-        
-        background-color: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 8px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Match button-container shadow */
-
-        transition: max-height 0.6s ease-in-out, opacity 0.6s ease-in;
-        
-        max-height: 0;
-        opacity: 0;
-
-    }
-
-    .slide-buttons.show {
-        max-height: 500px;
-        opacity: 1;
-    }
+  }
+  .nav-links {
+    justify-content: unset;
+  }
 }

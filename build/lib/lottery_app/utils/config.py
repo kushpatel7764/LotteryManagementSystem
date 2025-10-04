@@ -16,7 +16,7 @@ from importlib import resources
 #db_path = os.path.join(db_dir, "Lottery_Management_Database.db")
 #sql_file_path = os.path.join(db_dir, "Lottery_DB_Schema.sql")
 
-with resources.path("src.database", "Lottery_Management_Database.db") as db_file_path:
+with resources.path("lottery_app.database", "Lottery_Management_Database.db") as db_file_path:
     db_path = str(db_file_path)
     db_dir = os.path.dirname(db_path)
     sql_file_path = os.path.join(db_dir, "Lottery_DB_Schema.sql")

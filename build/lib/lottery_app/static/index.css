@@ -1,10 +1,3 @@
-body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #f5f7fa, #e4e9f2);
-    margin: 0;
-    padding: 0;
-}
-
 .home-container {
     display: flex;
     flex-direction: column;
@@ -16,65 +9,68 @@ body {
 }
 
 h1 {
-    font-size: 36px;
-    color: #1f2937;
-    margin-bottom: 50px;
+    font-size: 2.5rem; /* Modern heading size */
+    color: #0d47a1; /* Professional blue */
+    margin-bottom: 3rem;
     font-weight: 700;
+    letter-spacing: -0.025em;
 }
 
 .card {
     background: white;
-    padding: 40px 50px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    padding: 2.5rem;
+    border-radius: 12px;
+    /* Subtle, single-layer shadow */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
     display: flex;
     flex-direction: column;
-    gap: 30px;
-    max-width: 500px;
+    gap: 1.5rem;
+    max-width: 450px;
     width: 100%;
+    border: 1px solid  #e0e0e0;
 }
 
 .nav-buttons,
 .user_edit_buttons {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 1rem;
 }
 
 .button {
-    padding: 14px;
-    background-color: #4f46e5;
+    padding: 0.85rem 1.5rem;
+    background-color:  #1f2937; /* Dark button color */
     color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
+    border:  1px solid #1f2937;;
+    border-radius: 8px;
+    font-size: 1rem;
     font-weight: 600;
+    text-decoration: none;
     cursor: pointer;
-    transition: all 0.3s ease;
-    width: 100%;
+    transition: all 0.2s ease-in-out;
 }
 
 .button:hover {
-    background-color: #4338ca;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);
+    background-color: #374151;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Special buttons */
-#settings_btn {
-    background-color: #6b7280;
+.button:active {
+    transform: translateY(1px);
 }
 
-#settings_btn:hover {
-    background-color: #4b5563;
-    box-shadow: 0 6px 15px rgba(107, 114, 128, 0.3);
+/* Secondary/Edit Button (Light, subtle) */
+.user_edit_buttons .button {
+    background-color: white;
+    color: #1f2937;
+    border: 1px solid #d1d5db;
 }
 
-#business_profile_btn {
-    background-color: #10b981;
+.user_edit_buttons .button:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
 }
 
-#business_profile_btn:hover {
-    background-color: #059669;
-    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+.nav-buttons a {
+    text-decoration: none;
 }

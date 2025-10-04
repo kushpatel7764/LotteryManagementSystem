@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Lottery Ticket App - Home</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,13 +13,13 @@
         <h1>Lottery Management System</h1>
         <div class="card">
             <div class="nav-buttons">
-                <a href="{{ url_for('tickets.scan_tickets') }}"><button class="button">📷 Scan Tickets</button></a>
-                <a href="{{ url_for('books.books_managment') }}"><button class="button">📚 Books Management</button></a>
-                <a href="{{ url_for('reports.edit_reports') }}"><button class="button">📝 Edit Reports</button></a>
+                <a href="{{ url_for('tickets.scan_tickets') }}" class="button">Scan Tickets</a>
+                <a href="{{ url_for('books.books_managment') }}" class="button">Books Management</a>
+                <a href="{{ url_for('reports.edit_reports') }}" class="button">Edit Reports</a>
             </div>
             <div class="user_edit_buttons">
-                <a href="{{ url_for('settings.settings') }}"><button class="button" id="settings_btn">⚙ Settings</button></a>
-                <a href="{{ url_for('business_profile.business_profile') }}"><button class="button" id="business_profile_btn">🏢 Business Profile</button></a>
+                <a href="{{ url_for('settings.settings') }}" class="button" id="settings_btn">Settings</a>
+                <a href="{{ url_for('business_profile.business_profile') }}" class="button" id="business_profile_btn">Business Profile</a>
             </div>
         </div>
     </div>

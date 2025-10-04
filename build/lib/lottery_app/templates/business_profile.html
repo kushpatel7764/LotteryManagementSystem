@@ -25,18 +25,15 @@
 
 
         <div id="profile_container">
-            <table id="profile_table">
-                <tr>
-                    <td>
-                        <form method="post" action="/business_profile" id="businessPortfolioForm">
-                            <label>Name: <input type="text" id="business_name" name="BusinessName" placeholder="e.g. Scuttlebutts Liquors" {% if business_Info["Name"] %} value="{{ business_Info["Name"] }}" {% endif %}></label>
-                            <label>Address: <input type="text" id="business_address" name="BusinessAddress" placeholder="123 Main St, Springfield, IL 62704"  {% if business_Info["Address"] %} value="{{ business_Info["Address"] }}" {% endif %}></label>
-                            <label>Phone: <input type="tel" id="business_phone"  placeholder="Enter 10-digit number" name="BusinessPhone" {% if business_Info["Phone"] %} value="{{ business_Info["Phone"] }}" {% endif %}></label>
-                            <label>Email: <input type="text" id="business_email" name="BusinessEmail" placeholder="e.g. johndoe@example.com" {% if business_Info["Email"] %} value="{{ business_Info["Email"] }}" {% endif %}></label>
-                            <button type="submit">Save</button>
-                        </form>
-                    </td>
-                </tr>
-            </table>
+            <form method="post" action="/business_profile" id="businessPortfolioForm">
+                <h2 id="GI_Title">General Information</h2>
+                <div class="form-field-group">
+                    <label>Business Name: <input type="text" id="business_name" name="BusinessName" placeholder="e.g. Scuttlebutts Liquors" {% if business_Info["Name"] %} value="{{ business_Info["Name"] }}" {% endif %}></label>
+                    <label>Address: <input type="text" id="business_address" name="BusinessAddress" placeholder="123 Main St, Springfield, IL 62704"  {% if business_Info["Address"] %} value="{{ business_Info["Address"] }}" {% endif %}></label>
+                    <label>Phone: <input type="tel" id="business_phone"  placeholder="Enter 10-digit number" name="BusinessPhone" {% if business_Info["Phone"] %} value="{{ business_Info["Phone"] }}" {% endif %}></label>
+                    <label>Email: <input type="text" id="business_email" name="BusinessEmail" placeholder="e.g. johndoe@example.com" {% if business_Info["Email"] %} value="{{ business_Info["Email"] }}" {% endif %}></label>
+                </div>
+                <button type="submit">Save Profile</button>
+            </form>
         </div>
 {% endblock %}

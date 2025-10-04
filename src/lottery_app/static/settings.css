@@ -1,59 +1,168 @@
-form {
-    padding: 30px 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+/* --- Global Layout/Container Styling --- */
+body {
+    font-family: 'Inter', sans-serif; /* Ensuring consistency with home page */
+    background: linear-gradient(135deg, #f5f7fa, #e4e9f2);
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+}
+/* card navigation bar */
+/* glass effect */
+/* glass icons */
+/* dock */
+/* stepper */
+.settings-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    padding: 20px;
+    max-width: 800px; /* Limits the max width of the settings area */
+    margin: 30px auto;
+}
+
+/* --- Setting Card Styling --- */
+.setting-card {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
     text-align: center;
-    font-family: "Segoe UI", sans-serif;
-    font-size: 1em;
-    background-color: rgb(230, 230, 230);
+}
+
+.setting-card h2 {
+    font-size: 1.5em;
+    color: #1f2937;
+    margin-bottom: 10px;
+}
+
+.setting-card p {
+    color: #6b7280;
+    margin-bottom: 25px;
+    font-size: 0.95em;
+}
+
+/* --- Form and Input Styling --- */
+.setting-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
 }
 
 label {
     display: block;
-    margin-bottom: 12px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #374151;
+    text-align: left;
+    width: 100%; /* Important for alignment */
+    max-width: 300px; /* Matches input width */
 }
 
-select {
+select, input[type="text"] {
     padding: 10px 15px;
     font-size: 1em;
+    width: 100%;
+    max-width: 300px;
     border-radius: 8px;
     border: 1px solid #ccc;
     outline: none;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-select:focus {
-    border-color: #007BFF;
+select:focus, input[type="text"]:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
 }
 
-#settings_table{
-    border-spacing: 2%;
-    margin: 0 auto;
-}
-#settings_table td {
-    text-align: center;
-    padding: 10px;
-}
-
+/* --- Button Styling (General) --- */
 button {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #4f46e5;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    font-weight: 600;
+    width: 100%;
+    max-width: 300px;
 }
-button:hover {
+
+/* Specific Style for Save Path Button */
+.setting-form button[type="submit"]:not(.toggle-button) {
+    background-color: #10b981; /* Green for Save */
+}
+
+.setting-form button[type="submit"]:not(.toggle-button):hover {
+    background-color: #059669;
+    transform: translateY(-1px);
+}
+
+/* --- Toggle Button Styling (Specific) --- */
+.toggle-button {
+    margin-top: 10px;
+}
+
+/* Style when polling is currently DISABLED (shows 'Enable' button - Primary Blue) */
+.enable-btn-style {
+    background-color: #4f46e5; 
+}
+.enable-btn-style:hover {
     background-color: #4338ca;
 }
 
-input{
-    padding: 10px 15px;
-    font-size: 1em;
-    border-radius: 8px;
-    border: 1px solid #c2c2c2;
-    outline: none;
-    transition: border-color 0.3s ease;
+/* Style when polling is currently ENABLED (shows 'Disable' button - Red) */
+.disable-btn-style {
+    background-color: #ef4444; 
+}
+.disable-btn-style:hover {
+    background-color: #dc2626;
 }
 
+/* --- Flash Message Styling (Re-used from other files) --- */
+.flash-message {
+    position: fixed;
+    top: 80px; /* Adjust based on navButton.html header height */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: opacity 1s ease-out; /* For fade out effect */
+}
+
+.flash-message.success {
+    background-color: #10b981;
+}
+
+.flash-message.error {
+    background-color: #ef4444;
+}
+
+.flash-message.warning {
+    background-color: #f59e0b;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 600px) {
+    .settings-container {
+        padding: 10px;
+        margin-top: 20px;
+    }
+    .setting-card {
+        padding: 20px;
+    }
+    .setting-form {
+        width: 100%;
+    }
+    select, input[type="text"], button {
+        max-width: 100%; /* Full width on smaller screens */
+    }
+}

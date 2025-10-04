@@ -1,68 +1,151 @@
-form {
-    background: rgb(230, 230, 230);
-    padding: 30px 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-family: "Segoe UI", sans-serif;
-    font-size: 1em;
-    text-align: center;
+/* --- Color Palette & Typography --- */
+:root {
+    --color-primary: #4f46e5;      /* Base Indigo - Used for general links/theme/focus */
+    --color-primary-dark: #4338ca; 
+    --color-action-button: #1D4ED8; /* NEW: Darker Royal Blue for primary actions (Save) */
+    --color-action-hover: #1E40AF;  /* NEW: Slightly darker for hover */
+    --color-background: #f5f7fa;   /* Very Light Grey/Blue */
+    --color-text-dark: #1f2937;    /* Dark Text */
+    --color-success: #10b981;      /* Emerald Green */
+    --color-error: #ef4444;        /* Red */
 }
 
-#profile_table{
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--color-background), #e4e9f2);
+    color: var(--color-text-dark);
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+/* --- Profile Container (The main card) --- */
+#profile_container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Aligns content to the top within the view */
+    padding: 20px 0;
+}
+
+form {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); /* Elevated shadow */
+    font-size: 1em;
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+    box-sizing: border-box;
+}
+
+#GI_Title {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--color-text-dark);
+    margin-bottom: 30px;
+}
+
+/* --- Input and Label Styling --- */
+
+/* Resetting table margins for the card layout */
+#profile_table {
     margin: 0 auto;
+    border-spacing: 0;
+    width: 100%;
+}
+
+#profile_table tr, #profile_table td {
+    display: block; /* Make table elements flow like divs */
+    width: 100%;
+    padding: 0;
 }
 
 label {
     display: block;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-align: left;
+    color: #374151; /* Slightly softer dark text */
 }
 
-#GI_Title{
-    font-size: 1.5em;
-}
-
-select {
-    padding: 10px 15px;
+/* Ensuring input fields are full width within their label/container */
+input[type="text"], input[type="tel"], input[type="email"] {
+    display: block;
+    width: 100%; /* Full width within the form structure */
+    padding: 12px 15px;
+    margin-top: 8px; /* Space between label text and input box */
     font-size: 1em;
     border-radius: 8px;
     border: 1px solid #ccc;
     outline: none;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
 }
 
-select:focus {
-    border-color: #007BFF;
+input[type="text"]:focus, input[type="tel"]:focus, input[type="email"]:focus {
+    border-color: var(--color-primary); /* Still use indigo for focus outline */
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
 }
 
-#settings_table{
-    border-spacing: 2%;
-    margin: 0 auto;
-}
-#settings_table td {
-    text-align: center;
-    padding: 10px;
-}
-
+/* --- Button Styling (Save button) --- */
 button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #4f46e5;
+    padding: 12px 25px;
+    font-size: 1em;
+    /* UPDATED TO TEAL */
+    background-color: var(--color-action-button); 
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 10px; /* Consistent rounded corners */
     cursor: pointer;
+    font-weight: 600;
+    margin-top: 15px;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    width: 100%;
+    max-width: 250px;
 }
 button:hover {
-    background-color: #4338ca;
+    /* UPDATED HOVER TO DARKER TEAL */
+    background-color: var(--color-action-hover); 
+    transform: translateY(-1px);
 }
 
-input{
-    padding: 10px 15px;
-    font-size: 1em;
+/* --- Flash Message Styling (Re-used for consistency) --- */
+.flash-message {
+    position: fixed;
+    top: 80px; 
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
     border-radius: 8px;
-    border: 1px solid #ccc;
-    outline: none;
-    transition: border-color 0.3s ease;
+    color: white;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: opacity 1s ease-out;
 }
 
+.flash-message.success {
+    background-color: var(--color-success);
+}
 
+.flash-message.error {
+    background-color: var(--color-error);
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 600px) {
+    form {
+        padding: 25px;
+        border-radius: 12px;
+    }
+
+    #GI_Title {
+        font-size: 1.5em;
+        margin-bottom: 20px;
+    }
+
+    button {
+        max-width: 100%;
+    }
+}

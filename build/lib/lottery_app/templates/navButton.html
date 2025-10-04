@@ -1,45 +1,46 @@
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='Nav.css') }}">
-    {% block extra_css %}{% endblock %}
-    {% block extra_js %}{% endblock %}
-    
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}{% endblock %}</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='Nav.css') }}">
+{% block extra_css %}{% endblock %}
 </head>
 <body>
-    <div class="button-container">
-        <div id="header">
-            <label>{% block header %} Header {% endblock %}</label>
-        </div>
-        <div class="right">
-            <button id="main-button">☰</button>
-            <div class="slide-buttons" id="slide-buttons">
-                <button onclick="window.location.href='/edit_reports'" class="slide-btn">Edit Reports</button>
-                <button onclick="window.location.href='/books_managment'" class="slide-btn">Books Management</button>
-                <button onclick="window.location.href='/scan_tickets'" class="slide-btn">Scan Tickets</button>
-                <button onclick="window.location.href='/'" class="slide-btn">Home</button>
-            </div>
-        </div>
+<div class="navbar">
+  <div id="header">
+    <label>
+      {% block header %} Header {% endblock %}
+      <span class="nav-indicator">▼</span>
+    </label>
+    
+  </div>
+  <div class="nav-links">
+    <div class="nav-links-pages">
+      <a href="/edit_reports" class="{% if request.path == '/edit_reports' %}active{% endif %}">
+        <i class="fas fa-edit"></i><span class="nav-text"> Edit Reports</span>
+      </a>
+      <a href="/books_managment" class="{% if request.path == '/books_managment' %}active{% endif %}">
+        <i class="fas fa-book"></i><span class="nav-text"> Books Management</span>
+      </a>
+      <a href="/scan_tickets" class="{% if request.path == '/scan_tickets' %}active{% endif %}">
+        <i class="fas fa-qrcode"></i><span class="nav-text"> Scan Tickets</span>
+      </a>
     </div>
-    <script>
-        const mainBtn = document.getElementById("main-button");
-        const slideBtns = document.getElementById("slide-buttons");
-
-        mainBtn.addEventListener("click", () => {
-            slideBtns.classList.toggle("show");
-            const isVisible = slideBtns.classList.contains("show");
-
-            if (isVisible){
-                mainBtn.innerText = "➤";
-            }else{
-                mainBtn.innerText = "☰";  
-            }
-        });
-    </script>
-    <div class="content">
-        {% block content%}{% endblock %}
+    <div class="nav-links-settings">
+      <a href="/settings" class="{% if request.path == '/settings' %}active{% endif %}">
+        <i class="fas fa-cog"></i><span class="nav-text"> Settings</span>
+      </a>
+      <a href="/business_profile" class="{% if request.path == '/business_profile' %}active{% endif %}">
+        <i class="fas fa-briefcase"></i><span class="nav-text"> Business Profile</span>
+      </a>
     </div>
+  </div>
+</div>
+
+<div class="content">
+{% block content %}{% endblock %}
+</div>
 </body>
 </html>
