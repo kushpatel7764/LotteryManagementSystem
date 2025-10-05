@@ -72,7 +72,7 @@ body {
 /* Rotate when navbar expands */
 .navbar:hover .nav-indicator {
   transform: rotate(180deg); /* ▼ becomes ▲ */
-  color: var(--color-primary);
+  color: var(--color-action-button);
 }
 
 /* Header (always visible) */
@@ -134,11 +134,13 @@ body {
   height: 30px;
   padding: 0;
   border-radius: 25%;
+  transition: width 0.4s ease, height 0.5s ease, padding 0.5s ease, border-radius 0.3s ease;
 }
 
 /* When hovered — expand and show labels */
 .navbar:hover {
   max-height: 225px;
+  transition: height 0.5s ease;
 }
 
 .navbar:hover .nav-links a {
@@ -167,12 +169,13 @@ body {
   border-radius: 6px;
   background-color: #1D4ED8;;
   color: white;
-  transition: background-color 0.3s, transform 0.2s ease;
+  transition: background-color 0.3s, transform 0.2s ease, border-radius 0.3s ease;
 }
 
 .nav-links-pages a:hover {
   background-color: #1E40AF;
   transform: scale(1.05);
+  transition: background-color 0.3s, transform 0.2s ease;
 }
 
 /* Highlight active tab */
@@ -189,12 +192,13 @@ body {
   border-radius: 6px;
   background-color: var(--color-nav-links-settings-buttons);
   color: white;
-  transition: background-color 0.3s, transform 0.2s ease;
+  transition: background-color 0.3s, transform 0.2s ease, border-radius 0.3s ease;
 }
 
 .nav-links-settings a:hover {
   background-color: var(--color-nav-links-settings-buttons-hover);
   transform: scale(1.05);
+  transition: background-color 0.3s, transform 0.2s ease;
 }
 
 /* Highlight active tab */
