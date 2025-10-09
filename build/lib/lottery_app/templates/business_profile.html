@@ -6,14 +6,24 @@
 
 {% block extra_js %}
     <script>
-        setTimeout(() => {
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Flash message script loaded"); // Check this in console
+
             const msg = document.querySelector(".flash-message");
+            console.log("Found flash message:", msg); // Check if this prints the element
+
             if (msg) {
-                msg.style.opacity = '0'; // Trigger CSS fade out
-                setTimeout(() => msg.remove(), 1000);
+                setTimeout(() => {
+                    msg.style.transition = "opacity 1s ease-out"; // ensure transition is set
+                    msg.style.opacity = "0";
+                    setTimeout(() => {
+                        console.log("Removing flash message");
+                        msg.remove();
+                    }, 1000);
+                }, 4000);
             }
-        }, 4000); // Start fade after 4 seconds
-    </script>
+        });
+    </script>  
 {% endblock %}
 {% block header %} Business Profile {% endblock %}  
 {% block content %}

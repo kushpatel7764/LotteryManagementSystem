@@ -1,7 +1,5 @@
 /* --- Color Palette & Typography --- */
 :root {
-    --color-primary: #4f46e5;      /* Base Indigo - Used for general links/theme/focus */
-    --color-primary-dark: #4338ca; 
     --color-action-button: #1D4ED8; /* NEW: Darker Royal Blue for primary actions (Save) */
     --color-action-hover: #1E40AF;  /* NEW: Slightly darker for hover */
     --color-background: #f5f7fa;   /* Very Light Grey/Blue */
@@ -10,10 +8,8 @@
     --color-text-dark: #1f2937;    /* Dark Text */
     --color-success: #10b981;      /* Emerald Green */
     --color-error: #ef4444;        /* Red */
-}
-
-.content{
-  margin-top: 25px;
+    --color-warning: #f59e0b;      /* Amber */
+    --border-radius-reg: 2px;
 }
 
 #header label {
@@ -23,6 +19,10 @@
     text-align: left;
     color: #374151; /* Slightly softer dark text */
     margin: 5px 0px 0px 0px
+}
+
+.content{
+  margin-top: 130px;
 }
 
 body {
@@ -38,7 +38,10 @@ body {
 
 /* Navbar container */
 .navbar {
-  position: sticky;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   max-height: 100px;
 
@@ -58,7 +61,7 @@ body {
   padding-right: 10px;
   padding-top: 10px;
   padding-bottom: 5px;
-  
+  margin: 15px
 }
 
 .nav-indicator {
@@ -133,8 +136,8 @@ body {
   width: 30px;  /* small square buttons */
   height: 30px;
   padding: 0;
-  border-radius: 25%;
-  transition: width 0.4s ease, height 0.5s ease, padding 0.5s ease, border-radius 0.3s ease;
+  border-radius: var(--border-radius-reg);
+  transition: width 0.4s ease, height 0.5s ease, padding 0.5s ease;
 }
 
 /* When hovered — expand and show labels */
@@ -146,11 +149,12 @@ body {
 .navbar:hover .nav-links a {
   width: auto;
   padding: 8px 14px;
-  border-radius: 6px;
+  transition: width 0.4s ease, padding 0.5s ease;
 }
 
 .navbar:hover .nav-text {
   display: inline;
+  transition: display 0.4s ease;
 }
 
 /* Show links when hovered */
@@ -166,7 +170,7 @@ body {
   text-decoration: none;
   font-size: 16px;
   padding: 8px 14px;
-  border-radius: 6px;
+  border-radius: var(--border-radius-reg);
   background-color: #1D4ED8;;
   color: white;
   transition: background-color 0.3s, transform 0.2s ease, border-radius 0.3s ease;
@@ -189,7 +193,7 @@ body {
   text-decoration: none;
   font-size: 16px;
   padding: 8px 14px;
-  border-radius: 6px;
+  border-radius: var(--border-radius-reg);
   background-color: var(--color-nav-links-settings-buttons);
   color: white;
   transition: background-color 0.3s, transform 0.2s ease, border-radius 0.3s ease;

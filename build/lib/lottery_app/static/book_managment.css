@@ -1,16 +1,63 @@
+:root {
+    --color-action-button: #1D4ED8; /* NEW: Darker Royal Blue for primary actions (Save) */
+    --color-action-hover: #1E40AF;  /* NEW: Slightly darker for hover */
+    --color-background: #fcfcfc;   /* Very Light Grey/Blue */
+    --color-input-selected: #90a9fc; /* Light Indigo for selected dropdown */
+    --color-nav-links-settings-buttons: #696d78; /* Bright Blue for Nav Links and Settings Buttons */
+    --color-nav-links-settings-buttons-hover: #383a40;
+    --color-text-dark: #1f2937;    /* Dark Text */
+    --color-success: #10b981;      /* Emerald Green */
+    --color-error: #ef4444;        /* Red */
+    --color-warning: #f59e0b;      /* Amber */
+    --border-radius-reg: 2px;
+}
+
 #scanInfoButton{
     position: relative;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
+    /* Increase size for better touch/click target and visual weight */
+    width: 38px; 
+    height: 38px; 
+    border-radius: 6px; /* Match or complement the input field radius */
     border: none;
-    background-color: #007BFF;
+    background-color: #60a5fa; /* A lighter, more accessible blue */
     color: white;
-    font-size: 10px;
-    text-align: center;
-    line-height: 16px;
+    font-size: 16px; /* Larger font for the 'i' */
+    font-weight: bold;
+    /* Use flex to perfectly center the 'i' */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 0;
     cursor: pointer;
+    /* Ensure it doesn't shrink in the flex container */
+    flex-shrink: 0; 
+    transition: background-color 0.2s ease;
+}
+
+#scanInfoButton:hover {
+    background-color: var(--color-action-button); /* Use the darker primary color on hover */
+}
+
+#infoModalContent {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 30px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    position: relative;
+    animation: modalPop 0.3s ease;
+}
+
+@keyframes modalPop {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 #infoModal{
@@ -21,32 +68,55 @@
     top: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0,0,0,0.6);
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(6px);
+    background-color: rgba(0,0,0,0.1);
+
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* Add a visible state */
+#infoModal.show {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+#infoModal img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
 #InfoModalCloseBtn{
     position: absolute;
-    top: -10px;
-    right: -10px;
-    background-color: #ff3d3d;
-    color: #333;
-    border: 1px solid #ff5e5e;
-    border-radius: 20%;
-    width: 24px;
-    height: 24px;
+    top: 10px;
+    right: 10px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
     font-size: 16px;
-    line-height: 20px;
     font-weight: bold;
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.15s ease;
 }
 
+#InfoModalCloseBtn:hover {
+    background-color: #ff0000;
+    transform: scale(1.1);
+}
 
 h1 {
     color: #333;
@@ -54,7 +124,28 @@ h1 {
 }
 
 .scan-box {
-    margin-bottom: 30px;
+    /* Use a slightly cleaner background from the dark text color for better contrast */
+    background-color: #f5f7fa; 
+    border: 1px solid #e0e7ff; /* A lighter blue/indigo border */
+    border-radius: 8px; /* Slightly larger radius for a modern feel */
+    padding: 20px 25px; /* Increased padding */
+    margin-bottom: 30px; /* Increased margin for separation */
+    /* A more subtle shadow gives a professional 'lifted' look */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1); 
+    max-width: 450px;
+}
+
+.scan-box label {
+  font-weight: 700; /* Bolder for the main title */
+  font-size: 1.1em; /* Slightly larger */
+  color: var(--color-text-dark); /* Using the defined dark text color */
+  margin-bottom: 15px; /* More separation from the input field */
+  display: block;
+}
+
+.scan-box input[type="text"] {
+  width: 100%;
+  max-width: 400px;
 }
 
 input[type="text"] {
@@ -62,50 +153,61 @@ input[type="text"] {
     width: 300px;
     font-size: 16px;
     border: 1px solid rgb(204, 204, 204);
-    border-radius: 6px;
+    border-radius: var(--border-radius-reg);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus {
+    border-color: var(--color-action-button); /* Highlight border on focus */
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2); /* Soft blue focus ring */
+    outline: none; /* Remove default focus outline */
+}
+
+/* Add this to your book_managment.css */
+.input-group-scan {
+    display: flex; /* Enable flex layout for alignment */
+    align-items: center; /* Vertically align items in the middle */
+    gap: 10px; /* Space between input and button */
+    max-width: 500px; /* Define a consistent max width for the group */
+}
+/* Ensure the input takes up the available space within the group */
+.input-group-scan input[type="text"] {
+    flex-grow: 1; /* Allows the input to fill the remaining space */
+    margin: 0; /* Remove default margin */
 }
 
 button {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #4f46e5;
+    background-color: var(--color-action-button);
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--border-radius-reg);
     cursor: pointer;
 }
 
 
 button:hover {
-    background-color: #4338ca;
+    background-color: var(--color-action-hover);
 }
-
-.status-activate_book_message, .status-add_book_message {
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-.status-activate_book_message.error{
-    color: red;
-}
-
-.status-add_book_message.error {
-    color: red;
-}
-.status-activate_book_message.success{
-    color: green;
-}
-
-.status-add_book_message.success {
-    color: green;
-}
-
-
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 30px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0);
+    /*box-shadow: 0 4px 10px rgba(0,0,0,0.05);*/
+}
+
+th{
+    background-color: #eef2ff; /* soft indigo */
+    color: #374151;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 13px;
+    padding: 12px 10px;
 }
 
 th, td {
@@ -113,13 +215,14 @@ th, td {
     padding: 12px;
     border: 1px solid #ddd;
 }
+
 /*Delete and Deactivate option CSS*/
 tr .options_Button{
     box-shadow: none;
     position: relative;
     padding: 5px;
-    background-color: rgb(249, 250, 251);
-    border-color: rgb(249, 250, 251);
+    background-color: rgba(249, 250, 251, 0);
+    border-color: rgba(249, 250, 251, 0);
     width: 0;
     height: 0;
     overflow: visible; /* allow contents to escape bounds */
@@ -127,8 +230,8 @@ tr .options_Button{
 
 tr .th_OptionsButton{
     box-shadow: none;
-    border-color: rgb(249, 250, 251);
-    background-color: rgb(249, 250, 251);
+    border-color: rgba(249, 250, 251, 0);
+    background-color: rgba(249, 250, 251, 0);
 }
 
 
@@ -146,12 +249,12 @@ td.options_Button.activated .dropdown-content button:hover{
     background-color: #48de81;
 }
 .dropbtn {
-  background-color: #4f46e5;
+  background-color: var(--color-action-button);
   border: none;
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: var(--border-radius-reg);
   transition: background-color 0.2s ease;
 }
 
@@ -159,12 +262,12 @@ td.options_Button.activated .dropdown-content button:hover{
   display: none;
   position: absolute;
   right: 0;
-  background-color: #4338ca;
-  min-width: 140px;
-  box-shadow: 0px 8px 16px #6f67d1;
+  background-color: var(--color-action-button);
+  min-width: 130px;
+  box-shadow: 0px 8px 16px var(--color-input-selected);
   z-index: 1;
-  border-radius: 8px;
-  padding: 6px 15px;
+  border-radius: var(--border-radius-reg);
+  padding: 5px 0px 5px 0px;
   box-sizing: border-box;
   overflow: hidden; 
 }
@@ -181,7 +284,7 @@ td.options_Button.activated .dropdown-content button:hover{
 }
 
 .dropdown-content button:hover {
-  background-color: #5c52cb;
+  background-color: var(--color-action-hover);
 }
 
 .dropdown-container.show .dropdown-content {
@@ -193,9 +296,14 @@ th {
     background-color: rgb(230, 230, 230);
 }
 
-tr.row {
+tr.row td:not(.options_Button){
     background-color: rgb(243, 244, 246); 
     font-weight: bold;
+}
+
+tr.row:hover td:not(.options_Button) {
+  background-color: #f1f5ff;
+  transition: background-color 0.2s ease;
 }
 
 .modal {
@@ -215,7 +323,7 @@ tr.row {
     background-color: white;
     margin: 15% auto;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: border;
     width: 300px;
     text-align: center;
 }
@@ -232,41 +340,31 @@ tr.row {
     box-shadow: 0 0 5px limegreen;
 }
 
-/* Error message display css */
+/* --- Flash Message Styling (Re-used from other files) --- */
 .flash-message {
     position: fixed;
-    top: 80px; /* adjust depending on your header height */
+    top: 80px; /* Adjust based on navButton.html header height */
     left: 50%;
-    transform: translateX(-50%); /* center horizontally */
+    transform: translateX(-50%);
     padding: 12px 24px;
-    border-radius: 8px;
+    border-radius: var(--border-radius-reg);
     color: white;
     font-weight: bold;
     z-index: 1000;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    opacity: 1;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-    background-color: #333;
-    min-width: 250px;
-    text-align: center;
+    transition: opacity 1s ease-out; /* For fade out effect */
 }
 
 .flash-message.success {
-    background-color: #d1fae5;
-    color: #065f46;
-    border: 1px solid #10b981;
+    background-color: var(--color-success);
 }
 
 .flash-message.error {
-    background-color: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #ef4444;
+    background-color: var(--color-error);
 }
 
 .flash-message.warning {
-    background-color: #fff3cd;  
-    color: #856404;             
-    border: 1px solid #ffeeba; 
+    background-color: var(--color-warning);
 }
+
 
