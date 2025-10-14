@@ -34,8 +34,8 @@ src/lottery_app/routes/settings.py
 src/lottery_app/routes/tickets.py
 src/lottery_app/static/BarcodeImg.JPG
 src/lottery_app/static/BookManagementInfoImg.JPG
-src/lottery_app/static/Check_Mark.png
-src/lottery_app/static/Edit_Icon.png
+src/lottery_app/static/Check_Mark.svg
+src/lottery_app/static/Edit_Icon.svg
 src/lottery_app/static/Nav.css
 src/lottery_app/static/Settingicon.png
 src/lottery_app/static/book_managment.css

@@ -139,6 +139,11 @@ h2 {
 }
 
 /*Edit Button*/
+.edit_button{
+    padding: 10px;
+    margin-left: 10px;
+}
+
 .edit_button img{
     width: 30px;
     height: 30px;
@@ -160,7 +165,15 @@ td .open-input {
     width: 60px !important;
     padding: 5px;
     font-size: 0.9rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-reg);
     text-align: center;
+}
+
+td .open-input:focus {
+    border-color: var(--color-action-button);
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
+    outline: none;
 }
 
 .modal {
@@ -248,9 +261,17 @@ input[type="text"]:focus {
 }
 
 .daily-totals-form input[type="number"]:focus {
-    border-color: var(--color-primary);
+    border-color: var(--color-action-button);
     box-shadow: 0 0 0 3px rgba(29,78,216,0.15);
     outline: none;
+}
+
+.form-input-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px 30px; /* row gap, column gap */
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 .form-group input[readonly] {
@@ -263,7 +284,7 @@ input[type="text"]:focus {
     grid-column: 1 / -1; /* Span the full width */
     margin-top: 15px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 15px; /* Spacing between Save and Download buttons */
 }
 

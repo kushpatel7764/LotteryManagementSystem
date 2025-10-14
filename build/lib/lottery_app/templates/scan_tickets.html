@@ -241,60 +241,63 @@
     <section class="totals-section">
         <h2>Report Totals</h2>
         <form method="POST" action="/submit" class="daily-totals-form">
-            <label for="instant_sold">Instant Tickets Sold:</label>
-            <div style="position: relative; display: inline-block;">
-                <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                <input name="instant_sold" id="instant_sold" 
-                    type="number" inputmode="decimal" min="0" step="0.01" 
-                    value="{{instant_tickets_sold_total}}" readonly
-                    style="padding-left: 20px;">
+            <div class="form-input-grid">
+                <div class="form-group">
+                    <label for="instant_sold">Instant Tickets Sold</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input name="instant_sold" id="instant_sold" 
+                            type="number" inputmode="decimal" min="0" step="0.01" 
+                            value="{{instant_tickets_sold_total}}" readonly
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="online_sold">Online Tickets Sold</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input type="number" name="online_sold" id="online_sold" 
+                            inputmode="decimal" min="0" step="0.01" required
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="instant_cashed">Instant Tickets Cashed</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input type="number" name="instant_cashed" id="instant_cashed"
+                            inputmode="decimal" min="0" step="0.01" required
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="online_cashed">Online Tickets Cashed</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input type="number" name="online_cashed" id="online_cashed"
+                            inputmode="decimal" min="0" step="0.01" required
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cash_on_hand">Cash On Hand</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input type="number" name="cash_on_hand" id="cash_on_hand"
+                            inputmode="decimal" min="0" step="0.01" required
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="total_due">Total Due</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input name="total_due" id="total_due"
+                            type="number" inputmode="decimal" min="0" step="0.01" readonly
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
             </div>
-            <br><br>
-
-            <label for="online_sold">Online Tickets Sold:</label>
-            <div style="position: relative; display: inline-block;">
-                <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                <input type="number" name="online_sold" id="online_sold" 
-                    inputmode="decimal" min="0" step="0.01" required
-                    style="padding-left: 20px;">
-            </div>
-            <br><br>
-
-            <label for="instant_cashed">Instant Tickets Cashed:</label>
-            <div style="position: relative; display: inline-block;">
-                <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                <input type="number" name="instant_cashed" id="instant_cashed"
-                    inputmode="decimal" min="0" step="0.01" required
-                    style="padding-left: 20px;">
-            </div>
-            <br><br>
-
-            <label for="online_cashed">Online Tickets Cashed:</label>
-            <div style="position: relative; display: inline-block;">
-                <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                <input type="number" name="online_cashed" id="online_cashed"
-                    inputmode="decimal" min="0" step="0.01" required
-                    style="padding-left: 20px;">
-            </div>
-            <br><br>
-
-            <label for="cash_on_hand">Cash On Hand:</label>
-            <div style="position: relative; display: inline-block;">
-                <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                <input type="number" name="cash_on_hand" id="cash_on_hand"
-                    inputmode="decimal" min="0" step="0.01" required
-                    style="padding-left: 20px;">
-            </div>
-            <br><br>
-
-            <label for="total_due">Total Due:</label>
-            <div style="position: relative; display: inline-block;">
-                <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                <input name="total_due" id="total_due"
-                    type="number" inputmode="decimal" min="0" step="0.01" readonly
-                    style="padding-left: 20px;">
-            </div>
-            <br><br>
 
             <button type="button" onclick="canSubmit(event)">Submit</button>
             <!-- Modal for Image -->

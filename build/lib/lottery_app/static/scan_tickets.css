@@ -459,6 +459,7 @@ h2 {
 
 /* Totals form inputs */
 .daily-totals-form input[type="number"] {
+    width: 100%;
     padding: 10px 12px 10px 24px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
@@ -469,7 +470,55 @@ h2 {
     box-shadow: 0 0 0 3px rgba(29,78,216,0.15);
 }
 
-/* Submit Button */
+.form-input-grid {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: var(--border-radius-reg);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px 30px; /* row gap, column gap */
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.form-input-grid div {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-input-grid label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    color: var(--color-text-dark);
+}
+
+.form-input-grid div {
+    position: relative;
+}
+
+.form-input-grid input:focus {
+    border-color: #2563eb; /* blue accent */
+    background-color: #fff;
+}
+
+.form-input-grid span {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85em;
+    color: #555;
+}
+
+.form-group input[readonly] {
+    background-color: #f3f4f6; /* Lighter background for non-editable fields */
+    color: var(--color-grey-text);
+}
+
 .daily-totals-form button {
     background: var(--color-success);
     border: none;
@@ -485,6 +534,8 @@ h2 {
     background: #059669;
     transform: translateY(-2px);
 }
+
+
 
 /* Animations */
 @keyframes fadeIn {
@@ -541,5 +592,8 @@ h2 {
     }
     #scanInfoButton {
         align-self: flex-end;
+    }
+     .form-input-grid {
+        grid-template-columns: 1fr;
     }
 }
