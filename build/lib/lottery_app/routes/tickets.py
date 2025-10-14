@@ -10,6 +10,7 @@ Handles:
 
 
 from flask import Blueprint, redirect, render_template, request, url_for
+from flask_login import login_required
 
 from lottery_app.database import database_queries
 from lottery_app.database import update_activated_books, update_sale_log
@@ -25,6 +26,7 @@ tickets_bp = Blueprint("tickets", __name__)
 
 
 @tickets_bp.route("/scan_tickets", methods=["GET", "POST"])
+@login_required
 def scan_tickets():
     """
     Route for scanning tickets.
@@ -138,6 +140,7 @@ def _render_scan_tickets(msg_data):
 
 
 @tickets_bp.route("/undo_scan", methods=["POST"])
+@login_required
 def undo_scan():
     """
     Route to undo the last scanned ticket for a given book.
@@ -191,6 +194,7 @@ def undo_scan():
 
 
 @tickets_bp.route("/book_sold_out", methods=["POST", "GET"])
+@login_required
 def book_sold_out():
     """
     Marks a book as sold out and updates related database tables.
@@ -275,6 +279,7 @@ def book_sold_out():
 
 
 @tickets_bp.route("/submit", methods=["GET", "POST"])
+@login_required
 def submit():
     """
     Submits the day's ticket sales if submission is allowed.

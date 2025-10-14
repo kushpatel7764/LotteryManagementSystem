@@ -8,6 +8,7 @@ from datetime import datetime
 
 from flask import (Blueprint, jsonify, redirect, render_template, request,
                    url_for)
+from flask_login import login_required
 
 from lottery_app.database import database_queries
 from lottery_app.database import (update_activated_books, update_books, update_sale_log,
@@ -22,6 +23,7 @@ report_bp = Blueprint("reports", __name__)
 
 # pylint: disable=too-many-locals
 @report_bp.route("/edit_reports", methods=["GET", "POST"])
+@login_required
 def edit_reports():
     """
     Display all sales reports with optional filtering by date and time.
@@ -99,6 +101,7 @@ def edit_reports():
 @report_bp.route(
     "/edit_report/<report_id>", methods=["GET", "POST"]
 )
+@login_required
 def edit_single_report(report_id):
     """
     Display a single sales report with all related sales logs.
@@ -147,6 +150,7 @@ def _create_scan_id(game_number, book_id, ticket_num, ticket_price, book_amount)
     return f"{game_number}{book_id}{ticket_num}{ticket_price}{book_amount}"
 
 @report_bp.route("/update_salesLog", methods=["GET", "POST"])
+@login_required
 def update_sales_log():
     """
     Update sales log entries for a given book and report.
@@ -340,6 +344,7 @@ def _handle_sold_book_reactivation(book_info, report_id_int, latest_report_id, c
 
 
 @report_bp.route("/update_sale_report/<report_id>", methods=["GET", "POST"])
+@login_required
 def update_sale_reports(report_id):
     """
     Update the summary sale report values for a given report.
@@ -387,6 +392,7 @@ def update_sale_reports(report_id):
 @report_bp.route(
     "/download/<int:report_id>", methods=["GET"]
 )  # change to GET for easier triggering
+@login_required
 def download_modified_report(report_id):
     """
     Trigger the download of the daily invoice report for a given report ID.

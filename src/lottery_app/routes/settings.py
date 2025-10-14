@@ -10,6 +10,7 @@ This module provides:
 import os
 
 from flask import Blueprint, render_template, request
+from flask_login import login_required
 
 from lottery_app.utils.config import (DEFAULT_DOWNLOADS_PATH, load_config,
                           update_invoice_output_path, update_ticket_order,
@@ -19,6 +20,7 @@ settings_bp = Blueprint("settings", __name__)
 
 
 @settings_bp.route("/settings", methods=["GET", "POST"])
+@login_required
 def settings():
     """
     Render and manage the settings page.

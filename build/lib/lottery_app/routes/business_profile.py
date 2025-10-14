@@ -9,6 +9,7 @@ the business profile information (name, address, phone, email).
 import re
 
 from flask import Blueprint, render_template, request
+from flask_login import login_required
 
 from lottery_app.utils.config import load_config, update_business_info
 
@@ -16,6 +17,7 @@ business_profile_bp = Blueprint("business_profile", __name__)
 
 
 @business_profile_bp.route("/business_profile", methods=["GET", "POST"])
+@login_required
 def business_profile():
     """
     Handle the business profile page.

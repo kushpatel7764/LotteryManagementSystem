@@ -1,0 +1,33 @@
+{% extends "navButton.html" %}
+{% block title %}Login{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+{% endblock %}
+
+{% block header %} Login {% endblock %}  
+{% block content %}
+<div class="login-container">
+
+    <form method="POST" action="{{ url_for('security.login') }}" class="login-form">
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Sign in to continue</p>
+
+        <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" placeholder="Enter your username" required>
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" placeholder="Enter your password" required>
+        </div>
+
+        <button type="submit" class="login-btn">Login</button>
+
+        <p class="signup-text">
+            Don’t have an account? 
+            <a href="{{ url_for('security.signup') }}">Create one</a>
+        </p>
+    </form>
+</div>
+{% endblock %}

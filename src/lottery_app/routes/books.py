@@ -8,6 +8,7 @@ adding, activating, deactivating, and deleting books in the system.
 import sqlite3
 from flask import (Blueprint, jsonify, redirect, render_template, request,
                    url_for)
+from flask_login import login_required
 
 from lottery_app.database import database_queries
 from lottery_app.database import update_books, update_activated_books
@@ -20,6 +21,7 @@ books_bp = Blueprint("books", __name__)
 
 
 @books_bp.route("/books_managment", methods=["GET", "POST"])
+@login_required
 def books_managment():
     """
     Display and manage books.
@@ -86,6 +88,7 @@ def books_managment():
 
 
 @books_bp.route("/delete_book", methods=["POST", "GET"])
+@login_required
 def delete_book():
     """
     Deletes a book after deactivating it.
@@ -150,6 +153,7 @@ def delete_book():
 
 
 @books_bp.route("/deactivate_book", methods=["POST", "GET"])
+@login_required
 def deactivate_book():
     """
     Deactivate a book by its ID.
@@ -208,6 +212,7 @@ def deactivate_book():
 
 
 @books_bp.route("/activate_book", methods=["GET", "POST"])
+@login_required
 def activate_book():
     """
     Activate a book by its scanned code.

@@ -6,6 +6,7 @@ This module provides:
 """
 from threading import Lock
 from flask import Blueprint, request, jsonify
+from flask_login import login_required
 
 from lottery_app.utils.config import BARCODE_STACK
 
@@ -16,6 +17,7 @@ BARCODE_LOCK = Lock()
 scanner_bp = Blueprint("scanner", __name__)
 
 @scanner_bp.route("/receive", methods=["POST"])
+@login_required
 def receive():
     """
     Receives a barcode via POST request and emits it to connected clients.
@@ -35,6 +37,7 @@ def receive():
     return "Received"
 
 @scanner_bp.route("/check_barcode_stack", methods=["GET"])
+@login_required
 def check():
     """
     Endpoint to check and retrieve the latest barcode from the queue.
