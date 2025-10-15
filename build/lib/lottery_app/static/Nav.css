@@ -12,13 +12,66 @@
     --border-radius-reg: 2px;
 }
 
+#header {
+  display: flex;
+  width: -webkit-fill-available;
+  font-family: "Segoe UI", sans-serif;
+  justify-content: space-between;
+  margin-bottom: unset;
+  align-items: center;
+
+  height: 50px;
+  font-size: 2em;
+  font-weight: bold;
+  color: #333;
+}
+
 #header label {
-    display: block;
-    margin-bottom: unset;
-    font-weight: 600;
-    text-align: left;
-    color: #374151; /* Slightly softer dark text */
-    margin: 5px 0px 0px 0px
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  text-decoration: none;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  border-radius: var(--border-radius-reg);
+  background-color: #c83939;
+  color: white;
+  transform: scale(1);
+  transition: background-color 0.3s ease, transform 0.2s ease, display 0.4s ease, width 0.4s ease, height 0.5s ease;
+}
+
+.navbar:hover .logout-btn:hover {
+  background-color: #ad0c0c;
+  transform: scale(1.05);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.logout-text {
+  display: none;
+  margin-left: 6px;
+  transition: display 0.4s ease, width 0.4s ease, height 0.5s ease;
+}
+
+.navbar:hover .logout-text {
+  display: inline;
+  padding: 4px 7px;
+  transition: display 0.4s ease, padding 0.5s ease;
+}
+
+.navbar:hover .logout-btn {
+  width: auto;
+  padding: 4px 7px;
+  transition: width 0.4s ease, padding 0.5s ease;
 }
 
 .content{
@@ -56,7 +109,6 @@ body {
   align-items: flex-start;
 
   transition: max-height 0.5s ease, padding 0.5s ease;
-  overflow: hidden;
   padding-left: 10px;
   padding-right: 10px;
   padding-top: 10px;
@@ -78,16 +130,6 @@ body {
   color: var(--color-action-button);
 }
 
-/* Header (always visible) */
-#header {
-  font-family: "Segoe UI", sans-serif;
-  height: 50px;
-  font-size: 2em;
-  font-weight: bold;
-  color: #333;
-  margin: 5px 0;
-}
-
 .nav-links {
   display: flex;
   height: auto;
@@ -97,7 +139,6 @@ body {
   align-items: center;
   gap: 10px;
   opacity: 1;
-  overflow-y: scroll;
   transition: opacity 0.4s ease, height 0.5s ease, padding 0.5s ease;
   width: 100%;
 }
@@ -149,7 +190,6 @@ body {
 .navbar:hover .nav-links a {
   width: auto;
   padding: 8px 14px;
-  transition: width 0.4s ease, padding 0.5s ease;
 }
 
 .navbar:hover .nav-text {
@@ -171,15 +211,16 @@ body {
   font-size: 16px;
   padding: 8px 14px;
   border-radius: var(--border-radius-reg);
-  background-color: #1D4ED8;;
+  background-color: #1D4ED8;
   color: white;
-  transition: background-color 0.3s, transform 0.2s ease, border-radius 0.3s ease;
+  transform: scale(1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .nav-links-pages a:hover {
   background-color: #1E40AF;
   transform: scale(1.05);
-  transition: background-color 0.3s, transform 0.2s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 /* Highlight active tab */
@@ -196,13 +237,14 @@ body {
   border-radius: var(--border-radius-reg);
   background-color: var(--color-nav-links-settings-buttons);
   color: white;
-  transition: background-color 0.3s, transform 0.2s ease, border-radius 0.3s ease;
+  transform: scale(1);
+  transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .nav-links-settings a:hover {
   background-color: var(--color-nav-links-settings-buttons-hover);
   transform: scale(1.05);
-  transition: background-color 0.3s, transform 0.2s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 /* Highlight active tab */
@@ -219,7 +261,20 @@ body {
     gap: 10px;
     transition: opacity 0.4s ease;
   }
+  #header {
+    overflow-x: scroll;
+    height: 65px;
+    scrollbar-width: none;
+    margin-bottom: 5px;
+  }
   .nav-links {
     justify-content: unset;
+  }
+}
+
+@media (max-width: 385px) {
+    .nav-links {
+    overflow-y: scroll;
+    scrollbar-width: none;
   }
 }

@@ -471,7 +471,6 @@ h2 {
 }
 
 .form-input-grid {
-    max-width: 900px;
     margin: 0 auto;
     background-color: #ffffff;
     border-radius: var(--border-radius-reg);
