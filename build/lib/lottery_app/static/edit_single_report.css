@@ -266,14 +266,6 @@ input[type="text"]:focus {
     outline: none;
 }
 
-.form-input-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 25px 30px; /* row gap, column gap */
-    align-items: center;
-    margin-bottom: 20px;
-}
-
 .form-group input[readonly] {
     background-color: #f3f4f6; /* Lighter background for non-editable fields */
     color: var(--color-grey-text);

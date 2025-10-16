@@ -29,6 +29,7 @@
 #header label {
   font-size: 1.1em;
   font-weight: 600;
+  max-width: 500px;
   color: #333;
   display: flex;
   align-items: center;

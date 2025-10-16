@@ -84,24 +84,38 @@ select:focus, input[type="text"]:focus {
 button {
     padding: 10px 20px;
     font-size: 16px;
+    background-color: var(--color-action-button);
     color: white;
     border: none;
     border-radius: var(--border-radius-reg);
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
     font-weight: 600;
     width: 100%;
     max-width: 300px;
+    transform: scale(1);
+    transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
-/* Specific Style for Save Path Button */
-.setting-form button[type="submit"]:not(.toggle-button) {
-    background-color: var(--color-action-button); /* Green for Save */
-}
-
-.setting-form button[type="submit"]:not(.toggle-button):hover {
+button:hover{
     background-color: var(--color-action-hover);
-    transform: translateY(-1px);
+    transform:scale(1.1);
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.input-group input{
+    padding: 10px 15px;
+    font-size: 1em;
+    width: 100%;
+    max-width: 300px;
+    border-radius: var(--border-radius-reg);
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-group input:focus{
+    border-color: var(--color-action-button);
+    box-shadow: 0 0 0 3px #90a9fc;
 }
 
 /* --- Toggle Button Styling (Specific) --- */
@@ -124,6 +138,39 @@ button {
 .disable-btn-style:hover {
     background-color: #dc2626;
 }
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px; /* Space for the eye button */
+}
+
+.toggle-password {
+    display: flex;
+    flex-direction: row-reverse;
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 1em;
+    width: fit-content;
+    padding: unset;
+    transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+    background-color: unset;
+    color: var(--color-action-button);
+}
+
 
 /* --- Flash Message Styling (Re-used from other files) --- */
 .flash-message {

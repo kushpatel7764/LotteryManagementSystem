@@ -40,6 +40,18 @@ class User(UserMixin):
         )
         conn.commit()
         conn.close()
+        
+    @staticmethod
+    def update_password(user_id, new_password):
+        hashed = generate_password_hash(new_password)
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE users SET password_hash = ? WHERE id = ?",
+            (hashed, user_id)
+        )
+        conn.commit()
+        conn.close()
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from lottery_app.database.user_model import User
 
 security_bp = Blueprint("security", __name__)
@@ -39,3 +39,23 @@ def logout():
     logout_user()
     flash("You’ve been logged out.", "info")
     return redirect(url_for("security.login"))
+
+@security_bp.route("/change_password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form['current_password']
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+        user = User.get_by_id(current_user.id)
+
+        if not user.verify_password(current_password):
+            flash('Current password is incorrect.', 'settings_error')
+        elif new_password != confirm_password:
+            flash('New passwords do not match.', 'settings_error')
+        else:
+            user.update_password(user.id, new_password)
+            flash('Password updated successfully!', 'settings_success')
+            return redirect(url_for('settings.settings'))
+
+    return render_template('settings.html')

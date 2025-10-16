@@ -103,3 +103,35 @@
 .signup-text a:hover {
     text-decoration: underline;
 }
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px; /* Space for the eye button */
+}
+
+.toggle-password {
+    display: flex;
+    flex-direction: row-reverse;
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 1em;
+    width: fit-content;
+    padding: unset;
+    transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+    background-color: unset;
+    color: var(--color-action-button);
+}
