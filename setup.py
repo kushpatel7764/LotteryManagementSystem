@@ -22,7 +22,7 @@ setup(
         "util-functions"
     ],
     package_data={
-        "lottery_app": ["templates/*.html", "static/*", "*.json","database/*.sql"],  # include SQL files
+        "lottery_app": ["templates/*.html", "static/*", "*.json","database/*.sql", "database/*.db"],  # include SQL files
     },
     entry_points={
         "console_scripts": [

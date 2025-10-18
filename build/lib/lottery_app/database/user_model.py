@@ -6,16 +6,17 @@ import sqlite3
 DATABASE = db_path # Update with your actual db path
 
 class User(UserMixin):
-    def __init__(self, id, username, password_hash):
+    def __init__(self, id, username, password_hash, role='standard'):
         self.id = id
         self.username = username
         self.password_hash = password_hash
+        self.role = role
 
     @staticmethod
     def get_by_username(username):
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+        cursor.execute("SELECT * FROM Users WHERE username = ?", (username,))
         row = cursor.fetchone()
         conn.close()
         return User(*row) if row else None
@@ -24,19 +25,19 @@ class User(UserMixin):
     def get_by_id(user_id):
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        cursor.execute("SELECT * FROM Users WHERE id = ?", (user_id,))
         row = cursor.fetchone()
         conn.close()
         return User(*row) if row else None
 
     @staticmethod
-    def create(username, password):
+    def create(username, password, role='standard'):
         hashed = generate_password_hash(password)
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-            (username, hashed)
+            "INSERT INTO Users (username, password_hash, role) VALUES (?, ?, ?)",
+            (username, hashed, role)
         )
         conn.commit()
         conn.close()
@@ -47,7 +48,7 @@ class User(UserMixin):
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE users SET password_hash = ? WHERE id = ?",
+            "UPDATE Users SET password_hash = ? WHERE id = ?",
             (hashed, user_id)
         )
         conn.commit()

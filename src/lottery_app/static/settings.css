@@ -1,17 +1,19 @@
-/* --- Global Layout/Container Styling --- */
-body {
-    font-family: 'Inter', sans-serif; /* Ensuring consistency with home page */
-    background: linear-gradient(135deg, #f5f7fa, #e4e9f2);
-    margin: 0;
-    padding: 20px;
-    min-height: 100vh;
+/* --- Color Palette & Typography --- */
+:root {
+    --color-action-button: #1D4ED8; /* NEW: Darker Royal Blue for primary actions (Save) */
+    --color-action-hover: #1E40AF;  /* NEW: Slightly darker for hover */
+    --color-background: #fcfcfc;   /* Very Light Grey/Blue */
+    --color-input-selected: #90a9fc; /* Light Indigo for selected dropdown */
+    --color-nav-links-settings-buttons: #696d78; /* Bright Blue for Nav Links and Settings Buttons */
+    --color-nav-links-settings-buttons-hover: #383a40;
+    --color-text-dark: #1f2937;    /* Dark Text */
+    --color-success: #10b981;      /* Emerald Green */
+    --color-error: #ef4444;        /* Red */
+    --color-warning: #f59e0b;      /* Amber */
+    --border-radius-reg: 2px;
 }
-/* card navigation bar */
-/* glass effect */
-/* glass icons */
-/* dock */
-/* stepper */
-.settings-container {
+
+.settings_container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -23,9 +25,9 @@ body {
 
 /* --- Setting Card Styling --- */
 .setting-card {
-    background: white;
+    background: var(--color-background);
     padding: 30px;
-    border-radius: 16px;
+    border-radius: var(--border-radius-reg);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 600px;
@@ -34,7 +36,7 @@ body {
 
 .setting-card h2 {
     font-size: 1.5em;
-    color: #1f2937;
+    color: var(--color-text-dark);
     margin-bottom: 10px;
 }
 
@@ -67,39 +69,53 @@ select, input[type="text"] {
     font-size: 1em;
     width: 100%;
     max-width: 300px;
-    border-radius: 8px;
+    border-radius: var(--border-radius-reg);
     border: 1px solid #ccc;
     outline: none;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 select:focus, input[type="text"]:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    border-color: var(--color-action-button);
+    box-shadow: 0 0 0 3px #90a9fc;
 }
 
 /* --- Button Styling (General) --- */
 button {
     padding: 10px 20px;
     font-size: 16px;
+    background-color: var(--color-action-button);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--border-radius-reg);
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
     font-weight: 600;
     width: 100%;
     max-width: 300px;
+    transform: scale(1);
+    transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
-/* Specific Style for Save Path Button */
-.setting-form button[type="submit"]:not(.toggle-button) {
-    background-color: #10b981; /* Green for Save */
+button:hover{
+    background-color: var(--color-action-hover);
+    transform:scale(1.1);
+    transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
-.setting-form button[type="submit"]:not(.toggle-button):hover {
-    background-color: #059669;
-    transform: translateY(-1px);
+.input-group input{
+    padding: 10px 15px;
+    font-size: 1em;
+    width: 100%;
+    max-width: 300px;
+    border-radius: var(--border-radius-reg);
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-group input:focus{
+    border-color: var(--color-action-button);
+    box-shadow: 0 0 0 3px #90a9fc;
 }
 
 /* --- Toggle Button Styling (Specific) --- */
@@ -109,10 +125,10 @@ button {
 
 /* Style when polling is currently DISABLED (shows 'Enable' button - Primary Blue) */
 .enable-btn-style {
-    background-color: #4f46e5; 
+    background-color: var(--color-action-button); 
 }
 .enable-btn-style:hover {
-    background-color: #4338ca;
+    background-color: var(--color-action-hover);
 }
 
 /* Style when polling is currently ENABLED (shows 'Disable' button - Red) */
@@ -123,6 +139,39 @@ button {
     background-color: #dc2626;
 }
 
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px; /* Space for the eye button */
+}
+
+.toggle-password {
+    display: flex;
+    flex-direction: row-reverse;
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 1em;
+    width: fit-content;
+    padding: unset;
+    transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+    background-color: unset;
+    color: var(--color-action-button);
+}
+
+
 /* --- Flash Message Styling (Re-used from other files) --- */
 .flash-message {
     position: fixed;
@@ -130,7 +179,7 @@ button {
     left: 50%;
     transform: translateX(-50%);
     padding: 12px 24px;
-    border-radius: 8px;
+    border-radius: var(--border-radius-reg);
     color: white;
     font-weight: bold;
     z-index: 1000;
@@ -139,15 +188,15 @@ button {
 }
 
 .flash-message.success {
-    background-color: #10b981;
+    background-color: var(--color-success);
 }
 
 .flash-message.error {
-    background-color: #ef4444;
+    background-color: var(--color-error);
 }
 
 .flash-message.warning {
-    background-color: #f59e0b;
+    background-color: var(--color-warning);
 }
 
 /* --- Responsive Adjustments --- */

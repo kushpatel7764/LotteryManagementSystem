@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from lottery_app.database.user_model import User
+from lottery_app.utils.config import load_config
 
 security_bp = Blueprint("security", __name__)
 
@@ -10,11 +11,22 @@ def signup():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
+        role = request.form.get("role", "standard")
 
-        User.create(username, password)
+        User.create(username, password, role)
         flash("Account created! You can now log in.", "success")
-        return redirect(url_for("login"))
-
+        return redirect(url_for("business_profile.business_profile"))
+    config = load_config()
+    '''return render_template("business_profile.html",
+        business_Info={
+            "Name": config["business_name"],
+            "Address": config["business_address"],
+            "Phone": config["business_phone"],
+            "Email": config["business_email"],
+        },
+        message="",
+        message_type=""
+        )'''
     return render_template("signup.html")
 
 @security_bp.route("/login", methods=["GET", "POST"])

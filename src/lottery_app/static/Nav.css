@@ -1,11 +1,103 @@
+/* --- Color Palette & Typography --- */
+:root {
+    --color-action-button: #1D4ED8; /* NEW: Darker Royal Blue for primary actions (Save) */
+    --color-action-hover: #1E40AF;  /* NEW: Slightly darker for hover */
+    --color-background: #f5f7fa;   /* Very Light Grey/Blue */
+    --color-nav-links-settings-buttons: #696d78; /* Bright Blue for Nav Links and Settings Buttons */
+    --color-nav-links-settings-buttons-hover: #383a40;
+    --color-text-dark: #1f2937;    /* Dark Text */
+    --color-success: #10b981;      /* Emerald Green */
+    --color-error: #ef4444;        /* Red */
+    --color-warning: #f59e0b;      /* Amber */
+    --border-radius-reg: 2px;
+}
+
+#header {
+  display: flex;
+  width: -webkit-fill-available;
+  font-family: "Segoe UI", sans-serif;
+  justify-content: space-between;
+  margin-bottom: unset;
+  align-items: center;
+
+  height: 50px;
+  font-size: 2em;
+  font-weight: bold;
+  color: #333;
+}
+
+#header label {
+  font-size: 1.1em;
+  font-weight: 600;
+  max-width: 500px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  text-decoration: none;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  border-radius: var(--border-radius-reg);
+  background-color: #c83939;
+  color: white;
+  transform: scale(1);
+  transition: background-color 0.3s ease, transform 0.2s ease, display 0.4s ease, width 0.4s ease, height 0.5s ease;
+}
+
+.navbar:hover .logout-btn:hover {
+  background-color: #ad0c0c;
+  transform: scale(1.05);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.logout-text {
+  display: none;
+  margin-left: 6px;
+  transition: display 0.4s ease, width 0.4s ease, height 0.5s ease;
+}
+
+.navbar:hover .logout-text {
+  display: inline;
+  padding: 4px 7px;
+  transition: display 0.4s ease, padding 0.5s ease;
+}
+
+.navbar:hover .logout-btn {
+  width: auto;
+  padding: 4px 7px;
+  transition: width 0.4s ease, padding 0.5s ease;
+}
+
+.content{
+  margin-top: 130px;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--color-background), #e4e9f2);
+    color: var(--color-text-dark);
+    margin: 0;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 20px;
+    min-height: 100vh;
+}
+
 /* Navbar container */
 .navbar {
-  position: sticky;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  width: 98%;
   z-index: 1000;
+  max-height: 100px;
 
   background-color: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
@@ -18,49 +110,100 @@
   align-items: flex-start;
 
   transition: max-height 0.5s ease, padding 0.5s ease;
-  overflow: hidden;
-  max-height: 70px; /* only header visible by default */
-  padding: 10px 0px 10px 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
+  padding-bottom: 5px;
+  margin: 15px
 }
 
-/* Expand navbar when hovering */
-.navbar:hover {
-  max-height: 200px; /* enough to reveal all tabs */
-
+.nav-indicator {
+  font-size: 0.7em;
+  margin-left: 8px;
+  color: #555;
+  transition: transform 0.3s ease;
+  display: inline-block;
 }
 
-/* Header (always visible) */
-#header {
-  font-family: "Segoe UI", sans-serif;
-  font-size: 2em;
-  font-weight: bold;
-  color: #333;
-  margin: 5px 0;
-  padding: 10px 0;
+/* Rotate when navbar expands */
+.navbar:hover .nav-indicator {
+  transform: rotate(180deg); /* ▼ becomes ▲ */
+  color: var(--color-action-button);
+}
+
+.nav-links {
+  display: flex;
+  height: auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  opacity: 1;
+  transition: opacity 0.4s ease, height 0.5s ease, padding 0.5s ease;
+  width: 100%;
+}
+
+/* Hide text until hover */
+.nav-text {
+  display: none;
+  margin-left: 6px;
 }
 
 /* Nav links container */
 .nav-links-pages {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   gap: 10px;
-  opacity: 0;
-  transition: opacity 0.4s ease;
 }
 
 .nav-links-settings {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   gap: 10px;
-  opacity: 0;
-  transition: opacity 0.4s ease;
+  
+}
+
+.nav-links a i {
+  font-size: 14px;
+  color: white;
+}
+
+.navbar .nav-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;  /* small square buttons */
+  height: 30px;
+  padding: 0;
+  border-radius: var(--border-radius-reg);
+  transition: width 0.4s ease, height 0.5s ease, padding 0.5s ease;
+}
+
+/* When hovered — expand and show labels */
+.navbar:hover {
+  max-height: 225px;
+  transition: height 0.5s ease;
+}
+
+.navbar:hover .nav-links a {
+  width: auto;
+  padding: 8px 14px;
+}
+
+.navbar:hover .nav-text {
+  display: inline;
+  transition: display 0.4s ease;
 }
 
 /* Show links when hovered */
-.navbar:hover .nav-links-pages {
+.navbar:hover .nav-links {
   opacity: 1;
-}
-
-.navbar:hover .nav-links-settings {
-  opacity: 1;
+  padding-bottom: 5px;
+  height: auto;
+  transition: opacity 0.4s ease, height 0.5s ease, padding 0.5s ease;
 }
 
 /* Individual nav links */
@@ -68,15 +211,17 @@
   text-decoration: none;
   font-size: 16px;
   padding: 8px 14px;
-  border-radius: 6px;
-  background-color: #1D4ED8;;
+  border-radius: var(--border-radius-reg);
+  background-color: #1D4ED8;
   color: white;
-  transition: background-color 0.3s, transform 0.2s ease;
+  transform: scale(1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .nav-links-pages a:hover {
   background-color: #1E40AF;
   transform: scale(1.05);
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 /* Highlight active tab */
@@ -90,15 +235,17 @@
   text-decoration: none;
   font-size: 16px;
   padding: 8px 14px;
-  border-radius: 6px;
-  background-color: #1D4ED8;;
+  border-radius: var(--border-radius-reg);
+  background-color: var(--color-nav-links-settings-buttons);
   color: white;
-  transition: background-color 0.3s, transform 0.2s ease;
+  transform: scale(1);
+  transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .nav-links-settings a:hover {
-  background-color: #1E40AF;
+  background-color: var(--color-nav-links-settings-buttons-hover);
   transform: scale(1.05);
+  transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 /* Highlight active tab */
@@ -106,4 +253,29 @@
   background-color: #333;
   border: 1px solid white;
   font-weight: bold;
+}
+
+@media (max-width: 250px) {
+    .nav-links-settings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    transition: opacity 0.4s ease;
+  }
+  #header {
+    overflow-x: scroll;
+    height: 65px;
+    scrollbar-width: none;
+    margin-bottom: 5px;
+  }
+  .nav-links {
+    justify-content: unset;
+  }
+}
+
+@media (max-width: 385px) {
+    .nav-links {
+    overflow-y: scroll;
+    scrollbar-width: none;
+  }
 }

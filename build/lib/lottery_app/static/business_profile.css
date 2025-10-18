@@ -37,6 +37,36 @@ form {
 }
 
 /* --- Input and Label Styling --- */
+section {
+    height: 100vh;
+    scroll-snap-align: start;
+    padding: 40px;
+    box-sizing: border-box;
+}
+.dots {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ccc;
+    cursor: pointer;
+}
+.dot.active { background: #1D4ED8; }
+
+.profile_container{
+    margin: 0;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    font-family: Arial, sans-serif;
+}
 
 /* Resetting table margins for the card layout */
 #profile_table {
@@ -99,6 +129,39 @@ button:hover {
     background-color: var(--color-action-hover); 
     transform: translateY(-1px);
 }
+
+
+h3 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.profile_container input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.profile_container .btn-primary {
+  background-color: var(--color-action-button);
+  color: white;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.profile_container .btn-primary:hover {
+  background-color: var(--color-action-hover);
+}
+
 
 /* --- Flash Message Styling (Re-used from other files) --- */
 .flash-message {

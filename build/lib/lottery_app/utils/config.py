@@ -16,10 +16,15 @@ from importlib import resources
 #db_path = os.path.join(db_dir, "Lottery_Management_Database.db")
 #sql_file_path = os.path.join(db_dir, "Lottery_DB_Schema.sql")
 
-with resources.path("lottery_app.database", "Lottery_Management_Database.db") as db_file_path:
-    db_path = str(db_file_path)
-    db_dir = os.path.dirname(db_path)
-    sql_file_path = os.path.join(db_dir, "Lottery_DB_Schema.sql")
+instance_path = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'instance_folder')
+os.makedirs(instance_path, exist_ok=True)
+
+db_path = os.path.join(instance_path, "Lottery_Management_Database.db")
+db_dir  = instance_path
+
+# Correct SQL path: point to the database folder
+sql_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../database/Lottery_DB_Schema.sql"))
+
 
 DEFAULT_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
 CONFIG_PATH = os.path.join(

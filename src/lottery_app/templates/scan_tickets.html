@@ -1,6 +1,7 @@
 {% extends "navButton.html" %}
 {% block title %}Scan Tickets Page{% endblock %}
 {% block extra_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
 {% endblock %}
 
@@ -114,12 +115,18 @@
                 form.reportValidity();
             }
         }
-         function showInfoImage() {
-            document.getElementById('infoModal').style.display = 'flex';
-        }
+        function showInfoImage() {
+                const modal = document.getElementById('infoModal');
+                modal.style.display = 'flex';
+                requestAnimationFrame(() => modal.classList.add('show')); // ensures transition triggers
+            }
 
         function hideInfoImage() {
-            document.getElementById('infoModal').style.display = 'none';
+            const modal = document.getElementById('infoModal');
+            modal.classList.remove('show');
+            modal.addEventListener('transitionend', () => {
+                if (!modal.classList.contains('show')) modal.style.display = 'none';
+            }, { once: true });
         }
         window.onload = function() {
         {% if message %}
@@ -138,163 +145,170 @@
 {% endblock %}
 {% block header %} Daily Scans {% endblock %}  
 {% block content %}
-    {% if message %}
-        <div class="flash-message {{ message_type }}">
-            {{ message }}
-        </div>
-    {% endif %}
-
-    <!-- Popup Message -->
-    <div id="popupModal" class="modal" class="modal" aria-hidden="true" style="display:none">
-        <div class="modal-content">
-            <button class="modal-close-btn" onclick="closeModal()">×</button>
-            <p>Did you make sure your newly activated books are also activated in this system?</p>
-            <button class="modal-option-btn" onclick="submitFormTo('/submit')" type="submit">YES</button>
-            <button class="modal-option-btn" onclick="closeModal()">NO</button>
-        </div>
-    </div>
-
-    <form method="POST" id="scanForm" class="scan-box">
-        <label for="scanned_code"><strong>Scan Ticket: </strong></label><br>
-        <input type="text" tagName="INPUT"
-               name="scanned_code"
-               id="scanned_code"
-               placeholder="Scan ticket..."
-               autofocus
-               required
-               oninput="checkLengthAndSubmit()">
-
-        <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton">
-            i
-        </button>
-        <!-- Submit button is hidden since auto-submit is now enabled -->
-        <button type="submit" style="display:none;">Submit</button>
-    </form>
-
-    <h2>Activated Books: {{activated_book_count}}</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>GAME NAME</th>
-                <th>GAME #</th>
-                <th>BOOK ID</th>
-                <th>PRICE</th>
-                <th>OPEN</th>
-                <th>CLOSE</th>
-                <th>SOLD</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% if  activated_books %}
-            {% for book in activated_books %}
-                <tr class="row {% if book['countingTicketNumber'] is not none %}scanned{% endif %}">
-                    <td>{{ book["TicketName"] }}
-                    <td>{{ book['GameNumber'] }}</td>
-                    <td>{{ book['ActiveBookID'] }}</td>
-                    <td>{{ book['ticketPrice'] }}</td>
-                    <td>{{ book['isAtTicketNumber'] }}</td>
-                    <td>
-                        {% if book['countingTicketNumber'] is not none %}
-                            {{ book['countingTicketNumber'] }}
-                        {% else %}
-                        <!-- if no input for close column then show a button sold out button -->
-                            <form method="POST" action="/book_sold_out">
-                                <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
-                                <button type="submit" id="SoldOutButton">Book Sold Out</button>
-                            </form>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
-                            {% if counting_order == "descending"%}
-                                {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
-                            {% else %}
-                                {{ ( book['countingTicketNumber'] - book['isAtTicketNumber'] ) }}
-                            {% endif %}
-                        {% else %}
-                            N/A
-                        {% endif %}
-                    </td>
-                    <td class="x_button_container">
-                        {% if book['countingTicketNumber'] is not none %}
-                            <form method="POST" action="/undo_scan">
-                                <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
-                                <button type="Submit">X</button>
-                            </form>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
+    <section class="scan-section">
+        {% if message %}
+            <div class="flash-message {{ message_type }}">
+                {{ message }}
+            </div>
         {% endif %}
-        </tbody>
-    </table>
-
-    <h2>Report Totals</h2>
-    <form method="POST" action="/submit" class="daily-totals-form">
-        <label for="instant_sold">Instant Tickets Sold:</label>
-        <div style="position: relative; display: inline-block;">
-            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-            <input name="instant_sold" id="instant_sold" 
-                type="number" inputmode="decimal" min="0" step="0.01" 
-                value="{{instant_tickets_sold_total}}" readonly
-                style="padding-left: 20px;">
-        </div>
-        <br><br>
-
-        <label for="online_sold">Online Tickets Sold:</label>
-        <div style="position: relative; display: inline-block;">
-            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-            <input type="number" name="online_sold" id="online_sold" 
-                inputmode="decimal" min="0" step="0.01" required
-                style="padding-left: 20px;">
-        </div>
-        <br><br>
-
-        <label for="instant_cashed">Instant Tickets Cashed:</label>
-        <div style="position: relative; display: inline-block;">
-            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-            <input type="number" name="instant_cashed" id="instant_cashed"
-                inputmode="decimal" min="0" step="0.01" required
-                style="padding-left: 20px;">
-        </div>
-        <br><br>
-
-        <label for="online_cashed">Online Tickets Cashed:</label>
-        <div style="position: relative; display: inline-block;">
-            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-            <input type="number" name="online_cashed" id="online_cashed"
-                inputmode="decimal" min="0" step="0.01" required
-                style="padding-left: 20px;">
-        </div>
-        <br><br>
-
-        <label for="cash_on_hand">Cash On Hand:</label>
-        <div style="position: relative; display: inline-block;">
-            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-            <input type="number" name="cash_on_hand" id="cash_on_hand"
-                inputmode="decimal" min="0" step="0.01" required
-                style="padding-left: 20px;">
-        </div>
-        <br><br>
-
-        <label for="total_due">Total Due:</label>
-        <div style="position: relative; display: inline-block;">
-            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-            <input name="total_due" id="total_due"
-                type="number" inputmode="decimal" min="0" step="0.01" readonly
-                style="padding-left: 20px;">
-        </div>
-        <br><br>
-
-        <button type="button" onclick="canSubmit(event)">Submit</button>
-        <!-- Modal for Image -->
-        <div id="infoModal">
-            <div style="position: relative; background: white; padding: 10px; border-radius: 8px;">
-                <img src="{{ url_for('static', filename='BarcodeImg.JPG') }}" 
-                    alt="Info Image" 
-                    style="max-width: 90vw; max-height: 80vh; display: block; margin: auto;">
-                <button onclick="hideInfoImage()" id="InfoModalCloseBtn" onmouseover="this.style.backgroundColor='#f2f2f2'" onmouseout="this.style.backgroundColor='#ff3d3d'">×</button>
+        
+        <!-- Popup Message -->
+        <div id="popupModal" class="modal" class="modal" aria-hidden="true" style="display:none">
+            <div class="modal-content">
+                <button class="modal-close-btn" onclick="closeModal()">×</button>
+                <p>Did you make sure your newly activated books are also activated in this system?</p>
+                <button class="modal-option-btn" onclick="submitFormTo('/submit')" type="submit">YES</button>
+                <button class="modal-option-btn" onclick="closeModal()">NO</button>
             </div>
         </div>
-    </form>
+
+        <form method="POST" id="scanForm" class="scan-box">
+            <label for="scanned_code"><strong>Scan Ticket: </strong></label><br>
+            <div class="input-group-scan">
+                <input type="text"
+                    name="scanned_code"
+                    id="scanned_code"
+                    placeholder="Scan ticket..."
+                    autofocus
+                    required
+                    oninput="checkLengthAndSubmit()">
+                <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton">i</button>
+            </div>
+            <!-- Submit button is hidden since auto-submit is now enabled -->
+            <button type="submit" style="display:none;">Submit</button>
+        </form>
+
+        <h2>Activated Books: {{activated_book_count}}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>GAME NAME</th>
+                    <th>GAME #</th>
+                    <th>BOOK ID</th>
+                    <th>PRICE</th>
+                    <th>OPEN</th>
+                    <th>CLOSE</th>
+                    <th>SOLD</th>
+                    <th class="x_button_container"></th>
+                </tr>
+            </thead>
+            <tbody id="scannedTicketsTable">
+            {% if  activated_books %}
+                {% for book in activated_books %}
+                    <tr class="row {% if book['countingTicketNumber'] is not none %}scanned{% endif %}">
+                        <td>{{ book["TicketName"] }}
+                        <td>{{ book['GameNumber'] }}</td>
+                        <td>{{ book['ActiveBookID'] }}</td>
+                        <td>${{ book['ticketPrice'] }}</td>
+                        <td>{{ book['isAtTicketNumber'] }}</td>
+                        <td>
+                            {% if book['countingTicketNumber'] is not none %}
+                                {{ book['countingTicketNumber'] }}
+                            {% else %}
+                            <!-- if no input for close column then show a button sold out button -->
+                                <form method="POST" action="/book_sold_out">
+                                    <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
+                                    <button type="submit" id="SoldOutButton" class="soldout-btn"><i class="fa-solid fa-book-bookmark"></i><span class="soldout-text">Book Sold Out</span></button>
+                                </form>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
+                                {% if counting_order == "descending"%}
+                                    {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
+                                {% else %}
+                                    {{ ( book['countingTicketNumber'] - book['isAtTicketNumber'] ) }}
+                                {% endif %}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td class="x_button_container">
+                            {% if book['countingTicketNumber'] is not none %}
+                                <form method="POST" action="/undo_scan">
+                                    <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
+                                    <button type="Submit" class="icon-btn close-btn"><i class="fa-solid fa-xmark"></i></button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="totals-section">
+        <h2>Report Totals</h2>
+        <form method="POST" action="/submit" class="daily-totals-form">
+            <div class="form-input-grid">
+                <div class="form-group">
+                    <label for="instant_sold">Instant Tickets Sold</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input name="instant_sold" id="instant_sold" 
+                            type="number" inputmode="decimal" min="0" step="0.01" 
+                            value="{{instant_tickets_sold_total}}" readonly
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="online_sold">Online Tickets Sold</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input type="number" name="online_sold" id="online_sold" 
+                            inputmode="decimal" min="0" step="0.01" required
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="instant_cashed">Instant Tickets Cashed</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input type="number" name="instant_cashed" id="instant_cashed"
+                            inputmode="decimal" min="0" step="0.01" required
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="online_cashed">Online Tickets Cashed</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input type="number" name="online_cashed" id="online_cashed"
+                            inputmode="decimal" min="0" step="0.01" required
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cash_on_hand">Cash On Hand</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input type="number" name="cash_on_hand" id="cash_on_hand"
+                            inputmode="decimal" min="0" step="0.01" required
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="total_due">Total Due</label>
+                    <div style="position: relative; display: inline-block;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
+                        <input name="total_due" id="total_due"
+                            type="number" inputmode="decimal" min="0" step="0.01" readonly
+                            style="padding-left: 20px;">
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" onclick="canSubmit(event)">Submit</button>
+            <!-- Modal for Image -->
+            <div id="infoModal">
+                <div style="position: relative; background: white; padding: 10px; border-radius: 8px;">
+                    <img src="{{ url_for('static', filename='BarcodeImg.JPG') }}" 
+                        alt="Info Image" 
+                        style="max-width: 90vw; max-height: 80vh; display: block; margin: auto;">
+                    <button onclick="hideInfoImage()" id="InfoModalCloseBtn" onmouseover="this.style.backgroundColor='#f2f2f2'" onmouseout="this.style.backgroundColor='#ff3d3d'">×</button>
+                </div>
+            </div>
+        </form>
+    </section>
 {% endblock %}

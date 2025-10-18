@@ -23,6 +23,14 @@
                 }, 4000);
             }
         });
+
+        function scrollToSection(index) {
+            const sections = document.querySelectorAll('section');
+            sections[index].scrollIntoView({ behavior: 'smooth' });
+            document.querySelectorAll('.dot').forEach((d, i) =>{
+                d.classList.toggle('active', i === index);
+            });
+        }
     </script>  
 {% endblock %}
 {% block header %} Business Profile {% endblock %}  
@@ -46,4 +54,41 @@
                 <button type="submit">Save Profile</button>
             </form>
         </div>
+
+        <div class="profile_container">
+            <div class="dots">
+                <div class="dot active" onclick="scrollToSection(0)"></div>
+                <div class="dot" onclick="scrollToSection(1)"></div>
+            </div>
+            <section id="users">
+                <h3>Existing Users</h3>
+                <ul>
+                    {% for user in users %}
+                        <li>{{ user.username }} — <strong>{{ user.role }}</strong></li>
+                    {% endfor %}
+                </ul>
+            </section>
+            <section id="add-user">
+                <form method="POST" action="{{ url_for('business_profile.business_profile') }}">
+                    <h2>Add New User</h2>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" name="username" id="username" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" id="password" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select name="role" id="role" required>
+                            <option value="standard" selected>Standard</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit">Add User</button>
+                </form>
+            </section>
+        </div>
+        
 {% endblock %}

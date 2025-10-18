@@ -4,6 +4,34 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 {% endblock %}
 
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Toggle password visibility buttons
+        document.querySelectorAll(".toggle-password").forEach(button => {
+            button.addEventListener("click", (e) => {
+                e.preventDefault(); // avoid form submission
+                const targetId = button.getAttribute("data-target");
+                const input = document.getElementById(targetId);
+                const icon = button.querySelector("i");
+
+                if (!input) return; // safety check
+
+                // Toggle the specific input’s type
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.classList.replace("fa-eye", "fa-eye-slash");
+                } else {
+                    input.type = "password";
+                    icon.classList.replace("fa-eye-slash", "fa-eye");
+                }
+            });
+        });
+
+    });
+</script>
+{% endblock %}
+
 {% block header %} Login {% endblock %}  
 {% block content %}
 <div class="login-container">
@@ -19,15 +47,15 @@
 
         <div class="input-group">
             <label for="password">Password</label>
-            <input type="password" name="password" id="password" placeholder="Enter your password" required>
+            <div class="password-wrapper">
+                <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                <button type="button" class="toggle-password" data-target="password">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
         </div>
 
         <button type="submit" class="login-btn">Login</button>
-
-        <p class="signup-text">
-            Don’t have an account? 
-            <a href="{{ url_for('security.signup') }}">Create one</a>
-        </p>
     </form>
 </div>
 {% endblock %}

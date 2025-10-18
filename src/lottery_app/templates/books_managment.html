@@ -145,11 +145,17 @@
                 }
             }
             function showInfoImage() {
-                document.getElementById('infoModal').style.display = 'flex';
+                const modal = document.getElementById('infoModal');
+                modal.style.display = 'flex';
+                requestAnimationFrame(() => modal.classList.add('show')); // ensures transition triggers
             }
 
             function hideInfoImage() {
-                document.getElementById('infoModal').style.display = 'none';
+                const modal = document.getElementById('infoModal');
+                modal.classList.remove('show');
+                modal.addEventListener('transitionend', () => {
+                    if (!modal.classList.contains('show')) modal.style.display = 'none';
+                }, { once: true });
             }
 
             window.addEventListener("DOMContentLoaded", function () {
@@ -192,29 +198,27 @@
         </div>
     {% endif %}
     <form method="POST" id="AddBookForm" class="scan-box">
-        <label for="add_book_code"><strong>Add Book:</strong></label><br>
-        <input type="text" tagName="INPUT"
-               name="add_book_code"
-               id="add_book_code"
-               placeholder="Scan book or ticket to add to the system"
-               required
-               oninput="checkLengthAndSubmitAddBook()">
-        <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton"> i </button>
-        <!-- Submit button is hidden since auto-submit is now enabled -->
-        <button type="submit" style="display:none;">Submit</button>
+        <label for="add_book_code"><strong>Add Book:</strong></label>
+        <div class="input-group-scan"> <input type="text"
+                name="add_book_code"
+                id="add_book_code"
+                placeholder="Scan book or ticket to add to the system"
+                required
+                oninput="checkLengthAndSubmitAddBook()">
+            <button type="button" onclick="showInfoImage()" title="Show barcode scan info" id="scanInfoButton"> i </button>
+        </div> <button type="submit" style="display:none;">Submit</button>
     </form>
 
     <form method="POST" id="ActivateBookForm" class="scan-box">
-        <label for="activate_book_code"><strong>Activate Book:</strong></label><br>
-        <input type="text"  tagName="INPUT"
-               name="activate_book_code"
-               id="activate_book_code"
-               placeholder="Scan book or ticket to activate it"
-               required
-               oninput="checkLengthAndSubmitActivateBook()">
-        <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton"> i </button>
-        <!-- Submit button is hidden since auto-submit is now enabled -->
-        <button type="submit" style="display:none;">Submit</button>
+        <label for="activate_book_code"><strong>Activate Book:</strong></label>
+        <div class="input-group-scan"> <input type="text"
+                name="activate_book_code"
+                id="activate_book_code"
+                placeholder="Scan book or ticket to activate it"
+                required
+                oninput="checkLengthAndSubmitActivateBook()">
+            <button type="button" onclick="showInfoImage()" title="Show barcode scan info" id="scanInfoButton"> i </button>
+        </div> <button type="submit" style="display:none;">Submit</button>
     </form>
 
     <h2>Books</h2>
@@ -241,7 +245,13 @@
                 <td>{{ book['Is_Sold'] }}</td>
                 <td class="options_Button {% if book['BookID'] in activated_ids %}activated{% endif %}">
                     <div class="dropdown-container">
-                        <button class="dropbtn" onclick="toggleDropdown(event)">⋯</button>
+                        <button class="dropbtn" onclick="toggleDropdown(event)">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                                <circle cx="5" cy="12" r="1.5"/>
+                                <circle cx="12" cy="12" r="1.5"/>
+                                <circle cx="19" cy="12" r="1.5"/>
+                            </svg>
+                        </button>
                         <div class="dropdown-content">
                             {% if book['BookID'] in activated_ids %}
                                 <button onclick="handleDeactivate('{{ book['BookID'] }}')">Deactivate</button> <!-- Should only show up with the given book is already activated-->

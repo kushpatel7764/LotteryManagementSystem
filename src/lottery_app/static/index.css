@@ -1,12 +1,3 @@
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #f7f9fc;
-    color: #1f2937; /* Dark text for professionalism */
-    margin: 0;
-    padding: 0;
-    line-height: 1.6;
-}
-
 .home-container {
     display: flex;
     flex-direction: column;
