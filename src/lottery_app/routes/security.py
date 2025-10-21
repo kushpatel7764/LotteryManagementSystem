@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 from lottery_app.database.user_model import User
 from lottery_app.utils.config import load_config
@@ -16,18 +16,8 @@ def signup():
         User.create(username, password, role)
         flash("Account created! You can now log in.", "success")
         return redirect(url_for("business_profile.business_profile"))
-    config = load_config()
-    '''return render_template("business_profile.html",
-        business_Info={
-            "Name": config["business_name"],
-            "Address": config["business_address"],
-            "Phone": config["business_phone"],
-            "Email": config["business_email"],
-        },
-        message="",
-        message_type=""
-        )'''
-    return render_template("signup.html")
+    
+    return redirect(url_for("business_profile.business_profile"))
 
 @security_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -71,3 +61,18 @@ def change_password():
             return redirect(url_for('settings.settings'))
 
     return render_template('settings.html')
+
+@security_bp.route('/delete_user', methods=['POST'])
+@login_required
+def delete_user():
+    username_to_delete = request.form.get('username', '').strip()
+    current_user = session.get('username')
+
+    # Protect self-delete
+    if username_to_delete == current_user:
+        flash("You cannot delete the currently logged-in user.", "error")
+        return redirect(url_for('business_profile.business_profile'))
+    
+    User.delete(username_to_delete)
+
+    return redirect(url_for('business_profile.business_profile'))

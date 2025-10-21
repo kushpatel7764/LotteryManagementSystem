@@ -7,11 +7,12 @@ the business profile information (name, address, phone, email).
 
 
 import re
-
-from flask import Blueprint, render_template, request
+import sqlite3
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_required
-
-from lottery_app.utils.config import load_config, update_business_info
+from werkzeug.security import generate_password_hash
+from lottery_app.utils.config import load_config, update_business_info, db_path
+from lottery_app.database.database_queries import get_all_users
 
 business_profile_bp = Blueprint("business_profile", __name__)
 
@@ -43,6 +44,7 @@ def business_profile():
 
     # Load current config for rendering
     config = load_config()
+    users = get_all_users(db_path)
     return render_template(
         "business_profile.html",
         business_Info={
@@ -51,6 +53,7 @@ def business_profile():
             "Phone": config["business_phone"],
             "Email": config["business_email"],
         },
+        users=users,
         message=message,
         message_type=message_type,
     )
@@ -119,3 +122,9 @@ def validate_and_update_business_info(data):
         errors.append("Not a valid EMAIL!")
 
     return errors
+
+def get_db_conn():
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
+

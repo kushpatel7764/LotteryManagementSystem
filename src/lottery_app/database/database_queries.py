@@ -704,3 +704,18 @@ def was_activated(db, book_id):
             return None
     except sqlite3.Error as e:
         return f"DATABASE ERROR IN was_activated: {e}", "error"
+
+
+def get_all_users(db):
+    """
+    Return all the usersnames and roles from the database.
+    """
+    setup_database.initialize_database(db)
+    try:
+        with get_db_cursor(db) as cursor:
+            cursor.execute("SELECT username, role FROM users")
+            users = cursor.fetchall()
+            # Convert to list of dictionaries (Flask/Jinja-friendly)
+            return [{"username": u[0], "role": u[1]} for u in users]
+    except sqlite3.Error as e:
+        return f"DATABASE ERROR IN get_all_users: {e}", "error"
