@@ -9,7 +9,7 @@ Handles:
 """
 
 
-from flask import Blueprint, redirect, render_template, request, url_for
+from flask import Blueprint, redirect, render_template, request, url_for, flash
 from flask_login import login_required
 
 from lottery_app.database import database_queries
@@ -35,12 +35,18 @@ def scan_tickets():
     msg_data = {"message": "", "message_type": ""}
     msg_data["message"] = request.args.get("message", "")
     msg_data["message_type"] = request.args.get("message_type", "")
-
+    
+    # Display any messages from previous actions
+    if msg_data["message_type"] != "" and msg_data["message"] != "":
+        flash(msg_data["message"], f"tickets_{msg_data['message_type']}")
+        msg_data["message"] = None
+        msg_data["message_type"] = None
+    
     if request.method == "POST":
         # Get book ids for all the active books
         all_active_book_ids = check_error(
             database_queries.get_all_active_book_ids(
-                db=db_path), message_holder=msg_data)
+                db=db_path), flash_prefix="tickets")
 
         # Get relevant information from the scanned code
         scanned_code = request.form["scanned_code"]
@@ -49,13 +55,9 @@ def scan_tickets():
         extracted_vals = scanned_info.extract_all_scanned_code()
 
         if extracted_vals == "INVALID BARCODE":
-            msg_data["message"] = "INVALID BARCODE"
-            msg_data["message_type"] = "error"
+            flash("INVALID BARCODE", f"tickets_error")
         elif extracted_vals["book_id"] not in all_active_book_ids:
-            msg_data["message"] = (
-                "Book IS NOT ACTIVATED! PLEASE ACTIVATE BEFORE SCANNING."
-            )
-            msg_data["message_type"] = "error"
+            flash("Book IS NOT ACTIVATED! PLEASE ACTIVATE BEFORE SCANNING.", f"tickets_error")
         else:
             # Insert ticket
             scan_id = scanned_code
@@ -66,20 +68,18 @@ def scan_tickets():
                 database_queries.is_counting_ticket_number_set(
                     db_path, extracted_vals["book_id"]
                 ),
-                message_holder=msg_data,
+                flash_prefix="tickets",
                 fallback=False,
             ):
-                msg_data["message"] = (
-                    """A ticket from this book has already been scanned.
-                    Please use the UNDO button if you want to rescan.""".upper())
-                msg_data["message_type"] = "error"
-                return _render_scan_tickets(msg_data)
+                flash("""A ticket from this book has already been scanned.
+                    Please use the UNDO button if you want to rescan.""".upper(), f"tickets_error")
+                return _render_scan_tickets()
 
             ticket_name = check_error(
                 database_queries.get_ticket_name(
                     db_path,
                     extracted_vals["game_number"]),
-                message_holder=msg_data,
+                flash_prefix="tickets",
             )
             check_error(
                 insert_ticket(
@@ -89,7 +89,7 @@ def scan_tickets():
                     ticket_name,
                     extracted_vals["ticket_price"],
                 ),
-                message_holder=msg_data,
+                flash_prefix="tickets",
             )
             # Add sales log
             check_error(
@@ -98,7 +98,7 @@ def scan_tickets():
                     extracted_vals["ticket_number"],
                     extracted_vals["game_number"],
                 ),
-                message_holder=msg_data,
+                flash_prefix="tickets",
             )
             # Update counting ticket number to show the new change to the user
             check_error(
@@ -106,36 +106,34 @@ def scan_tickets():
                     db_path,
                     extracted_vals["book_id"],
                     extracted_vals["ticket_number"]),
-                message_holder=msg_data,
+                flash_prefix="tickets",
             )
     # Get all the active books basically.
     # In reality, making a table to show to the user using activated bookids.
     # Instant ticket sold calculation
     # Get the counting order to calc sold
     # Get activated ticket count
-    return _render_scan_tickets(msg_data)
+    return _render_scan_tickets()
 
-def _render_scan_tickets(msg_data):
+def _render_scan_tickets():
     """Helper to render the scan tickets page."""
     return render_template(
         "scan_tickets.html",
         activated_books=check_error(
             database_queries.get_scan_ticket_page_table(db=db_path),
-            message_holder=msg_data,
+            flash_prefix="tickets",
         ),
         instant_tickets_sold_total=check_error(
             calculate_instant_tickets_sold(report_id="Pending"),
-            message_holder=msg_data,
+            flash_prefix="tickets",
         ),
         counting_order=load_config()["ticket_order"],
         activated_book_count=check_error(
             database_queries.count_activated_books(db_path),
-            message_holder=msg_data,
+            flash_prefix="tickets",
             fallback=0,
         ),
         should_poll=load_config().get("should_poll", False),
-        message=msg_data.get("message", ""),
-        message_type=msg_data.get("message_type", ""),
     )
 
 
@@ -162,13 +160,11 @@ def undo_scan():
                 update_sale_log.delete_sales_log_by_book_id(db_path, book_id),
                 message_holder=msg_data,
             )
-
             # Step 3: Clear the counting ticket number
             check_error(
                 update_activated_books.clear_counting_ticket_number(db_path, book_id),
                 message_holder=msg_data,
             )
-
             # Step 4: Mark Book Unsold
             check_error(
                 update_books.update_is_sold_for_book(db_path, False, book_id),
@@ -183,6 +179,10 @@ def undo_scan():
         except Exception as e: # pylint: disable=broad-exception-caught
             msg_data["message"] = f"Unexpected error: {str(e)}"
             msg_data["message_type"] = "error"
+            
+    if msg_data.get("message"):
+        flash(msg_data["message"], f"tickets_{msg_data['message_type']}")
+        msg_data["message"] = None
 
     return redirect(
         url_for(

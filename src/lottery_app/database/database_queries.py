@@ -5,6 +5,7 @@ for the lottery system.
 """
 
 import sqlite3
+from flask import flash
 
 from lottery_app.database import setup_database
 from lottery_app.decorators import get_db_cursor

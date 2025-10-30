@@ -48,7 +48,6 @@ src/lottery_app/static/index.css
 src/lottery_app/static/login.css
 src/lottery_app/static/scan_tickets.css
 src/lottery_app/static/settings.css
-src/lottery_app/static/signup.css
 src/lottery_app/templates/books_managment.html
 src/lottery_app/templates/business_profile.html
 src/lottery_app/templates/edit_reports.html
@@ -58,7 +57,6 @@ src/lottery_app/templates/login.html
 src/lottery_app/templates/navButton.html
 src/lottery_app/templates/scan_tickets.html
 src/lottery_app/templates/settings.html
-src/lottery_app/templates/signup.html
 src/lottery_app/utils/__init__.py
 src/lottery_app/utils/books.py
 src/lottery_app/utils/config.py

@@ -30,7 +30,7 @@ def receive():
         print("Polling is disabled — barcode ignored")
         return "Ignored"
     barcode = request.form.get("barcode")
-    print(f"Received barcode: {barcode}")
+    #print(f"Received barcode: {barcode}")
     #with app.app_context():
     BARCODE_STACK.append(barcode)
         #socketio.emit("barcode_scanned", {"barcode": barcode})

@@ -9,19 +9,16 @@
         document.addEventListener("DOMContentLoaded", () => {
             console.log("Flash message script loaded"); // Check this in console
 
-            const msg = document.querySelector(".flash-message");
-            console.log("Found flash message:", msg); // Check if this prints the element
-
-            if (msg) {
+            const msgs = document.querySelectorAll(".flash-message");
+            msgs.forEach((msg, index) => {
                 setTimeout(() => {
                     msg.style.transition = "opacity 1s ease-out"; // ensure transition is set
                     msg.style.opacity = "0";
                     setTimeout(() => {
-                        console.log("Removing flash message");
                         msg.remove();
                     }, 1000);
-                }, 4000);
-            }
+                }, 4000 + index * 500);
+            });
         });
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -78,11 +75,16 @@
 {% endblock %}
 {% block header %} Business Profile {% endblock %}  
 {% block content %}
-    {% if message %}
-        <div class="flash-message {{ message_type }}">
-            {{ message }}
-        </div>
-    {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category.startswith('business-profile_') %}
+                    <div class="flash-message {{ 'success' if 'success' in category else 'warning' if 'warning' in category else 'error' }}"
+                    style="--index: {{ loop.index0 }};">{{ message }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
     <div class="sections-container">
         <!-- Section 1: General Info -->

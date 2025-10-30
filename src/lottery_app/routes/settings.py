@@ -9,7 +9,7 @@ This module provides:
 
 import os
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, flash
 from flask_login import login_required
 
 from lottery_app.utils.config import (DEFAULT_DOWNLOADS_PATH, load_config,
@@ -29,8 +29,6 @@ def settings():
     - Update the ticket counting order.
     - Change the invoice output path (validated before saving).
     """
-    message = None
-    message_type = "warning"
     if request.method == "POST":
         config = load_config()
 
@@ -45,7 +43,7 @@ def settings():
             form_data["output_path"]
         )
         if warning_message:
-            message = warning_message
+            flash(warning_message, 'settings_warning')
         update_invoice_output_path(valid_output)
         update_should_poll(form_data["should_poll"])
 
@@ -56,8 +54,6 @@ def settings():
         counting_order=config["ticket_order"],
         invoice_output_path=config["invoice_output_path"],
         should_poll=config["should_poll"],
-        message=message,
-        message_type=message_type,
     )
 
 

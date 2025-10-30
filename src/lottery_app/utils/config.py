@@ -6,6 +6,7 @@ download locations, and application configuration settings.
 
 import json
 import os
+from flask import flash
 from importlib import resources
 
 # Define project and database paths
@@ -50,10 +51,15 @@ def update_ticket_order(order):
     Args:
         order (list): New ticket order to be saved.
     """
+    updated = False
     config = load_config()
+    if config["ticket_order"] != order:
+        updated = True
     config["ticket_order"] = order
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)
+    if updated: # if ticket order was changed
+        flash(f"Ticket Order Updated to {order} sucessfully.", "settings_success")
 
 
 def update_invoice_output_path(invoice_output_path):
@@ -63,10 +69,15 @@ def update_invoice_output_path(invoice_output_path):
     Args:
         invoice_output_path (str): Path where invoices should be saved.
     """
+    updated = False
     config = load_config()
+    if config["invoice_output_path"] != invoice_output_path:
+        updated = True
     config["invoice_output_path"] = invoice_output_path
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)
+    if updated:
+        flash(f"Output path updated to {instance_path} sucessfully.", "settings_success")
 
 
 def update_business_info(name, value):
@@ -79,10 +90,17 @@ def update_business_info(name, value):
     """
     # Name of the business info you want to change in the config file
     # Value is the value it should be changed to
+    updated = False
     config = load_config()
+    
+    if config[name] != value and value != "": 
+        updated = True
+    
     config[name] = value
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)
+    if updated:
+        flash(f"{name} is updated to {value} successfully.", "business-profile_success")
 
 def update_should_poll(set_val):
     """

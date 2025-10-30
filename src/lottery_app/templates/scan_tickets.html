@@ -94,6 +94,17 @@
             document.getElementById("online_sold").addEventListener("input", calculateCashDue);
             document.getElementById("instant_cashed").addEventListener("input", calculateCashDue);
             document.getElementById("online_cashed").addEventListener("input", calculateCashDue);
+
+            const msgs = document.querySelectorAll(".flash-message");
+            msgs.forEach((msg, index) => {
+                setTimeout(() => {
+                    msg.style.transition = "opacity 1s ease-out"; // ensure transition is set
+                    msg.style.opacity = "0";
+                    setTimeout(() => {
+                        msg.remove();
+                    }, 1000);
+                }, 4000 + index * 500);
+            });
         });
 
         function closeModal() {
@@ -134,23 +145,21 @@
             if (scanInput) scanInput.value = "";
         {% endif %}
         }
-        setTimeout(() => {
-            const msg = document.querySelector(".flash-message");
-            if (msg) {
-                msg.style.opacity = '0'; // Trigger CSS fade out
-                setTimeout(() => msg.remove(), 1000);
-            }
-        }, 4000); // Start fade after 4 seconds
     </script>
 {% endblock %}
 {% block header %} Daily Scans {% endblock %}  
 {% block content %}
     <section class="scan-section">
-        {% if message %}
-            <div class="flash-message {{ message_type }}">
-                {{ message }}
-            </div>
-        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category.startswith('tickets_') %}
+                        <div class="flash-message {{ 'success' if 'success' in category else 'warning' if 'warning' in category else 'error' }}"
+                        style="--index: {{ loop.index0 }};">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         
         <!-- Popup Message -->
         <div id="popupModal" class="modal" class="modal" aria-hidden="true" style="display:none">

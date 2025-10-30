@@ -5,24 +5,32 @@
 {% endblock %}
 {% block extra_js %}
     <script>
-        setTimeout(() => {
-                const msg = document.querySelector(".flash-message");
-                if (msg) {
-                    msg.style.opacity = '0'; // Trigger CSS fade out
-                    setTimeout(() => msg.remove(), 1000);
-                }
-            }, 4000); // Start fade after 4 seconds
+        const msgs = document.querySelectorAll(".flash-message");
+        msgs.forEach((msg, index) => {
+            setTimeout(() => {
+                msg.style.transition = "opacity 1s ease-out"; // ensure transition is set
+                msg.style.opacity = "0";
+                setTimeout(() => {
+                    msg.remove();
+                }, 1000);
+            }, 4000 + index * 500);
+        });
     </script>
 {% endblock %}
 
 {% block header %} Edit Reports {% endblock %}
 {% block content %}
     <div class="edit-reports-container">
-        {% if message %}
-            <div class="flash-message {{ message_type }}">
-                {{ message }}
-            </div>
-        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category.startswith('edit-reports_') %}
+                        <div class="flash-message {{ 'success' if 'success' in category else 'warning' if 'warning' in category else 'error' }}"
+                        style="--index: {{ loop.index0 }};">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <section class="filter-section">
             <h2>Filter Sales Reports</h2>
@@ -65,9 +73,15 @@
                             <td>{{ report['ReportDate'] }}</td>
                             <td>{{ report['ReportTime'] }}</td>
                             <td>
-                                <form method="GET" action="/edit_report/{{ report['ReportID'] }}">
-                                    <button type="submit" class="edit-btn">Edit</button>
-                                </form>
+                                {% if user_role == 'admin' %}
+                                    <form method="GET" action="/edit_report/{{ report['ReportID'] }}">
+                                        <button type="submit" class="edit-btn">Edit</button>
+                                    </form>
+                                {% else %}
+                                    <button type="button" class="edit-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                                        Edit
+                                    </button>
+                                {% endif %}
                             </td>
                         </tr>
                     {% else %}

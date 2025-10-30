@@ -60,6 +60,16 @@
             });
         });
 
+        const msgs = document.querySelectorAll(".flash-message");
+        msgs.forEach((msg, index) => {
+            setTimeout(() => {
+                msg.style.transition = "opacity 1s ease-out"; // ensure transition is set
+                msg.style.opacity = "0";
+                setTimeout(() => {
+                    msg.remove();
+                }, 1000);
+            }, 4000 + index * 500);
+        });
     });
 </script>
 <script>
@@ -79,13 +89,6 @@
 
         document.getElementById("orderForm").submit();
     }
-    setTimeout(() => {
-            const msg = document.querySelector(".flash-message");
-            if (msg) {
-                msg.style.opacity = '0'; // Trigger CSS fade out
-                setTimeout(() => msg.remove(), 1000);
-            }
-    }, 4000); // Start fade after 4 seconds
 </script>
 {% endblock %}
 {% block header %} System Settings {% endblock %}  
@@ -95,7 +98,7 @@
         {% if messages %}
             {% for category, message in messages %}
                 {% if category.startswith('settings_') %}
-                    <div class="flash-message {{ 'success' if 'success' in category else 'error' }}">{{ message }}</div>
+                    <div class="flash-message {{ 'success' if 'success' in category else 'warning' if 'warning' in category else 'error' }}">{{ message }}</div>
                 {% endif %}
             {% endfor %}
         {% endif %}
