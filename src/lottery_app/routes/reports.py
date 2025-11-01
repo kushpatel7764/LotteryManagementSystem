@@ -31,13 +31,19 @@ def edit_reports():
     Converts UTC to local time and gracefully handles errors.
     """
     # Safely load all reports
-    msg_data = {"message": "", "message_type": ""}
+    
+    message = request.args.get("message", "")
+    message_type = request.args.get("message_type", "")
+    
+    # Displaying messages coming from redirects
+    if message and message_type:
+        flash(message, f"edit-report_{message_type}")
+    
     sales_reports = check_error(
-        database_queries.get_all_sales_reports(db_path), msg_data, fallback=[]
+        database_queries.get_all_sales_reports(db_path), flash_prefix="edit-reports", fallback=[]
     )
     # Ensure it's always a list
     if not isinstance(sales_reports, list):
-        flash(msg_data.get("message", ""), "edit-reports_error")
         return render_template(
             "edit_reports.html",
             sales_reports=[]
@@ -110,37 +116,28 @@ def edit_single_report(report_id):
     
     message = request.args.get("message", "")
     message_type = request.args.get("message_type", "")
-
-    msg_data = {"message": message, "message_type": message_type}
+    
+    # Displaying messages coming from redirects
+    if message and message_type:
+        flash(message, f"edit-report_{message_type}")
     # Query the sales logs related to this report ID
     sales_logs = check_error(
         database_queries.get_sales_log(db_path, report_id),
-        message_holder=msg_data,
+        flash_prefix="edit-report",
         fallback=[],
     )
-    
-    if msg_data.get("message"):
-        flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-        msg_data["message"] = None  # or del msg_data["message"]
 
     sale_report = check_error(
         database_queries.get_daily_report(db_path, report_id),
-        message_holder=msg_data,
+        flash_prefix="edit-report",
         fallback={},
     )
-    
-    if msg_data.get("message"):
-        flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-        msg_data["message"] = None  # or del msg_data["message"]
     
     # Instant ticket sold recalculation
     if sale_report:
         instant_tickets_sold_total = check_error(
             calculate_instant_tickets_sold(
-                report_id=report_id), msg_data, fallback=0)
-        if msg_data.get("message"):
-            flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-            msg_data["message"] = None  # or del msg_data["message"]
+                report_id=report_id), flash_prefix="edit-report", fallback=0)
         sale_report["InstantTicketSold"] = instant_tickets_sold_total
     # Get the counting order to calc sold
     counting_order = load_config()["ticket_order"]
@@ -180,13 +177,7 @@ def update_sales_log():
         # previous_report_id = report_id_int - 1
         next_report_id = report_id_int + 1
         latest_report_id = _get_latest_report_id(msg_data)
-        if msg_data.get("message"):
-            flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-            msg_data["message"] = None  # or del msg_data["message"]
         game_number, book, _ = _get_book_metadata(book_id, msg_data)
-        if msg_data.get("message"):
-            flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-            msg_data["message"] = None  # or del msg_data["message"]
         book_info = { # book[4] is ticket price, book[3] is book amount and is type int
             "book_id": book_id,
             "game_number": game_number,
@@ -196,9 +187,6 @@ def update_sales_log():
         is_book_sold = check_error(
             database_queries.is_sold(
                 db_path, book_id), msg_data)
-        if msg_data.get("message"):
-            flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-            msg_data["message"] = None  # or del msg_data["message"]
         # Make the open_ticket and close_ticket values that are being set,
         # are not greater than or equal to book amount.
         if int(open_ticket) >= book[3] or int(close_ticket) > book[3]:
@@ -215,47 +203,29 @@ def update_sales_log():
 
         # Main update for current report
         _update_current_report(report_id, book_id, open_ticket, close_ticket, msg_data)
-        if msg_data.get("message"):
-            flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-            msg_data["message"] = None  # or del msg_data["message"]
         # Book is sold and closing value is not the sold out value than
         # the book can be reactivated (removing sold status)
         sold_out_val = "-1" if load_config()["ticket_order"] == "descending" else str(book[3])
         if is_book_sold and close_ticket != sold_out_val:
             _handle_sold_book_reactivation(book_info, report_id_int, latest_report_id, close_ticket,
                                            msg_data)
-            if msg_data.get("message"):
-                flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-                msg_data["message"] = None  # or del msg_data["message"]
 
         # Update previous report if it exists
         if (report_id_int - 1) >= 1: # previous report exists
             _update_previous_report(report_id_int - 1, book_id, open_ticket, msg_data)
-            if msg_data.get("message"):
-                flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-                msg_data["message"] = None  # or del msg_data["message"]
 
         # Update next report if it exists
         if next_report_id <= latest_report_id:
             _update_next_report(next_report_id, book_id, close_ticket, msg_data)
-            if msg_data.get("message"):
-                flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-                msg_data["message"] = None  # or del msg_data["message"]
 
         # If current is the latest report, update isAtTicketNumber
         if latest_report_id == report_id_int:
             check_error(
                 update_activated_books.update_is_at_ticketnumber_val(
                     db_path, book_id, close_ticket), msg_data)
-            if msg_data.get("message"):
-                flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-                msg_data["message"] = None  # or del msg_data["message"]
         # Update ticket timeline and instant sold for current
         # A update in sale log means the instant sold should also be updated
         _update_ticket_timeline_and_sold(report_id, book_id, close_ticket, msg_data)
-        if msg_data.get("message"):
-            flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-            msg_data["message"] = None  # or del msg_data["message"]
 
         return jsonify(
             {
@@ -270,8 +240,6 @@ def update_sales_log():
     except (KeyError, ValueError, TypeError) as e:
         msg_data["message"] = str(e)
         msg_data["message_type"] = "error"
-        flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-        msg_data["message"] = None  # or del msg_data["message"]
         safe_report_id = report_id if "report_id" in locals() else "unknown"
         return jsonify(
             {
@@ -409,9 +377,6 @@ def update_sale_reports(report_id):
                 ),
                 message_holder=msg_data,
             )
-            if msg_data.get("message"):
-                flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-                msg_data["message"] = None  # or del msg_data["message"]
         return redirect(
             url_for(
                 "reports.edit_single_report",
@@ -442,7 +407,6 @@ def download_modified_report(report_id):
     msg_data = {"message": "", "message_type": ""}
     result = check_error(lambda: create_daily_invoice(report_id), msg_data)
     if msg_data.get("message"):
-            flash(msg_data["message"], f"edit-report_{msg_data["message_type"]}")
-            msg_data["message"] = None  # or del msg_data["message"]
+            return msg_data["message"], msg_data["message_type"]
 
     return result
