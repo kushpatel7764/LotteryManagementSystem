@@ -57,17 +57,16 @@ def activate_book_procedure(scanned_code):
             activate_book_info["isAtTicketNumber"] = was_active_ticket_num
 
         # Final activation step
-        result = check_error(
+        check_error(
             update_activated_books.insert_book_to_activated_book_table(
                 database_path=db_path, active_book_info=activate_book_info
             ),
             message_holder=msg_data,
         )
 
-        # Return error or success response
-        if msg_data["message_type"] == "error":
-            return msg_data["message"], msg_data["message_type"]
-        return result
+        
+        return msg_data["message"], msg_data["message_type"]
+        
     except Exception as e: # pylint: disable=broad-exception-caught
         return f"Unexpected Error: {str(e)}", "error"
 

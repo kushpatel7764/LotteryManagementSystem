@@ -18,3 +18,4 @@ urllib3
 util-functions
 WebOb
 websockets
+Fernet
