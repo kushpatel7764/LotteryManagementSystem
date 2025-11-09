@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='edit_single_report.css') }}">
 {% endblock %}
 {% block extra_js %}
+{{ super() }}
     <script>
         function getOpenCellByBookId(bookId) {
             const rows = document.querySelectorAll("tr");
@@ -134,17 +135,6 @@
             document.getElementById("online_sold").addEventListener("input", calculateCashDue);
             document.getElementById("instant_cashed").addEventListener("input", calculateCashDue);
             document.getElementById("online_cashed").addEventListener("input", calculateCashDue);
-
-            const msgs = document.querySelectorAll(".flash-message");
-            msgs.forEach((msg, index) => {
-                setTimeout(() => {
-                    msg.style.transition = "opacity 1s ease-out"; // ensure transition is set
-                    msg.style.opacity = "0";
-                    setTimeout(() => {
-                        msg.remove();
-                    }, 1000);
-                }, 4000 + index * 500);
-            });
         });
 
         function downloadInvoice(report_id) {
@@ -161,16 +151,6 @@
 {% endblock %}
 {% block header %} Edit Report {{report_id}} {% endblock %}  
 {% block content %}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                {% if category.startswith('edit-report_') %}
-                    <div class="flash-message {{ 'success' if 'success' in category else 'warning' if 'warning' in category else 'error' }}"
-                    style="--index: {{ loop.index0 }};">{{ message }}</div>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
     <div class="Back_Navigation_Div">
             <button id="Back_Navigation_Button" class="back-btn" onclick="window.location.href='/edit_reports'" title="Go Back">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">

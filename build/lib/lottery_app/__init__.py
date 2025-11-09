@@ -9,10 +9,12 @@ from flask import Flask
 
 from flask_login import LoginManager
 from dotenv import load_dotenv
+from cryptography.fernet import Fernet
 import os
 import atexit
 
 from lottery_app.database.user_model import User
+from lottery_app.utils.version_check import check_for_updates
 from lottery_app.database import setup_database
 from lottery_app.utils.encrypted_db import decrypt_file, encrypt_file
 from lottery_app.utils.config import db_path
@@ -40,12 +42,28 @@ def create_app():
     enc_path = db_path + ".enc"
     # Load .env file from project root
     load_dotenv()
+    
+    # Check for FERMENT_KEY in environment, else generate and save it
+    fernet_key = os.getenv("FERNET_KEY")
+
+    if not fernet_key:
+        fernet_key = Fernet.generate_key().decode()
+        # Write it to .env for future use
+        with open(".env", "a") as f:
+            f.write(f"\nFERNET_KEY={fernet_key}\n")
+        app.logger.info("Generated new Fernet key and saved to .env")
+
+    # Store it in Flask config
+    app.config["FERNET_KEY"] = fernet_key
+    app.fernet = Fernet(fernet_key.encode())
+    
     # --- Decrypt database at startup ---
     if os.path.exists(enc_path):
         decrypt_file(enc_path, db_path)
 
     # --- Initialize database inside app context ---
     with app.app_context():
+        check_for_updates(app)
         setup_database.initialize_database(db_path)
         print("Database initialized successfully!")
 

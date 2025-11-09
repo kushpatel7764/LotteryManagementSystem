@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: lottery_app
-Version: 0.1
+Version: 0.1.0
 Requires-Dist: beautifulsoup4==4.13.4
 Requires-Dist: decorator==5.1.1
 Requires-Dist: etelemetry==0.3.1

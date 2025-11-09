@@ -178,34 +178,6 @@ button:hover{
     color: var(--color-action-button);
 }
 
-
-/* --- Flash Message Styling (Re-used from other files) --- */
-.flash-message {
-    position: fixed;
-    top: 80px; /* Adjust based on navButton.html header height */
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 12px 24px;
-    border-radius: var(--border-radius-reg);
-    color: white;
-    font-weight: bold;
-    z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: opacity 1s ease-out; /* For fade out effect */
-}
-
-.flash-message.success {
-    background-color: var(--color-success);
-}
-
-.flash-message.error {
-    background-color: var(--color-error);
-}
-
-.flash-message.warning {
-    background-color: var(--color-warning);
-}
-
 /* --- Responsive Adjustments --- */
 @media (max-width: 600px) {
     .settings-container {
