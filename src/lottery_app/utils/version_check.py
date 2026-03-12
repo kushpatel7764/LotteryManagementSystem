@@ -15,8 +15,6 @@ def check_for_updates(app, package_name="lottery_app"):
         # PyPI JSON API for package info : https://pypi.org/pypi/{package_name}/json
         resp = requests.get(f"https://test.pypi.org/pypi/{package_name}/json", timeout=5)
         latest_version = resp.json()["info"]["version"]
-        print(f"__version__ = {version.parse(__version__)}")
-        print(f" latest_version = {version.parse(latest_version)}")
         if version.parse(latest_version) > version.parse(__version__):
             flash(
                 f"New version {latest_version} available! "

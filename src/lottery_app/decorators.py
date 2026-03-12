@@ -24,6 +24,7 @@ def get_db_cursor(db_path):
         sqlite3.Error: If a database operation fails.
     """
     conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row  # ✅ ADD THIS
     try:
         cursor = conn.cursor()
         yield cursor

@@ -65,7 +65,6 @@ def create_app():
     with app.app_context():
         check_for_updates(app)
         setup_database.initialize_database(db_path)
-        print("Database initialized successfully!")
 
     # --- Setup login manager ---
     login_manager = LoginManager()

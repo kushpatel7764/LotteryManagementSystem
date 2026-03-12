@@ -1,12 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from lottery_app.database.user_model import User
-from lottery_app.utils.config import load_config
 
 security_bp = Blueprint("security", __name__)
 
 @security_bp.route("/signup", methods=["GET", "POST"])
-@login_required
+@login_required 
 def signup():
     if request.method == "POST":
         username = request.form["username"]

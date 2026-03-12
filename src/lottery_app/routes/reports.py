@@ -150,8 +150,25 @@ def edit_single_report(report_id):
     )
 
 def _get_latest_report_id(msg_data):
-    """Helper to fetch the latest report ID safely."""
-    return int(check_error(lambda: database_queries.next_report_id(db_path), msg_data)) - 1
+    """
+    Helper to fetch the latest report ID safely.
+
+    Contract:
+    - Report IDs start at 1
+    - Returns 0 if no valid reports exist
+    """
+    next_id = check_error(
+        lambda: database_queries.next_report_id(db_path),
+        message_holder=msg_data,
+        fallback=1
+    )
+
+    try:
+        latest = int(next_id) - 1
+    except (TypeError, ValueError):
+        return 0
+
+    return max(latest, 0)
 
 
 def _create_scan_id(game_number, book_id, ticket_num, ticket_price, book_amount):
@@ -407,6 +424,6 @@ def download_modified_report(report_id):
     msg_data = {"message": "", "message_type": ""}
     result = check_error(lambda: create_daily_invoice(report_id), msg_data)
     if msg_data.get("message"):
-            return msg_data["message"], msg_data["message_type"]
+            return msg_data["message"], 500
 
     return result

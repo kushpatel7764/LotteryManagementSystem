@@ -51,20 +51,19 @@ def activate_book_procedure(scanned_code):
             "isAtTicketNumber": extracted_vals["ticket_number"],
         }
         was_active_ticket_num = check_error(database_queries.was_activated(
-            db_path, activate_book_info["ActiveBookID"]), msg_data, fallback=None, )
+            db_path, activate_book_info["ActiveBookID"]), msg_data, fallback=None)
         # check to see if the book has been activated previosly or not
         if was_active_ticket_num is not None and was_active_ticket_num > -1:
             activate_book_info["isAtTicketNumber"] = was_active_ticket_num
 
         # Final activation step
         check_error(
-            update_activated_books.insert_book_to_activated_book_table(
+            result_or_callable=update_activated_books.insert_book_to_activated_book_table(
                 database_path=db_path, active_book_info=activate_book_info
             ),
-            message_holder=msg_data,
+            message_holder=msg_data
         )
 
-        
         return msg_data["message"], msg_data["message_type"]
         
     except Exception as e: # pylint: disable=broad-exception-caught

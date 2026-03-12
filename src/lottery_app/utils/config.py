@@ -7,7 +7,6 @@ download locations, and application configuration settings.
 import json
 import os
 from flask import flash
-from importlib import resources
 
 # Define project and database paths
 #project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -52,6 +51,8 @@ def update_ticket_order(order):
     Args:
         order (list): New ticket order to be saved.
     """
+    if not isinstance(order, list):
+        raise TypeError("ticket_order must be a list")
     updated = False
     config = load_config()
     if config["ticket_order"] != order:
@@ -70,6 +71,8 @@ def update_invoice_output_path(invoice_output_path):
     Args:
         invoice_output_path (str): Path where invoices should be saved.
     """
+    if not isinstance(invoice_output_path, str):
+        raise TypeError("invoice_output_path must be a string")
     updated = False
     config = load_config()
     if config["invoice_output_path"] != invoice_output_path:
@@ -91,6 +94,8 @@ def update_business_info(name, value):
     """
     # Name of the business info you want to change in the config file
     # Value is the value it should be changed to
+    if not isinstance(value, str):
+        raise TypeError("value must be a string")
     updated = False
     config = load_config()
     
@@ -113,6 +118,8 @@ def update_should_poll(set_val):
     """
     # Name of the business info you want to change in the config file
     # Value is the value it should be changed to
+    if not isinstance(set_val, str):
+        raise TypeError("should_poll value must be a string")
     config = load_config()
     config["should_poll"] = set_val
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:

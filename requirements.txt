@@ -11,6 +11,7 @@ python-socketio
 reportlab
 requests==2.31.0
 Gunicorn==21.2.0
+pytest-mock
 ruff
 simple-websocket
 simplejson

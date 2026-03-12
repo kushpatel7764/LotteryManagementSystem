@@ -2,6 +2,7 @@
 Database setup module for the lottery database system.
 """
 import os
+import sqlite3
 from lottery_app.decorators import get_db_cursor
 from lottery_app.utils.config import sql_file_path
 
@@ -38,10 +39,17 @@ def initialize_database(db_path):
     Parameters:
         database_path (str): The file path to the SQLite database file.
     """
-    db_exists = os.path.exists(db_path)
     
     with get_db_cursor(db_path) as cursor:
-        if not db_exists:
-            print("Database file not found. Creating new database and schema...")
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        )
+
+        if not os.path.exists(db_path):
+            # Database file not found 
+            return
+
+        if not cursor.fetchall():
+            print("Creating new database and schema...")
             # Pass the path through
             setup_database_schema_with_sql_file(cursor)

@@ -53,14 +53,14 @@ def insert_book_to_activated_book_table(database_path, active_book_info):
         2. Returns an error message on failure or None on success.
     """
     initialize_database(database_path)
-
+    
     try:
         with get_db_cursor(database_path) as cursor:
             add_activate_book_info_to_activated_book(cursor, active_book_info)
+        return ("SUCCESSFULLY UPDATED ACTIVATED BOOK TABLE", "success")
     except sqlite3.Error as e:
-        return f"ERROR ACTIVATING BOOK: {e}", "error"
+        return (f"ERROR ACTIVATING BOOK: {e}", "error")
 
-    return "SUCCESSFULLY UPDATED ACTIVATED BOOK TABLE", "success"
 
 
 def update_counting_ticket_number_for_book_id_query(

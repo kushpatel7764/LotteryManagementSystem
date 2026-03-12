@@ -61,8 +61,7 @@ def scan_tickets():
         else:
             # Insert ticket
             scan_id = scanned_code
-            msg_data["message"] = "TICKET SCANNED"
-            msg_data["message_type"] = "success"
+            flash("TICKET SCANNED", "tickets_success")
             # check the a ticket for this book_id has not already been scanned
             if check_error(
                 database_queries.is_counting_ticket_number_set(
@@ -108,6 +107,7 @@ def scan_tickets():
                     extracted_vals["ticket_number"]),
                 flash_prefix="tickets",
             )
+            
     # Get all the active books basically.
     # In reality, making a table to show to the user using activated bookids.
     # Instant ticket sold calculation
@@ -171,7 +171,7 @@ def undo_scan():
                 message_holder=msg_data,
             )
 
-            msg_data["message"] = "UNDO SCAN SUCCESSFUL"
+            msg_data["message"] = "UNDONE SUCCESSFUL"
             msg_data["message_type"] = "success"
         except ValueError as ve:
             msg_data["message"] = str(ve)

@@ -65,3 +65,5 @@ src/lottery_app/utils/error_hanlder.py
 src/lottery_app/utils/reports.py
 src/lottery_app/utils/tickets.py
 src/lottery_app/utils/version_check.py
+tests/test_login.py
+tests/test_rout_auth.py

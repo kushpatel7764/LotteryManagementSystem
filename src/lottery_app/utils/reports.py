@@ -131,11 +131,16 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
         database_queries.get_activated_book_is_at_ticketnumber(db_path, book_id),
         message_holder=msg_data,
     )
+    if msg_data["message_type"] == "error":
+        return msg_data.get("message"), "error"
+
     ticket_name = check_error(
         database_queries.get_ticket_name(
             db_path,
             game_number),
         message_holder=msg_data)
+    if msg_data["message_type"] == "error":
+        return msg_data.get("message"), "error"
 
     # Build sales log entry
     sale_log_info = {

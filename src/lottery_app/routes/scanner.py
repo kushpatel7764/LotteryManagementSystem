@@ -26,8 +26,8 @@ def receive():
         str: A simple confirmation message.
     """
     config = load_config()
-    if config.get("should_poll", False) == "false":
-        print("Polling is disabled — barcode ignored")
+    should_poll = str(config.get("should_poll", "true")).lower() == "true"
+    if not should_poll:
         return "Ignored"
     barcode = request.form.get("barcode")
     #print(f"Received barcode: {barcode}")

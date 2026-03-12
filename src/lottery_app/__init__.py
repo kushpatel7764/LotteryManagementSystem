@@ -46,12 +46,11 @@ def create_app():
     # Check for FERMENT_KEY in environment, else generate and save it
     fernet_key = os.getenv("FERNET_KEY")
 
-    if not fernet_key:
+    if not fernet_key: # Generate fernet key if not found
         fernet_key = Fernet.generate_key().decode()
         # Write it to .env for future use
         with open(".env", "a") as f:
             f.write(f"\nFERNET_KEY={fernet_key}\n")
-        app.logger.info("Generated new Fernet key and saved to .env")
 
     # Store it in Flask config
     app.config["FERNET_KEY"] = fernet_key
@@ -65,7 +64,6 @@ def create_app():
     with app.app_context():
         check_for_updates(app)
         setup_database.initialize_database(db_path)
-        print("Database initialized successfully!")
 
     # --- Setup login manager ---
     login_manager = LoginManager()

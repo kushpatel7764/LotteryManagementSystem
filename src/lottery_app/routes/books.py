@@ -166,6 +166,8 @@ def deactivate_book():
     msg_data = {"message": "", "message_type": ""}
     try:
         data = request.get_json()
+        if not data or "bookID" not in data:
+            raise ValueError("Missing 'bookID'")
         book_id = data.get("bookID")
 
         check_error(update_activated_books.deactivate_book(db_path, book_id), msg_data)

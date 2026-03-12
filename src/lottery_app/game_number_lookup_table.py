@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 
 from lottery_app.database import database_queries, update_ticket_name_lookup
 from lottery_app.utils.config import db_dir
+# import the module under test
 
 
 def get_lottery_net_lookup_table() -> DataFrame:
