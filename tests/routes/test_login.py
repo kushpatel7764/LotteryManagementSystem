@@ -1,8 +1,8 @@
 import pytest
 import sqlite3
 from unittest.mock import patch, MagicMock
-from flask import url_for
 from lottery_app.database.user_model import User
+
 
 @pytest.fixture
 def mock_db():
@@ -21,6 +21,7 @@ def mock_db():
     yield conn
     conn.close()
 
+
 @pytest.fixture
 def client(app):
     app.config["TESTING"] = True
@@ -28,9 +29,11 @@ def client(app):
     with app.test_client() as client:
         yield client
 
+
 @pytest.fixture
 def mock_cursor(mock_db):
     """Return a mock context manager similar to get_db_cursor(DATABASE)."""
+
     class MockCursorContext:
         def __init__(self, *args, **kwargs):
             # Accept any arguments like DATABASE
@@ -65,8 +68,10 @@ def test_get_by_id(mock_cursor):
     with patch("lottery_app.database.user_model.get_db_cursor", mock_cursor):
         # Insert user manually
         with mock_cursor() as cursor:
-            cursor.execute("INSERT INTO Users (username, password_hash, role) VALUES (?, ?, ?)",
-                           ("iduser", "fakehash", "standard"))
+            cursor.execute(
+                "INSERT INTO Users (username, password_hash, role) VALUES (?, ?, ?)",
+                ("iduser", "fakehash", "standard"),
+            )
             user_id = cursor.lastrowid
 
         user = User.get_by_id(user_id)
@@ -87,7 +92,7 @@ def test_update_password(mock_cursor):
 
 def test_delete_user(mock_cursor):
     with patch("lottery_app.database.user_model.get_db_cursor", mock_cursor):
-        with patch("lottery_app.database.user_model.flash") as mock_flash: 
+        with patch("lottery_app.database.user_model.flash") as mock_flash:
             User.create("delete_me", "1234")
             user = User.get_by_username("delete_me")
             assert user is not None
@@ -95,8 +100,9 @@ def test_delete_user(mock_cursor):
             User.delete("delete_me")
             deleted_user = User.get_by_username("delete_me")
             assert deleted_user is None
-            
+
             mock_flash.assert_called()  # optional: verify flash was called
+
 
 def test_login_success(client):
     # --- create a fake user object ---
@@ -106,42 +112,54 @@ def test_login_success(client):
 
         def verify_password(self, password):
             return password == "pass"
-        
+
     fake_user = FakeUser()
 
     # Track whether login_user was called
     login_called = {"value": False}
-    
+
     def fake_login_user(user):
         login_called["value"] = True
         assert user.username == "user"
-    
-    with patch("lottery_app.database.user_model.User.get_by_username", return_value=fake_user):
-        with patch("lottery_app.routes.security.login_user", side_effect=fake_login_user):
-            response = client.post("/login", data={"username": "user", "password": "pass"}, follow_redirects=True)
-    
+
+    with patch(
+        "lottery_app.database.user_model.User.get_by_username", return_value=fake_user
+    ):
+        with patch(
+            "lottery_app.routes.security.login_user", side_effect=fake_login_user
+        ):
+            response = client.post(
+                "/login",
+                data={"username": "user", "password": "pass"},
+                follow_redirects=True,
+            )
+
     # --- Assertions ---
     assert login_called["value"] is True
     assert response.status_code == 200
 
 
 def test_login_failure(client):
-    with patch("lottery_app.database.user_model.User.get_by_username", return_value=None):
-        response = client.post("/login", data={"username": "wrong", "password": "wrong"}, follow_redirects=True)
+    with patch(
+        "lottery_app.database.user_model.User.get_by_username", return_value=None
+    ):
+        response = client.post(
+            "/login",
+            data={"username": "wrong", "password": "wrong"},
+            follow_redirects=True,
+        )
         assert b"Invalid username or password" in response.data
 
+
 def test_logout(client, monkeypatch):
-     # -----------------------------
+    # -----------------------------
     # 1. Force user to be logged in
     # -----------------------------
     class FakeUser:
         id = 1
         is_authenticated = True
 
-    monkeypatch.setattr(
-        "flask_login.utils._get_user",
-        lambda: FakeUser()
-    )
+    monkeypatch.setattr("flask_login.utils._get_user", lambda: FakeUser())
 
     # -----------------------------
     # 2. Patch logout_user
@@ -166,16 +184,14 @@ def test_logout(client, monkeypatch):
     assert response.status_code in (302, 303)
     assert "/login" in response.headers["Location"]
 
+
 def test_change_password_success(client, monkeypatch):
     # 1. Force user to be logged in
     class FakeUser:
         id = 1
         is_authenticated = True
 
-    monkeypatch.setattr(
-        "flask_login.utils._get_user",
-        lambda: FakeUser()
-    )
+    monkeypatch.setattr("flask_login.utils._get_user", lambda: FakeUser())
 
     # 2. Mock User.get_by_id() to return a fake user instance
     mock_user_instance = MagicMock()
@@ -185,8 +201,7 @@ def test_change_password_success(client, monkeypatch):
     mock_user_instance.update_password = MagicMock()
 
     monkeypatch.setattr(
-        "lottery_app.routes.security.User.get_by_id",
-        lambda user_id: mock_user_instance
+        "lottery_app.routes.security.User.get_by_id", lambda user_id: mock_user_instance
     )
 
     # 3. Make POST request
@@ -198,14 +213,15 @@ def test_change_password_success(client, monkeypatch):
         data={
             "current_password": "old",
             "new_password": "new",
-            "confirm_password": "new"
+            "confirm_password": "new",
         },
-        follow_redirects=True
+        follow_redirects=True,
     )
 
     # 4. Assert the instance method was called
     mock_user_instance.update_password.assert_called_once_with(1, "new")
     assert b"Password updated successfully!" in response.data
+
 
 def test_change_password_fail_mismatch(client, monkeypatch):
     # -----------------------------
@@ -215,10 +231,7 @@ def test_change_password_fail_mismatch(client, monkeypatch):
         id = 1
         is_authenticated = True
 
-    monkeypatch.setattr(
-        "flask_login.utils._get_user",
-        lambda: FakeUser()
-    )
+    monkeypatch.setattr("flask_login.utils._get_user", lambda: FakeUser())
 
     # -----------------------------------
     # 2. Mock User.get_by_id() to return a fake user instance
@@ -229,7 +242,7 @@ def test_change_password_fail_mismatch(client, monkeypatch):
 
     monkeypatch.setattr(
         "lottery_app.database.user_model.User.get_by_id",
-        lambda user_id: mock_user_instance
+        lambda user_id: mock_user_instance,
     )
     # -----------------------------
     # 3. Make the POST request with mismatched passwords
@@ -239,9 +252,9 @@ def test_change_password_fail_mismatch(client, monkeypatch):
         data={
             "current_password": "old",
             "new_password": "new1",
-            "confirm_password": "new2"
+            "confirm_password": "new2",
         },
-        follow_redirects=True
+        follow_redirects=True,
     )
     # -----------------------------
     # 4. Assert the flash message is present
@@ -261,8 +274,10 @@ def test_delete_user_success(client, monkeypatch):
     # 2. Mock User.get_by_id()
     mock_user_instance = MagicMock()
     mock_user_instance.username = "admin"
-    monkeypatch.setattr("lottery_app.database.user_model.User.get_by_id",
-                        lambda user_id: mock_user_instance)
+    monkeypatch.setattr(
+        "lottery_app.database.user_model.User.get_by_id",
+        lambda user_id: mock_user_instance,
+    )
 
     # 3. Mock User.delete
     mock_delete = MagicMock()
@@ -273,14 +288,15 @@ def test_delete_user_success(client, monkeypatch):
     monkeypatch.setattr("lottery_app.routes.security.flash", mock_flash)
 
     # 5. Make POST request
-    response = client.post("/delete_user",
-                           data={"username": "other_user"},
-                           follow_redirects=True)
+    response = client.post(
+        "/delete_user", data={"username": "other_user"}, follow_redirects=True
+    )
 
     # 6. Assertions
     mock_delete.assert_called_once_with("other_user")
-    mock_flash.assert_called_once_with("other_user's account was deleted sucessfully.",
-                                       "business-profile_success")
+    mock_flash.assert_called_once_with(
+        "other_user's account was deleted sucessfully.", "business-profile_success"
+    )
     assert response.status_code == 200
 
 
@@ -296,8 +312,10 @@ def test_delete_user_protect_self(client, monkeypatch):
     # 2. Mock User.get_by_id
     mock_user_instance = MagicMock()
     mock_user_instance.username = "selfuser"
-    monkeypatch.setattr("lottery_app.database.user_model.User.get_by_id",
-                        lambda user_id: mock_user_instance)
+    monkeypatch.setattr(
+        "lottery_app.database.user_model.User.get_by_id",
+        lambda user_id: mock_user_instance,
+    )
 
     # 3. Mock User.delete
     mock_delete = MagicMock()
@@ -308,14 +326,13 @@ def test_delete_user_protect_self(client, monkeypatch):
     monkeypatch.setattr("lottery_app.routes.security.flash", mock_flash)
 
     # 5. Make POST request
-    response = client.post("/delete_user",
-                           data={"username": "selfuser"},
-                           follow_redirects=True)
+    response = client.post(
+        "/delete_user", data={"username": "selfuser"}, follow_redirects=True
+    )
 
     # 6. Assertions
     mock_delete.assert_not_called()
     mock_flash.assert_called_once_with(
-        "You cannot delete the currently logged-in user.",
-        "business-profile_error"
+        "You cannot delete the currently logged-in user.", "business-profile_error"
     )
     assert response.status_code == 200

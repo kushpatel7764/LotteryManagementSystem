@@ -6,15 +6,17 @@ from lottery_app.database import update_ticket_timeline
 from lottery_app.utils.config import db_path
 from lottery_app.utils.error_hanlder import check_error
 
+
 # pylint: disable=too-many-arguments
 def insert_ticket(
-        scan_id,
-        book_id,
-        ticket_number,
-        ticket_name,
-        ticket_price,
-        *, # everything after this must be passed by name
-        report_id=None):
+    scan_id,
+    book_id,
+    ticket_number,
+    ticket_name,
+    ticket_price,
+    *,  # everything after this must be passed by name
+    report_id=None,
+):
     """
     Inserts a ticket into the TicketTimeline table.
 
@@ -43,7 +45,9 @@ def insert_ticket(
         ticket_info["ReportID"] = report_id
     # Insert this ticket in TicketTimeline
     check_error(
-        update_ticket_timeline.insert_ticket_to_ticket_timeline_table(db_path, ticket_info),
+        update_ticket_timeline.insert_ticket_to_ticket_timeline_table(
+            db_path, ticket_info
+        ),
         message_holder=msg_data,
     )
 

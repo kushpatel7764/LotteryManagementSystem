@@ -1,11 +1,13 @@
 import os
 from cryptography.fernet import Fernet
 
+
 def get_cipher():
     key = os.getenv("FERNET_KEY")
     if not key:
         raise RuntimeError("Missing FERNET_KEY environment variable")
     return Fernet(key.encode())
+
 
 def encrypt_file(input_path, output_path=None):
     cipher = get_cipher()
@@ -21,8 +23,9 @@ def encrypt_file(input_path, output_path=None):
 
     with open(output_path, "wb") as f:
         f.write(encrypted)
-        
+
     print("Encrypted file created:", os.path.exists("app.db.enc"))
+
 
 def decrypt_file(input_path, output_path=None):
     cipher = get_cipher()

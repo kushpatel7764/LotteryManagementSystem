@@ -1,11 +1,10 @@
 """
-DatabaseQueries module: Handles interactions with Books, ActivatedBooks, SalesLog, 
+DatabaseQueries module: Handles interactions with Books, ActivatedBooks, SalesLog,
 and SaleReport tables. Provides standardized database operations and error handling
 for the lottery system.
 """
 
 import sqlite3
-from flask import flash
 
 from lottery_app.database import setup_database
 from lottery_app.decorators import get_db_cursor
@@ -26,8 +25,7 @@ def get_books(db):
     try:
         setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
-            cursor.execute(
-                "SELECT * FROM Books ORDER BY Books.TicketPrice DESC;")
+            cursor.execute("SELECT * FROM Books ORDER BY Books.TicketPrice DESC;")
             books = cursor.fetchall()
 
             if not books:
@@ -121,7 +119,7 @@ def get_activated_books(db):
 
 def is_book(db, book_id):
     """
-    Checks if a book with the given BookID exists in the Books table. If a book 
+    Checks if a book with the given BookID exists in the Books table. If a book
     exists then all information for that book is returned.
 
     Parameters:
@@ -135,8 +133,7 @@ def is_book(db, book_id):
     try:
         setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
-            cursor.execute(
-                "SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
+            cursor.execute("SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
             book = cursor.fetchone() is not None
 
             if book:
@@ -245,8 +242,7 @@ def get_book(db, book_id):
     try:
         setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
-            cursor.execute(
-                "SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
+            cursor.execute("SELECT * FROM Books WHERE BookID = ? LIMIT 1;", (book_id,))
             book = cursor.fetchone()
 
             return book
@@ -270,7 +266,8 @@ def get_ticket_with_bookid(db, book_id):
         setup_database.initialize_database(db)
         with get_db_cursor(db) as cursor:
             cursor.execute(
-                "SELECT * FROM TicketTimeLine WHERE BookID = ? LIMIT 1;", (book_id,))
+                "SELECT * FROM TicketTimeLine WHERE BookID = ? LIMIT 1;", (book_id,)
+            )
             ticket = cursor.fetchone()
 
             return ticket
@@ -312,8 +309,7 @@ def get_scan_ticket_page_table(db):
     setup_database.initialize_database(db)
     try:
         with get_db_cursor(db) as cursor:
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT TicketNameLookup.TicketName, ActivatedBooks.ActiveBookID, Books.TicketPrice,
                 Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber, 
                 ActivatedBooks.countingTicketNumber
@@ -321,8 +317,7 @@ def get_scan_ticket_page_table(db):
                 Join Books ON ActiveBookID = BookID
                 Left Join TicketNameLookup ON Books.GameNumber = TicketNameLookup.GameNumber
                 ORDER BY Books.TicketPrice DESC;
-                """
-            )
+                """)
             rows = cursor.fetchall()
             return [
                 {
@@ -659,7 +654,8 @@ def get_game_num_of(db, book_id):
     try:
         with get_db_cursor(db) as cursor:
             cursor.execute(
-                "SELECT GameNumber FROM Books Where BookID = ? LIMIT 1", (book_id,))
+                "SELECT GameNumber FROM Books Where BookID = ? LIMIT 1", (book_id,)
+            )
             row = cursor.fetchone()
             return row[0] if row else None
     except sqlite3.Error as e:

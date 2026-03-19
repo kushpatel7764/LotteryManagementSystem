@@ -1,10 +1,9 @@
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from lottery_app.utils.tickets import insert_ticket
 
-
 # ---------- Helpers ----------
+
 
 def success_check_error(return_value, message_holder):
     message_holder["message"] = "SUCCESS"
@@ -20,7 +19,10 @@ def error_check_error(return_value, message_holder):
 
 # ---------- Tests ----------
 
-@patch("lottery_app.utils.tickets.update_ticket_timeline.insert_ticket_to_ticket_timeline_table")
+
+@patch(
+    "lottery_app.utils.tickets.update_ticket_timeline.insert_ticket_to_ticket_timeline_table"
+)
 @patch("lottery_app.utils.tickets.check_error")
 def test_insert_ticket_success_without_report_id(
     mock_check_error,
@@ -55,7 +57,9 @@ def test_insert_ticket_success_without_report_id(
     }
 
 
-@patch("lottery_app.utils.tickets.update_ticket_timeline.insert_ticket_to_ticket_timeline_table")
+@patch(
+    "lottery_app.utils.tickets.update_ticket_timeline.insert_ticket_to_ticket_timeline_table"
+)
 @patch("lottery_app.utils.tickets.check_error")
 def test_insert_ticket_success_with_report_id(
     mock_check_error,
@@ -82,7 +86,9 @@ def test_insert_ticket_success_with_report_id(
     assert ticket_info["ReportID"] == "REPORT99"
 
 
-@patch("lottery_app.utils.tickets.update_ticket_timeline.insert_ticket_to_ticket_timeline_table")
+@patch(
+    "lottery_app.utils.tickets.update_ticket_timeline.insert_ticket_to_ticket_timeline_table"
+)
 @patch("lottery_app.utils.tickets.check_error")
 def test_insert_ticket_db_error(
     mock_check_error,
@@ -103,7 +109,9 @@ def test_insert_ticket_db_error(
     assert message_type == "error"
 
 
-@patch("lottery_app.utils.tickets.update_ticket_timeline.insert_ticket_to_ticket_timeline_table")
+@patch(
+    "lottery_app.utils.tickets.update_ticket_timeline.insert_ticket_to_ticket_timeline_table"
+)
 @patch("lottery_app.utils.tickets.check_error")
 def test_insert_ticket_calls_check_error_with_message_holder(
     mock_check_error,

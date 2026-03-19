@@ -1,10 +1,11 @@
 """
 Database setup module for the lottery database system.
 """
+
 import os
-import sqlite3
 from lottery_app.decorators import get_db_cursor
 from lottery_app.utils.config import sql_file_path
+
 
 # Connect to database
 def setup_database_schema_with_sql_file(cursor):
@@ -21,7 +22,7 @@ def setup_database_schema_with_sql_file(cursor):
         After execution, it commits the changes to the database.
     """
     try:
-        #sql_file_path = resource_path(sql_filename)
+        # sql_file_path = resource_path(sql_filename)
 
         # Read the SQL schema file
         with open(sql_file_path, "r", encoding="utf-8") as file:
@@ -39,14 +40,12 @@ def initialize_database(db_path):
     Parameters:
         database_path (str): The file path to the SQLite database file.
     """
-    
+
     with get_db_cursor(db_path) as cursor:
-        cursor.execute(
-            "SELECT name FROM sqlite_master WHERE type='table'"
-        )
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
 
         if not os.path.exists(db_path):
-            # Database file not found 
+            # Database file not found
             return
 
         if not cursor.fetchall():

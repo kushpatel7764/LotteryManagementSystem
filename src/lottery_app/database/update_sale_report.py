@@ -2,7 +2,6 @@
 Database management module for the Sales Report table in lottery database system.
 """
 
-
 import datetime
 import sqlite3
 
@@ -10,17 +9,16 @@ from lottery_app.database.setup_database import initialize_database
 from lottery_app.decorators import get_db_cursor
 
 
-def update_sale_report( # pylint: disable=too-many-arguments
+def update_sale_report(  # pylint: disable=too-many-arguments
     database_path,
     instant_sold,
     online_sold,
     instant_cashed,
     online_cashed,
-    *, # everything after this must be passed by name
+    *,  # everything after this must be passed by name
     cash_on_hand,
     report_id,
-    date=datetime.datetime.now(
-        datetime.timezone.utc).time().strftime("%H:%M:%S"),
+    date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S"),
 ):
     """
     Updates a finalized SaleReport entry with totals for ticket sales and cash.
@@ -124,7 +122,9 @@ def insert_daily_totals(database_path, daily_totals):
             add_daily_totals(cursor, daily_totals)
     except sqlite3.Error as e:
         return (
-            f"ERROR ADDING A SALE REPORT FOR REPORTID({daily_totals['ReportID']}): {e}", "error", )
+            f"ERROR ADDING A SALE REPORT FOR REPORTID({daily_totals['ReportID']}): {e}",
+            "error",
+        )
 
     return "SUCCESSFULLY UPDATED SALE REPORT TABLE", "success"
 
@@ -140,7 +140,7 @@ def update_sale_report_instant_sold(database_path, instant_sold, report_id):
 
     Returns:
         tuple:
-            - ("ERROR UPDATING INSTANT SOLD VALUE FOR SALES REPORTID(<report_id>): 
+            - ("ERROR UPDATING INSTANT SOLD VALUE FOR SALES REPORTID(<report_id>):
             <error>", "error") on SQLite error.
 
     Description:
@@ -162,8 +162,8 @@ def update_sale_report_instant_sold(database_path, instant_sold, report_id):
             )
     except sqlite3.Error as e:
         return (
-            f"Error updating instant sold value for sales reportid({report_id}) : ".upper() +
-            f"{e}",
+            f"Error updating instant sold value for sales reportid({report_id}) : ".upper()
+            + f"{e}",
             "error",
         )
 

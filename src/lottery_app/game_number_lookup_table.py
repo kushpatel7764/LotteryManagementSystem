@@ -5,7 +5,6 @@ This module fetches the lottery scratch-off data, maintains a local tracking fil
 and updates the database with new game numbers.
 """
 
-
 import os
 
 import pandas as pd
@@ -15,6 +14,7 @@ from bs4 import BeautifulSoup
 
 from lottery_app.database import database_queries, update_ticket_name_lookup
 from lottery_app.utils.config import db_dir
+
 # import the module under test
 
 
@@ -48,11 +48,7 @@ def get_lottery_net_lookup_table() -> DataFrame:
 
     # Create DataFrame
     df = pd.DataFrame(rows, columns=headers)
-    new_df = df.drop(
-        columns=[
-            "Top Prize",
-            "Prizes Remaining",
-            "Odds of Winning"])
+    new_df = df.drop(columns=["Top Prize", "Prizes Remaining", "Odds of Winning"])
     return new_df
 
 
@@ -98,7 +94,8 @@ def insert_new_ticket_name_to_lookup_table(
                     )
                     track_gms_in_lookup_table(db_path)
             except (OSError, KeyError, TypeError) as e:
-                return ( f"Failed inserting game number {row['Game No.']}: {str(e)}",
+                return (
+                    f"Failed inserting game number {row['Game No.']}: {str(e)}",
                     "error",
                 )
 
@@ -121,8 +118,7 @@ def remove_ticketname_gm_track(file_name):
     os.remove(ticketname_gm_track_file_path)
 
 
-def track_gms_in_lookup_table(db_path,
-                              file_name="TicketNameLook_GM_Track.txt"):
+def track_gms_in_lookup_table(db_path, file_name="TicketNameLook_GM_Track.txt"):
     """
     Get Game numbers from lookup table and store them in file for use
     """
@@ -165,7 +161,7 @@ def load_from_gm_track_file(file_name):
     """
     game_number_list = []
     gm_track_file_path = os.path.join(db_dir, file_name)
-    with open(gm_track_file_path, "r",  encoding="utf-8") as f:
+    with open(gm_track_file_path, "r", encoding="utf-8") as f:
         for line in f:
             game_number_list.append(line.strip("\n"))
     return game_number_list
@@ -228,5 +224,5 @@ def create_empty_gm_track_file(file_name):
     """
     track_gm_file_path = os.path.join(db_dir, file_name)
     if not os.path.exists(track_gm_file_path):
-        with open(track_gm_file_path, "w",  encoding="utf-8"):
+        with open(track_gm_file_path, "w", encoding="utf-8"):
             pass  # Just create an empty file

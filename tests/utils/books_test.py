@@ -6,9 +6,9 @@ from lottery_app.utils.books import (
     add_book_procedure,
 )
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Pytest: test suite for books management functions in lottery_app.utils.books
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 """
 Testing Code: 35600949981000515070000000091
 activate_book_procedure:
@@ -30,21 +30,21 @@ add_book_procedure:
 # activate_book_procedure tests
 # ============================================================
 
+
 @pytest.fixture
 def scanned_info_mock(mocker):
     """Patch ScannedCodeManagement constructor and return its instance mock."""
     obj = MagicMock()
-    mocker.patch(
-        "lottery_app.scanned_code_information_management",
-        return_value=obj
-    )
+    mocker.patch("lottery_app.scanned_code_information_management", return_value=obj)
     return obj
+
 
 def test_activate_book_invalid_barcode(scanned_info_mock):
     scanned_info_mock.extract_all_scanned_code.return_value = "INVALID BARCODE"
 
     result = activate_book_procedure("ANY")
     assert result == ("INVALID BARCODE", "error")
+
 
 def test_activate_book_book_not_exists(scanned_info_mock, mocker):
     scanned_info_mock.extract_all_scanned_code.return_value = {
@@ -55,13 +55,9 @@ def test_activate_book_book_not_exists(scanned_info_mock, mocker):
         "ticket_price": "5",
     }
 
+    mocker.patch("lottery_app.database.database_queries.is_book", return_value=False)
     mocker.patch(
-        "lottery_app.database.database_queries.is_book",
-        return_value=False
-    )
-    mocker.patch(
-        "lottery_app.database.database_queries.is_activated_book",
-        return_value=False
+        "lottery_app.database.database_queries.is_activated_book", return_value=False
     )
 
     msg, msg_type = activate_book_procedure("35600949981000515070000000091")
@@ -78,13 +74,9 @@ def test_activate_book_already_activated(scanned_info_mock, mocker):
         "ticket_price": "5",
     }
 
+    mocker.patch("lottery_app.database.database_queries.is_book", return_value=True)
     mocker.patch(
-        "lottery_app.database.database_queries.is_book",
-        return_value=True
-    )
-    mocker.patch(
-        "lottery_app.database.database_queries.is_activated_book",
-        return_value=True
+        "lottery_app.database.database_queries.is_activated_book", return_value=True
     )
 
     msg, msg_type = activate_book_procedure("35600949981000515070000000091")
@@ -92,7 +84,9 @@ def test_activate_book_already_activated(scanned_info_mock, mocker):
     assert msg_type == "error"
 
 
-def test_activate_book_previous_activation_sets_ticket_number(mocker, scanned_info_mock):
+def test_activate_book_previous_activation_sets_ticket_number(
+    mocker, scanned_info_mock
+):
     scanned_info_mock.extract_all_scanned_code.return_value = {
         "book_id": "094995",
         "ticket_number": "011",
@@ -102,20 +96,18 @@ def test_activate_book_previous_activation_sets_ticket_number(mocker, scanned_in
     }
 
     mocker.patch("lottery_app.database.database_queries.is_book", return_value=True)
-    mocker.patch("lottery_app.database.database_queries.is_activated_book", return_value=False)
+    mocker.patch(
+        "lottery_app.database.database_queries.is_activated_book", return_value=False
+    )
 
     # was_activated returns an earlier ticket index
-    mocker.patch(
-        "lottery_app.database.database_queries.was_activated",
-        return_value=5
-    )
+    mocker.patch("lottery_app.database.database_queries.was_activated", return_value=5)
 
     # make check_error write to msg_data
     def fake_check_error(*args, **kwargs):
         message_holder = kwargs.get("message_holder") or args[1]
         message_holder["message"] = "ACTIVATION SUCCESS"
         message_holder["message_type"] = "success"
-        
 
     mocker.patch("lottery_app.utils.books.check_error", side_effect=fake_check_error)
 
@@ -126,7 +118,7 @@ def test_activate_book_previous_activation_sets_ticket_number(mocker, scanned_in
     msg, msg_type = activate_book_procedure("35600949980110515070000000091")
     assert msg == "ACTIVATION SUCCESS"
     assert msg_type == "success"
-    
+
     # ---- CRITICAL ASSERTIONS ----
     # Ensure the mock was actually called
     insert_mock.assert_called_once()
@@ -146,6 +138,7 @@ def test_activate_book_previous_activation_sets_ticket_number(mocker, scanned_in
 
 def test_activate_book_no_previous_activation(mocker, scanned_info_mock):
     from lottery_app.utils.books import db_path
+
     scanned_info_mock.extract_all_scanned_code.return_value = {
         "book_id": "094998",
         "ticket_number": "99",
@@ -153,12 +146,17 @@ def test_activate_book_no_previous_activation(mocker, scanned_info_mock):
         "book_amount": "149",
         "ticket_price": "5",
     }
-    
+
     # Patch db_path used inside the function
     mocker.patch("lottery_app.database.database_queries.is_book", return_value=True)
-    mocker.patch("lottery_app.database.database_queries.is_activated_book", return_value=False)
+    mocker.patch(
+        "lottery_app.database.database_queries.is_activated_book", return_value=False
+    )
     # No previous activation
-    was_activated_mock = mocker.patch("lottery_app.database.database_queries.was_activated", return_value=None)
+    was_activated_mock = mocker.patch(
+        "lottery_app.database.database_queries.was_activated", return_value=None
+    )
+
     # make check_error write to msg_data
     def fake_check_error(*args, **kwargs):
         message_holder = kwargs.get("message_holder") or args[1]
@@ -174,7 +172,7 @@ def test_activate_book_no_previous_activation(mocker, scanned_info_mock):
     msg, msg_type = activate_book_procedure("35600949981000515070000000091")
     assert msg == "ADDED SUCCESSFULLY"
     assert msg_type == "success"
-    
+
     # ---- REAL VERIFICATION ----
     # Ensure we actually checked for previous activation
     was_activated_mock.assert_called_once_with(db_path, "094998")
@@ -196,7 +194,7 @@ def test_activate_book_no_previous_activation(mocker, scanned_info_mock):
 def test_activate_book_unexpected_exception(mocker, scanned_info_mock):
     mocker.patch(
         "lottery_app.database.database_queries.is_book",
-        side_effect=Exception("DB Failure")
+        side_effect=Exception("DB Failure"),
     )
 
     scanned_info_mock.extract_all_scanned_code.return_value = {
@@ -216,13 +214,11 @@ def test_activate_book_unexpected_exception(mocker, scanned_info_mock):
 # add_book_procedure tests
 # ============================================================
 
+
 @pytest.fixture
 def scan_info_add_mock(mocker):
     obj = MagicMock()
-    mocker.patch(
-        "lottery_app.scanned_code_information_management",
-        return_value=obj
-    )
+    mocker.patch("lottery_app.scanned_code_information_management", return_value=obj)
     return obj
 
 
@@ -245,7 +241,7 @@ def test_add_book_lookup_insert_error(scan_info_add_mock, mocker):
 
     mocker.patch(
         "lottery_app.game_number_lookup_table.insert_new_ticket_name_to_lookup_table",
-        return_value=("lookup failed", "error")
+        return_value=("lookup failed", "error"),
     )
 
     mocker.patch(
@@ -266,11 +262,10 @@ def test_add_book_lookup_success(mocker, scan_info_add_mock):
         "book_amount": "149",
         "ticket_price": "05",
     }
-    
 
     mocker.patch(
         "lottery_app.game_number_lookup_table.insert_new_ticket_name_to_lookup_table",
-        return_value=("lookup ok", "success")
+        return_value=("lookup ok", "success"),
     )
 
     mocker.patch(
@@ -293,7 +288,7 @@ def test_add_book_insert_error(mocker, scan_info_add_mock):
 
     mocker.patch(
         "lottery_app.game_number_lookup_table.insert_new_ticket_name_to_lookup_table",
-        return_value=("lookup ok", "success")
+        return_value=("lookup ok", "success"),
     )
 
     mocker.patch(

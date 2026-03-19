@@ -5,10 +5,10 @@ from flask_login import LoginManager, UserMixin
 from lottery_app.routes.scanner import scanner_bp
 from lottery_app.utils import config as config_module
 
-
 # ------------------------
 # Test Helpers / Fixtures
 # ------------------------
+
 
 class TestUser(UserMixin):
     id = 1
@@ -63,16 +63,13 @@ def clear_barcode_stack():
 # Tests for /receive
 # ------------------------
 
+
 def test_receive_barcode_polling_enabled(logged_in_client, monkeypatch):
     monkeypatch.setattr(
-        "lottery_app.routes.scanner.load_config",
-        lambda: {"should_poll": "true"}
+        "lottery_app.routes.scanner.load_config", lambda: {"should_poll": "true"}
     )
 
-    response = logged_in_client.post(
-        "/receive",
-        data={"barcode": "123456"}
-    )
+    response = logged_in_client.post("/receive", data={"barcode": "123456"})
 
     assert response.status_code == 200
     assert response.data == b"Received"
@@ -80,16 +77,9 @@ def test_receive_barcode_polling_enabled(logged_in_client, monkeypatch):
 
 
 def test_receive_barcode_polling_disabled(logged_in_client, monkeypatch):
-    monkeypatch.setattr(
-        config_module,
-        "load_config",
-        lambda: {"should_poll": "false"}
-    )
+    monkeypatch.setattr(config_module, "load_config", lambda: {"should_poll": "false"})
 
-    response = logged_in_client.post(
-        "/receive",
-        data={"barcode": "999999"}
-    )
+    response = logged_in_client.post("/receive", data={"barcode": "999999"})
 
     assert response.status_code == 200
     assert response.data == b"Ignored"
@@ -98,8 +88,7 @@ def test_receive_barcode_polling_disabled(logged_in_client, monkeypatch):
 
 def test_receive_missing_barcode(logged_in_client, monkeypatch):
     monkeypatch.setattr(
-        "lottery_app.routes.scanner.load_config",
-        lambda: {"should_poll": "true"}
+        "lottery_app.routes.scanner.load_config", lambda: {"should_poll": "true"}
     )
 
     response = logged_in_client.post("/receive", data={})
@@ -110,10 +99,7 @@ def test_receive_missing_barcode(logged_in_client, monkeypatch):
 
 
 def test_receive_requires_login(client):
-    response = client.post(
-        "/receive",
-        data={"barcode": "123"}
-    )
+    response = client.post("/receive", data={"barcode": "123"})
 
     assert response.status_code in (302, 401)
 
@@ -121,6 +107,7 @@ def test_receive_requires_login(client):
 # ------------------------
 # Tests for /check_barcode_stack
 # ------------------------
+
 
 def test_check_returns_latest_barcode(logged_in_client):
     config_module.BARCODE_STACK.extend(["111", "222", "333"])

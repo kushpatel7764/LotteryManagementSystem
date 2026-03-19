@@ -5,7 +5,6 @@ This module provides the Flask route and helper functions for managing
 the business profile information (name, address, phone, email).
 """
 
-
 import re
 from flask import Blueprint, render_template, request, flash
 from flask_login import login_required
@@ -34,7 +33,7 @@ def business_profile():
         # Validate and update business info fields
         errors = validate_and_update_business_info(form_data)
         if errors:
-            flash(f"{errors[0]}", "business-profile_error") # Only show the first error
+            flash(f"{errors[0]}", "business-profile_error")  # Only show the first error
 
     # Load current config for rendering
     config = load_config()
@@ -47,7 +46,7 @@ def business_profile():
             "Phone": config["business_phone"],
             "Email": config["business_email"],
         },
-        users=users
+        users=users,
     )
 
 
@@ -88,8 +87,8 @@ def validate_and_update_business_info(data):
     # Address validation
     address = data["business_address"]
     if address == "" or re.match(
-        "^(\\d{1,}) [a-zA-Z0-9\\s]+(\\,)? [a-zA-Z]+(\\,)? [A-Z]{2} [0-9]{5,6}$",
-            address):
+        "^(\\d{1,}) [a-zA-Z0-9\\s]+(\\,)? [a-zA-Z]+(\\,)? [A-Z]{2} [0-9]{5,6}$", address
+    ):
         update_business_info(name="business_address", value=address)
     else:
         update_business_info(name="business_address", value="")
@@ -114,4 +113,3 @@ def validate_and_update_business_info(data):
         errors.append("Not a valid EMAIL!")
 
     return errors
-

@@ -1,11 +1,9 @@
-import os
 import pytest
 from unittest.mock import patch
 from flask import template_rendered
 from lottery_app.routes.settings import (
     extract_setting_form_data,
     validate_invoice_output_path,
-    settings as settings_route
 )
 
 
@@ -34,7 +32,7 @@ def test_extract_setting_form_data_with_post_request(app):
     config = {
         "ticket_order": "asc",
         "invoice_output_path": "/default/path",
-        "should_poll": "false"
+        "should_poll": "false",
     }
 
     with app.test_request_context(
@@ -43,7 +41,7 @@ def test_extract_setting_form_data_with_post_request(app):
         data={
             "ticket_order": "desc",
             "outputPath": "/new/output",
-            "polling_state": "true"
+            "polling_state": "true",
         },
     ):
         result = extract_setting_form_data(config)
@@ -58,7 +56,7 @@ def test_extract_setting_form_data_fallbacks(app):
     config = {
         "ticket_order": "asc",
         "invoice_output_path": "/fallback/path",
-        "should_poll": "false"
+        "should_poll": "false",
     }
 
     with app.test_request_context("/settings", method="POST", data={}):
@@ -187,4 +185,3 @@ def test_settings_post_route(
         assert b"DEFAULT" not in response.data
     else:
         assert b"Resetting to DEFAULT" in response.data
-

@@ -2,18 +2,18 @@ import os
 import tempfile
 import pytest
 import json
-import pytest
-from lottery_app.utils import config as config_updates
 from unittest.mock import MagicMock
 from lottery_app import create_app
 from lottery_app.database import setup_database
 from lottery_app.database.user_model import User
+
 
 @pytest.fixture
 def app():
     db_fd, temp_db = tempfile.mkstemp()
 
     import lottery_app.utils.config
+
     lottery_app.utils.config.db_path = temp_db
 
     app = create_app()
@@ -22,7 +22,7 @@ def app():
 
     # Initialize schema in temp db
     setup_database.initialize_database(temp_db)
-    
+
     # Only create if it doesn't exist
     if not User.get_by_username("testuser"):
         User.create("testuser", "testpassword", role="admin")
@@ -57,6 +57,7 @@ class AuthActions:
 def auth(client):
     return AuthActions(client)
 
+
 # -------------------------------------------------------------------
 # Helper: assert JSON written correctly
 # -------------------------------------------------------------------
@@ -76,6 +77,7 @@ def update_env(monkeypatch, tmp_path):
     Fixture that creates a fake config environment for update_* tests.
     Returns helper function to initialize config + mocks.
     """
+
     def _env(initial_config):
         json_path = tmp_path / "config.json"
 
@@ -92,6 +94,7 @@ def update_env(monkeypatch, tmp_path):
         # Mock load_config to read test file
         def load_cfg():
             return json.loads(json_path.read_text())
+
         monkeypatch.setattr("lottery_app.utils.config.load_config", load_cfg)
 
         # Helper for asserting json updates
@@ -109,5 +112,5 @@ def update_env(monkeypatch, tmp_path):
 def json_assert():
     def _assert(matcher, expected):
         matcher(expected)
-    return _assert
 
+    return _assert

@@ -1,13 +1,12 @@
 import pytest
-from flask import Flask
 from lottery_app.app import app as flask_app
 
 
 @pytest.fixture
 def client():
     """Return a test client using the actual Flask app."""
-    flask_app.config['TESTING'] = True
-    flask_app.config['WTF_CSRF_ENABLED'] = False
+    flask_app.config["TESTING"] = True
+    flask_app.config["WTF_CSRF_ENABLED"] = False
     with flask_app.test_client() as client:
         yield client
 
@@ -52,6 +51,6 @@ def test_all_protected_routes_blocked_without_login(app, client):
             # Valid blocked status codes
             allowed = {301, 302, 401, 403}
 
-            assert (
-                response.status_code in allowed
-            ), f"Route {rule.rule} method {method} not protected — got {response.status_code}"
+            assert response.status_code in allowed, (
+                f"Route {rule.rule} method {method} not protected — got {response.status_code}"
+            )

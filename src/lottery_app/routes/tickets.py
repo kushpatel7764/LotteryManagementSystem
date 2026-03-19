@@ -8,7 +8,6 @@ Handles:
 - Submitting the day's sales.
 """
 
-
 from flask import Blueprint, redirect, render_template, request, url_for, flash
 from flask_login import login_required
 
@@ -18,8 +17,11 @@ from lottery_app.database import update_ticket_timeline, update_books
 from lottery_app.scanned_code_information_management import ScannedCodeManagement
 from lottery_app.utils.config import db_path, load_config
 from lottery_app.utils.error_hanlder import check_error
-from lottery_app.utils.reports import (add_sales_log, calculate_instant_tickets_sold,
-                           do_submit_procedure)
+from lottery_app.utils.reports import (
+    add_sales_log,
+    calculate_instant_tickets_sold,
+    do_submit_procedure,
+)
 from lottery_app.utils.tickets import insert_ticket
 
 tickets_bp = Blueprint("tickets", __name__)
@@ -35,29 +37,31 @@ def scan_tickets():
     msg_data = {"message": "", "message_type": ""}
     msg_data["message"] = request.args.get("message", "")
     msg_data["message_type"] = request.args.get("message_type", "")
-    
+
     # Display any messages from previous actions
     if msg_data["message_type"] != "" and msg_data["message"] != "":
         flash(msg_data["message"], f"tickets_{msg_data['message_type']}")
         msg_data["message"] = None
         msg_data["message_type"] = None
-    
+
     if request.method == "POST":
         # Get book ids for all the active books
         all_active_book_ids = check_error(
-            database_queries.get_all_active_book_ids(
-                db=db_path), flash_prefix="tickets")
+            database_queries.get_all_active_book_ids(db=db_path), flash_prefix="tickets"
+        )
 
         # Get relevant information from the scanned code
         scanned_code = request.form["scanned_code"]
-        scanned_info = ScannedCodeManagement(
-            scanned_code=scanned_code, db_path=db_path)
+        scanned_info = ScannedCodeManagement(scanned_code=scanned_code, db_path=db_path)
         extracted_vals = scanned_info.extract_all_scanned_code()
 
         if extracted_vals == "INVALID BARCODE":
-            flash("INVALID BARCODE", f"tickets_error")
+            flash("INVALID BARCODE", "tickets_error")
         elif extracted_vals["book_id"] not in all_active_book_ids:
-            flash("Book IS NOT ACTIVATED! PLEASE ACTIVATE BEFORE SCANNING.", f"tickets_error")
+            flash(
+                "Book IS NOT ACTIVATED! PLEASE ACTIVATE BEFORE SCANNING.",
+                "tickets_error",
+            )
         else:
             # Insert ticket
             scan_id = scanned_code
@@ -70,14 +74,17 @@ def scan_tickets():
                 flash_prefix="tickets",
                 fallback=False,
             ):
-                flash("""A ticket from this book has already been scanned.
-                    Please use the UNDO button if you want to rescan.""".upper(), f"tickets_error")
+                flash(
+                    """A ticket from this book has already been scanned.
+                    Please use the UNDO button if you want to rescan.""".upper(),
+                    "tickets_error",
+                )
                 return _render_scan_tickets()
 
             ticket_name = check_error(
                 database_queries.get_ticket_name(
-                    db_path,
-                    extracted_vals["game_number"]),
+                    db_path, extracted_vals["game_number"]
+                ),
                 flash_prefix="tickets",
             )
             check_error(
@@ -102,18 +109,18 @@ def scan_tickets():
             # Update counting ticket number to show the new change to the user
             check_error(
                 update_activated_books.update_counting_ticket_number(
-                    db_path,
-                    extracted_vals["book_id"],
-                    extracted_vals["ticket_number"]),
+                    db_path, extracted_vals["book_id"], extracted_vals["ticket_number"]
+                ),
                 flash_prefix="tickets",
             )
-            
+
     # Get all the active books basically.
     # In reality, making a table to show to the user using activated bookids.
     # Instant ticket sold calculation
     # Get the counting order to calc sold
     # Get activated ticket count
     return _render_scan_tickets()
+
 
 def _render_scan_tickets():
     """Helper to render the scan tickets page."""
@@ -150,7 +157,9 @@ def undo_scan():
         try:
             # Step 1: Delete ticket
             check_error(
-                update_ticket_timeline.delete_ticket_timeline_by_book_id(db_path, book_id),
+                update_ticket_timeline.delete_ticket_timeline_by_book_id(
+                    db_path, book_id
+                ),
                 message_holder=msg_data,
             )
 
@@ -176,10 +185,10 @@ def undo_scan():
         except ValueError as ve:
             msg_data["message"] = str(ve)
             msg_data["message_type"] = "error"
-        except Exception as e: # pylint: disable=broad-exception-caught
+        except Exception as e:  # pylint: disable=broad-exception-caught
             msg_data["message"] = f"Unexpected error: {str(e)}"
             msg_data["message_type"] = "error"
-            
+
     if msg_data.get("message"):
         flash(msg_data["message"], f"tickets_{msg_data['message_type']}")
         msg_data["message"] = None
@@ -232,9 +241,8 @@ def book_sold_out():
         # Step 4: Update counting ticket number
         check_error(
             update_activated_books.update_counting_ticket_number(
-                db_path,
-                book_id,
-                sold_out_val),
+                db_path, book_id, sold_out_val
+            ),
             message_holder=msg_data,
         )
 
@@ -255,18 +263,15 @@ def book_sold_out():
         # Step 6: Add sales log
         # TicketNumber is sold_out_val here
         check_error(
-            add_sales_log(
-                book_id,
-                sold_out_val,
-                game_number),
-            message_holder=msg_data)
+            add_sales_log(book_id, sold_out_val, game_number), message_holder=msg_data
+        )
 
         msg_data["message"] = "BOOK MARKED AS SOLD OUT"
         msg_data["message_type"] = "success"
     except ValueError as ve:
         msg_data["message"] = str(ve)
         msg_data["message_type"] = "error"
-    except Exception as e: # pylint: disable=broad-exception-caught
+    except Exception as e:  # pylint: disable=broad-exception-caught
         msg_data["message"] = "Unexpected Error: ".upper() + f"{str(e)}"
         msg_data["message_type"] = "error"
     return redirect(
@@ -286,10 +291,7 @@ def submit():
     """
     msg_data = {"message": "", "message_type": ""}
     try:
-        if check_error(
-                database_queries.can_submit(db_path),
-                msg_data,
-                fallback=False):
+        if check_error(database_queries.can_submit(db_path), msg_data, fallback=False):
             result = do_submit_procedure()
             # In case result is an error message
             if isinstance(result, tuple) and result[1] == "error":
@@ -303,7 +305,5 @@ def submit():
 
     except ValueError as e:
         return redirect(
-            url_for(
-                "tickets.scan_tickets",
-                message=str(e),
-                message_type="error"))
+            url_for("tickets.scan_tickets", message=str(e), message_type="error")
+        )

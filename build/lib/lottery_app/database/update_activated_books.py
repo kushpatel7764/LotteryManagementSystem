@@ -2,7 +2,6 @@
 Database management module for the Activated Books table in lottery database system.
 """
 
-
 import datetime
 import sqlite3
 
@@ -36,13 +35,13 @@ def add_activate_book_info_to_activated_book(cursor, activated_book_info):
 
 def insert_book_to_activated_book_table(database_path, active_book_info):
     """
-    Inserts an activated book record into the 'ActivatedBook' table of the specified 
+    Inserts an activated book record into the 'ActivatedBook' table of the specified
     SQLite database.
 
     Parameters:
         database_path (str): The file path to the SQLite database.
         active_book_info (dict): A dictionary containing information about the activated
-        book. 
+        book.
 
     Returns:
         tuple: a message and status type.
@@ -64,8 +63,11 @@ def insert_book_to_activated_book_table(database_path, active_book_info):
 
 
 def update_counting_ticket_number_for_book_id_query(
-    cursor, book_id, new_ticket_number, date=datetime.datetime.now(
-        datetime.timezone.utc).time().strftime("%H:%M:%S"), ):
+    cursor,
+    book_id,
+    new_ticket_number,
+    date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S"),
+):
     """
     Query to update the counting ticket number to a new number for a given book in the
     ActivatedBooks table.
@@ -89,15 +91,15 @@ def update_counting_ticket_number(database_path, book_id, new_ticket_number):
     Parameters:
         database_path (str): The path to the SQLite database file.
         book_id (str): The unique identifier of the book whose ticket number is
-        being updated. new_ticket_number (int): The new ticket number to set 
+        being updated. new_ticket_number (int): The new ticket number to set
         for the book.
 
     Returns:
         tuple: A tuple containing:
-               - A success message and status 
+               - A success message and status
                ("COUNTING TICKET NUMBER UPDATED!", "success") if successful.
-               - An error message and status 
-               ("ERROR UPDATING CLOSE VALUE: <error>", "error") if an 
+               - An error message and status
+               ("ERROR UPDATING CLOSE VALUE: <error>", "error") if an
                SQLite error occurs.
 
     Description:
@@ -141,7 +143,8 @@ def deactivate_book(database_path, book_id):
     try:
         with get_db_cursor(database_path) as cursor:
             cursor.execute(
-                "DELETE FROM ActivatedBooks WHERE ActiveBookID = ?;", (book_id,))
+                "DELETE FROM ActivatedBooks WHERE ActiveBookID = ?;", (book_id,)
+            )
     except sqlite3.Error as e:
         return "Error deactivating book: ".upper() + f"{e}", "error"
 
@@ -150,7 +153,7 @@ def deactivate_book(database_path, book_id):
 
 def update_is_at_ticketnumbers(database_path):
     """
-    Sets the 'isAtTicketNumber' field to the value of 'countingTicketNumber' for 
+    Sets the 'isAtTicketNumber' field to the value of 'countingTicketNumber' for
     all activated books.
 
     Parameters:
@@ -173,8 +176,8 @@ def update_is_at_ticketnumbers(database_path):
             """)
     except sqlite3.Error as e:
         return (
-            "An error occured while setting new open values for activated books: ".upper() +
-            f"{e}",
+            "An error occured while setting new open values for activated books: ".upper()
+            + f"{e}",
             "error",
         )
 
@@ -211,8 +214,8 @@ def update_is_at_ticketnumber_val(database_path, book_id, new_val):
             )
     except sqlite3.Error as e:
         return (
-            f"Error updating open value to {new_val} at bookID({book_id}): ".upper() +
-            f"{e}",
+            f"Error updating open value to {new_val} at bookID({book_id}): ".upper()
+            + f"{e}",
             "error",
         )
 
@@ -243,8 +246,7 @@ def clear_counting_ticket_numbers(database_path):
             """)
     except sqlite3.Error as e:
         return (
-            "An Error occured while clearing old closing values: ".upper() +
-            f"{e}",
+            "An Error occured while clearing old closing values: ".upper() + f"{e}",
             "error",
         )
 
@@ -276,8 +278,7 @@ def clear_counting_ticket_number(database_path, book_id):
             )
     except sqlite3.Error as e:
         return (
-            f"Unable to clear closing value at bookID({book_id})".upper() +
-            f"{e}",
+            f"Unable to clear closing value at bookID({book_id})".upper() + f"{e}",
             "error",
         )
 

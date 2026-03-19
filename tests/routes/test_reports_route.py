@@ -1,8 +1,7 @@
 import json
 from urllib.parse import parse_qs, urlparse
 import pytest
-from unittest.mock import patch, MagicMock
-from flask import url_for
+from unittest.mock import MagicMock
 
 from lottery_app.routes.reports import (
     _create_scan_id,
@@ -14,15 +13,13 @@ from lottery_app.routes.reports import (
 # Fixtures
 # ------------------------------------------------------------------
 
+
 @pytest.fixture
 def admin_user(mocker):
     user = MagicMock()
     user.id = 1
     user.role = "admin"
-    mocker.patch(
-        "lottery_app.routes.reports.User.get_by_id",
-        return_value=user
-    )
+    mocker.patch("lottery_app.routes.reports.User.get_by_id", return_value=user)
     return user
 
 
@@ -31,10 +28,7 @@ def normal_user(mocker):
     user = MagicMock()
     user.id = 2
     user.role = "user"
-    mocker.patch(
-        "lottery_app.routes.reports.User.get_by_id",
-        return_value=user
-    )
+    mocker.patch("lottery_app.routes.reports.User.get_by_id", return_value=user)
     return user
 
 
@@ -55,6 +49,7 @@ def login_user(client, normal_user):
 # ------------------------------------------------------------------
 # Helper Function Tests
 # ------------------------------------------------------------------
+
 
 def test_create_scan_id():
     scan_id = _create_scan_id(
@@ -86,22 +81,22 @@ def test_get_latest_report_id_error(mocker):
 
     msg_data = {}
     latest = _get_latest_report_id(msg_data)
-    
+
     assert latest == 0
 
 
 def test_get_book_metadata_success(mocker):
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_game_num_of",
-        return_value="123"
+        return_value="123",
     )
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_book",
-        return_value=("id", "x", "y", 100, 5)
+        return_value=("id", "x", "y", 100, 5),
     )
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_ticket_name",
-        return_value="Mega Bucks"
+        return_value="Mega Bucks",
     )
 
     msg_data = {}
@@ -116,17 +111,15 @@ def test_get_book_metadata_success(mocker):
 # /edit_reports
 # ------------------------------------------------------------------
 
+
 def test_edit_reports_success(client, auth, mocker):
     auth.login()
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_all_sales_reports",
-        return_value=[
-            {"ReportDate": "2024-01-01", "ReportTime": "12:00:00"}
-        ],
+        return_value=[{"ReportDate": "2024-01-01", "ReportTime": "12:00:00"}],
     )
     mocker.patch(
-        "lottery_app.routes.reports.convert_utc_to_local",
-        side_effect=lambda dt, tz: dt
+        "lottery_app.routes.reports.convert_utc_to_local", side_effect=lambda dt, tz: dt
     )
 
     resp = client.get("/edit_reports")
@@ -152,22 +145,21 @@ def test_edit_reports_invalid_report_format(client, login_admin, mocker):
 # /edit_report/<id>
 # ------------------------------------------------------------------
 
+
 def test_edit_single_report_admin_access(client, login_admin, mocker):
     mocker.patch(
-        "lottery_app.routes.reports.database_queries.get_sales_log",
-        return_value=[]
+        "lottery_app.routes.reports.database_queries.get_sales_log", return_value=[]
     )
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_daily_report",
-        return_value={"InstantTicketSold": 0}
+        return_value={"InstantTicketSold": 0},
     )
     mocker.patch(
-        "lottery_app.routes.reports.calculate_instant_tickets_sold",
-        return_value=5
+        "lottery_app.routes.reports.calculate_instant_tickets_sold", return_value=5
     )
     mocker.patch(
         "lottery_app.routes.reports.load_config",
-        return_value={"ticket_order": "ascending"}
+        return_value={"ticket_order": "ascending"},
     )
 
     resp = client.get("/edit_report/1")
@@ -185,34 +177,32 @@ def test_edit_single_report_non_admin_redirect(client, login_user):
 # /update_salesLog
 # ------------------------------------------------------------------
 
+
 def test_update_sales_log_success(client, login_admin, mocker):
     mocker.patch(
-        "lottery_app.routes.reports.database_queries.is_sold",
-        return_value=False
+        "lottery_app.routes.reports.database_queries.is_sold", return_value=False
     )
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_game_num_of",
-        return_value="123"
+        return_value="123",
     )
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_book",
-        return_value=("id", "x", "y", 100, 5)
+        return_value=("id", "x", "y", 100, 5),
     )
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_ticket_name",
-        return_value="Mega"
+        return_value="Mega",
     )
     mocker.patch(
-        "lottery_app.routes.reports.calculate_instant_tickets_sold",
-        return_value=10
+        "lottery_app.routes.reports.calculate_instant_tickets_sold", return_value=10
     )
     mocker.patch(
-        "lottery_app.routes.reports.database_queries.next_report_id",
-        return_value=5
+        "lottery_app.routes.reports.database_queries.next_report_id", return_value=5
     )
     mocker.patch(
         "lottery_app.routes.reports.load_config",
-        return_value={"ticket_order": "ascending"}
+        return_value={"ticket_order": "ascending"},
     )
 
     payload = {
@@ -236,19 +226,17 @@ def test_update_sales_log_success(client, login_admin, mocker):
 def test_update_sales_log_ticket_exceeds_book(client, login_admin, mocker):
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_book",
-        return_value=("id", "x", "y", 20, 5)
+        return_value=("id", "x", "y", 20, 5),
     )
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_game_num_of",
-        return_value="123"
+        return_value="123",
     )
     mocker.patch(
-        "lottery_app.routes.reports.database_queries.is_sold",
-        return_value=False
+        "lottery_app.routes.reports.database_queries.is_sold", return_value=False
     )
     mocker.patch(
-        "lottery_app.routes.reports.database_queries.next_report_id",
-        return_value=3
+        "lottery_app.routes.reports.database_queries.next_report_id", return_value=3
     )
 
     resp = client.post(
@@ -258,7 +246,7 @@ def test_update_sales_log_ticket_exceeds_book(client, login_admin, mocker):
             "reportID": "1",
             "open": "10",
             "close": "30",
-        }
+        },
     )
 
     data = resp.get_json()
@@ -274,10 +262,11 @@ def test_update_sales_log_ticket_exceeds_book(client, login_admin, mocker):
 # /update_sale_report
 # ------------------------------------------------------------------
 
+
 def test_update_sale_report_success(client, login_admin, mocker):
     mocker.patch(
         "lottery_app.routes.reports.update_sale_report.update_sale_report",
-        return_value=("OK", "success")
+        return_value=("OK", "success"),
     )
 
     resp = client.post(
@@ -299,10 +288,10 @@ def test_update_sale_report_success(client, login_admin, mocker):
 # /download/<id>
 # ------------------------------------------------------------------
 
+
 def test_download_report_success(client, login_admin, mocker):
     mocker.patch(
-        "lottery_app.routes.reports.create_daily_invoice",
-        return_value="PDF_BYTES"
+        "lottery_app.routes.reports.create_daily_invoice", return_value="PDF_BYTES"
     )
 
     resp = client.get("/download/1")
@@ -312,11 +301,9 @@ def test_download_report_success(client, login_admin, mocker):
 
 def test_download_report_error(client, login_admin, mocker):
     mocker.patch(
-        "lottery_app.routes.reports.create_daily_invoice",
-        side_effect=Exception("fail")
+        "lottery_app.routes.reports.create_daily_invoice", side_effect=Exception("fail")
     )
 
     resp = client.get("/download/1")
     assert resp.status_code == 500
     assert b"fail" in resp.data
-

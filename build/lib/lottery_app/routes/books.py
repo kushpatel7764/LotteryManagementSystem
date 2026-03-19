@@ -6,8 +6,7 @@ adding, activating, deactivating, and deleting books in the system.
 """
 
 import sqlite3
-from flask import (Blueprint, jsonify, redirect, render_template, request,
-                   url_for, flash)
+from flask import Blueprint, jsonify, redirect, render_template, request, url_for, flash
 from flask_login import login_required
 
 from lottery_app.database import database_queries
@@ -34,12 +33,12 @@ def books_managment():
         "message": request.args.get("message", ""),
         "message_type": request.args.get("message_type", ""),
     }
-    
+
     if msg_data["message_type"] != "" and msg_data["message"] != "":
         flash(msg_data["message"], f"books_{msg_data['message_type']}")
         msg_data["message"] = None
         msg_data["message_type"] = None
-    
+
     # The redirect from /activate will generate a URL like:
     # /books_managment?activate_book_message=SomeMessage&activate_book_message_type=success
     # request.args.get('activate_book_message', '') will then get these
@@ -48,15 +47,12 @@ def books_managment():
     if request.method == "POST":
         scanned_code = request.form["add_book_code"]
 
-        check_error(
-            add_book_procedure(scanned_code), flash_prefix="books")
+        check_error(add_book_procedure(scanned_code), flash_prefix="books")
 
     # Books info for the books table to display on screen
     books_result = check_error(
-        database_queries.get_books(
-            db=db_path),
-        flash_prefix="books",
-        fallback=[])
+        database_queries.get_books(db=db_path), flash_prefix="books", fallback=[]
+    )
 
     books = books_result if isinstance(books_result, list) else []
 
@@ -67,8 +63,10 @@ def books_managment():
                 # pylint: disable=unsupported-assignment-operation
                 game_number = book.get("GameNumber")
                 book["TicketName"] = check_error(
-                    database_queries.get_ticket_name(
-                        db_path, game_number), fallback="N/A", flash_prefix="books")
+                    database_queries.get_ticket_name(db_path, game_number),
+                    fallback="N/A",
+                    flash_prefix="books",
+                )
 
     # Get activated books (just the BookIDs)
     activated_books = check_error(
@@ -108,8 +106,8 @@ def delete_book():
         # Deactivate first, then delete
         # Safely run deactivation and deletion with error checking
         check_error(
-            lambda: update_activated_books.deactivate_book(
-                db_path, book_id), msg_data)
+            lambda: update_activated_books.deactivate_book(db_path, book_id), msg_data
+        )
         check_error(lambda: update_books.delete_book(db_path, book_id), msg_data)
 
         if msg_data["message_type"] == "error":
@@ -229,7 +227,5 @@ def activate_book():
         message, message_type = activate_book_procedure(scanned_code)
 
     return redirect(
-        url_for(
-            "books.books_managment",
-            message=message,
-            message_type=message_type))
+        url_for("books.books_managment", message=message, message_type=message_type)
+    )

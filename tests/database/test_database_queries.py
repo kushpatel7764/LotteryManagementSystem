@@ -22,10 +22,7 @@ def mock_cursor_ctx(mock_cursor):
 @patch("lottery_app.database.database_queries.setup_database.initialize_database")
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_get_books_success(mock_cursor_ctx, mock_init, mock_cursor):
-
-    mock_cursor.fetchall.return_value = [
-        ("B1", "100", False, 300, 10, "c", "u")
-    ]
+    mock_cursor.fetchall.return_value = [("B1", "100", False, 300, 10, "c", "u")]
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
 
@@ -37,7 +34,6 @@ def test_get_books_success(mock_cursor_ctx, mock_init, mock_cursor):
 
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_get_books_empty(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchall.return_value = []
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
@@ -46,10 +42,10 @@ def test_get_books_empty(mock_cursor_ctx, mock_cursor):
 
     assert result[1] == "error"
 
+
 # count_activated_books()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_count_activated_books(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchone.return_value = (5,)
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
@@ -58,13 +54,11 @@ def test_count_activated_books(mock_cursor_ctx, mock_cursor):
 
     assert result == 5
 
+
 # get_activated_books()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_get_activated_books_success(mock_cursor_ctx, mock_cursor):
-
-    mock_cursor.fetchall.return_value = [
-        (1, "BOOK1", "x", 5, 10)
-    ]
+    mock_cursor.fetchall.return_value = [(1, "BOOK1", "x", 5, 10)]
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
 
@@ -72,10 +66,10 @@ def test_get_activated_books_success(mock_cursor_ctx, mock_cursor):
 
     assert result[0]["ActiveBookID"] == "BOOK1"
 
+
 # is_book()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_is_book_true(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchone.return_value = ("row",)
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
@@ -87,18 +81,17 @@ def test_is_book_true(mock_cursor_ctx, mock_cursor):
 
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_is_book_false(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchone.return_value = None
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
 
     result = dq.is_book("db", "B1")
 
     assert result is False
-    
+
+
 # is_activated_book()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_is_activated_book_true(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchone.return_value = ("row",)
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
@@ -107,10 +100,10 @@ def test_is_activated_book_true(mock_cursor_ctx, mock_cursor):
 
     assert result is True
 
+
 # get_activated_book_is_at_ticketnumber()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_get_activated_book_is_at_ticketnumber(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchone.return_value = (42,)
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
@@ -118,11 +111,11 @@ def test_get_activated_book_is_at_ticketnumber(mock_cursor_ctx, mock_cursor):
     result = dq.get_activated_book_is_at_ticketnumber("db", "AB1")
 
     assert result == 42
-    
+
+
 # get_activated_book()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_get_activated_book(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchone.return_value = ("row",)
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
@@ -130,11 +123,11 @@ def test_get_activated_book(mock_cursor_ctx, mock_cursor):
     result = dq.get_activated_book("db", "AB1")
 
     assert result == ("row",)
-    
+
+
 # get_book()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_get_book(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchone.return_value = ("row",)
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
@@ -142,11 +135,11 @@ def test_get_book(mock_cursor_ctx, mock_cursor):
     result = dq.get_book("db", "B1")
 
     assert result == ("row",)
-    
+
+
 # get_all_active_book_ids()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_get_all_active_book_ids(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchall.return_value = [("A1",), ("A2",)]
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
@@ -155,22 +148,20 @@ def test_get_all_active_book_ids(mock_cursor_ctx, mock_cursor):
 
     assert result == ["A1", "A2"]
 
+
 # is_counting_ticket_number_set()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_is_counting_ticket_number_set_true(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchone.return_value = (10,)
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
 
     assert dq.is_counting_ticket_number_set("db", "AB1") is True
-    
+
+
 # get_all_instant_tickets_sold_quantity()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_get_all_instant_tickets_sold_quantity(mock_cursor_ctx, mock_cursor):
-
-    mock_cursor.fetchall.return_value = [
-        ("AB1", 5, 10)
-    ]
+    mock_cursor.fetchall.return_value = [("AB1", 5, 10)]
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
 
@@ -178,20 +169,20 @@ def test_get_all_instant_tickets_sold_quantity(mock_cursor_ctx, mock_cursor):
 
     assert result[0]["ActiveBookID"] == "AB1"
 
+
 # is_sold()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_is_sold(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchone.return_value = (True,)
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
 
     assert dq.is_sold("db", "B1") is True
 
+
 # next_report_id()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_next_report_id(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchone.return_value = ("5",)
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
@@ -200,10 +191,10 @@ def test_next_report_id(mock_cursor_ctx, mock_cursor):
 
     assert result == "6"
 
+
 # get_game_num_of()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_get_game_num_of(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchone.return_value = (123,)
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
@@ -211,21 +202,21 @@ def test_get_game_num_of(mock_cursor_ctx, mock_cursor):
     result = dq.get_game_num_of("db", "B1")
 
     assert result == 123
-    
+
+
 # can_submit()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_can_submit_true(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchall.return_value = [(1,), (2,)]
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
 
     assert dq.can_submit("db") is True
-    
+
+
 # was_activated()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_was_activated(mock_cursor_ctx, mock_cursor):
-
     mock_cursor.fetchall.return_value = [(50,), (40,)]
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
@@ -234,14 +225,11 @@ def test_was_activated(mock_cursor_ctx, mock_cursor):
 
     assert result == 50
 
+
 # get_all_users()
 @patch("lottery_app.database.database_queries.get_db_cursor")
 def test_get_all_users(mock_cursor_ctx, mock_cursor):
-
-    mock_cursor.fetchall.return_value = [
-        ("kush", "admin"),
-        ("bob", "standard")
-    ]
+    mock_cursor.fetchall.return_value = [("kush", "admin"), ("bob", "standard")]
 
     mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
 
@@ -249,21 +237,21 @@ def test_get_all_users(mock_cursor_ctx, mock_cursor):
 
     assert result[0]["username"] == "kush"
 
+
 # get_ticket_with_bookid()
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from lottery_app.database.database_queries import get_ticket_with_bookid
-
 
 # --------------------------
 # Success: ticket found
 # --------------------------
 
+
 @patch("lottery_app.database.database_queries.get_db_cursor")
 @patch("lottery_app.database.database_queries.setup_database.initialize_database")
 def test_get_ticket_with_bookid_found(mock_init_db, mock_get_cursor):
-
     mock_cursor = MagicMock()
     mock_cursor.fetchone.return_value = ("SCAN1", "1", "BOOK1", 25)
 
@@ -282,10 +270,10 @@ def test_get_ticket_with_bookid_found(mock_init_db, mock_get_cursor):
 # Success: ticket NOT found
 # --------------------------
 
+
 @patch("lottery_app.database.database_queries.get_db_cursor")
 @patch("lottery_app.database.database_queries.setup_database.initialize_database")
 def test_get_ticket_with_bookid_not_found(mock_init_db, mock_get_cursor):
-
     mock_cursor = MagicMock()
     mock_cursor.fetchone.return_value = None
 
@@ -300,10 +288,10 @@ def test_get_ticket_with_bookid_not_found(mock_init_db, mock_get_cursor):
 # ValueError handling
 # --------------------------
 
+
 @patch("lottery_app.database.database_queries.get_db_cursor")
 @patch("lottery_app.database.database_queries.setup_database.initialize_database")
 def test_get_ticket_with_bookid_value_error(mock_init_db, mock_get_cursor):
-
     mock_get_cursor.side_effect = ValueError("bad value")
 
     result = get_ticket_with_bookid("test.db", "BOOK1")
@@ -316,17 +304,18 @@ def test_get_ticket_with_bookid_value_error(mock_init_db, mock_get_cursor):
 # TypeError handling
 # --------------------------
 
+
 @patch("lottery_app.database.database_queries.get_db_cursor")
 @patch("lottery_app.database.database_queries.setup_database.initialize_database")
 def test_get_ticket_with_bookid_type_error(mock_init_db, mock_get_cursor):
-
     mock_get_cursor.side_effect = TypeError("bad type")
 
     result = get_ticket_with_bookid("test.db", "BOOK1")
 
     assert result[1] == "error"
     assert "ERROR FETCHING TICKET TIMELINE" in result[0]
-    
+
+
 # get_scan_ticket_page_table(db)
 from lottery_app.database.database_queries import get_scan_ticket_page_table
 
@@ -368,22 +357,16 @@ def test_db(tmp_path):
 
     return str(db_path)
 
-def test_get_scan_ticket_page_table_success(test_db):
 
+def test_get_scan_ticket_page_table_success(test_db):
     conn = sqlite3.connect(test_db)
     cursor = conn.cursor()
 
-    cursor.execute(
-        "INSERT INTO ActivatedBooks VALUES ('BOOK1', 10, 20)"
-    )
+    cursor.execute("INSERT INTO ActivatedBooks VALUES ('BOOK1', 10, 20)")
 
-    cursor.execute(
-        "INSERT INTO Books VALUES ('BOOK1', 30, 1001, 0)"
-    )
+    cursor.execute("INSERT INTO Books VALUES ('BOOK1', 30, 1001, 0)")
 
-    cursor.execute(
-        "INSERT INTO TicketNameLookup VALUES (1001, 'Lucky 7s')"
-    )
+    cursor.execute("INSERT INTO TicketNameLookup VALUES (1001, 'Lucky 7s')")
 
     conn.commit()
     conn.close()
@@ -402,15 +385,15 @@ def test_get_scan_ticket_page_table_success(test_db):
     assert row["Is_Sold"] == 0
     assert row["isAtTicketNumber"] == 10
     assert row["countingTicketNumber"] == 20
-    
-def test_get_scan_ticket_page_table_empty(test_db):
 
+
+def test_get_scan_ticket_page_table_empty(test_db):
     result = get_scan_ticket_page_table(test_db)
 
     assert result == []
-    
-def test_get_scan_ticket_page_table_sorting(test_db):
 
+
+def test_get_scan_ticket_page_table_sorting(test_db):
     conn = sqlite3.connect(test_db)
     cursor = conn.cursor()
 
@@ -433,9 +416,9 @@ def test_get_scan_ticket_page_table_sorting(test_db):
     # Should be sorted by TicketPrice DESC
     assert result[0]["ticketPrice"] == 50
     assert result[1]["ticketPrice"] == 10
-    
-def test_get_scan_ticket_page_table_missing_ticket_name(test_db):
 
+
+def test_get_scan_ticket_page_table_missing_ticket_name(test_db):
     conn = sqlite3.connect(test_db)
     cursor = conn.cursor()
 
@@ -450,6 +433,7 @@ def test_get_scan_ticket_page_table_missing_ticket_name(test_db):
     assert len(result) == 1
     assert result[0]["TicketName"] is None
 
+
 from unittest.mock import patch
 
 
@@ -463,16 +447,18 @@ def test_get_scan_ticket_page_table_database_error(test_db):
 
     with patch(
         "lottery_app.database.database_queries.get_db_cursor",
-        return_value=mock_context_manager
+        return_value=mock_context_manager,
     ):
         result = get_scan_ticket_page_table(test_db)
 
     assert isinstance(result, tuple)
     assert result[1] == "error"
     assert "DATABASE ERROR IN get_scan_ticket_page_table" in result[0]
-    
+
+
 # get_all_sold_books
 from lottery_app.database.database_queries import get_all_sold_books
+
 
 @pytest.fixture
 def test_db_get_all_sold_books(tmp_path):
@@ -502,8 +488,8 @@ def test_db_get_all_sold_books(tmp_path):
 
     return str(db_path)
 
-def test_get_all_sold_books_success(test_db_get_all_sold_books):
 
+def test_get_all_sold_books_success(test_db_get_all_sold_books):
     conn = sqlite3.connect(test_db_get_all_sold_books)
     cursor = conn.cursor()
 
@@ -518,9 +504,9 @@ def test_get_all_sold_books_success(test_db_get_all_sold_books):
     assert isinstance(result, list)
     assert len(result) == 1
     assert result[0]["BookID"] == "BOOK1"
-    
-def test_get_all_sold_books_multiple(test_db_get_all_sold_books):
 
+
+def test_get_all_sold_books_multiple(test_db_get_all_sold_books):
     conn = sqlite3.connect(test_db_get_all_sold_books)
     cursor = conn.cursor()
 
@@ -541,9 +527,9 @@ def test_get_all_sold_books_multiple(test_db_get_all_sold_books):
 
     assert "BOOK1" in ids
     assert "BOOK2" in ids
-    
-def test_get_all_sold_books_none_found(test_db_get_all_sold_books):
 
+
+def test_get_all_sold_books_none_found(test_db_get_all_sold_books):
     conn = sqlite3.connect(test_db_get_all_sold_books)
     cursor = conn.cursor()
 
@@ -557,8 +543,8 @@ def test_get_all_sold_books_none_found(test_db_get_all_sold_books):
 
     assert result == []
 
-def test_get_all_sold_books_not_sold_filtered(test_db_get_all_sold_books):
 
+def test_get_all_sold_books_not_sold_filtered(test_db_get_all_sold_books):
     conn = sqlite3.connect(test_db_get_all_sold_books)
     cursor = conn.cursor()
 
@@ -571,9 +557,9 @@ def test_get_all_sold_books_not_sold_filtered(test_db_get_all_sold_books):
     result = get_all_sold_books(test_db_get_all_sold_books, 1)
 
     assert result == []
-    
-def test_get_all_sold_books_database_error(test_db_get_all_sold_books):
 
+
+def test_get_all_sold_books_database_error(test_db_get_all_sold_books):
     mock_cursor = MagicMock()
     mock_cursor.execute.side_effect = sqlite3.Error("DB failure")
 
@@ -582,18 +568,19 @@ def test_get_all_sold_books_database_error(test_db_get_all_sold_books):
     mock_context.__exit__.return_value = False
 
     with patch(
-        "lottery_app.database.database_queries.get_db_cursor",
-        return_value=mock_context
+        "lottery_app.database.database_queries.get_db_cursor", return_value=mock_context
     ):
         result = get_all_sold_books(test_db_get_all_sold_books, 1)
 
     assert isinstance(result, tuple)
     assert result[1] == "error"
     assert "DATABASE ERROR IN get_all_sold_books" in result[0]
-    
+
+
 # get_table_for_invoice
 
 from lottery_app.database.database_queries import get_table_for_invoice
+
 
 @pytest.fixture
 def test_db_get_table_for_invoice(tmp_path):
@@ -626,8 +613,8 @@ def test_db_get_table_for_invoice(tmp_path):
 
     return str(db_path)
 
-def test_get_table_for_invoice_success(test_db_get_table_for_invoice):
 
+def test_get_table_for_invoice_success(test_db_get_table_for_invoice):
     conn = sqlite3.connect(test_db_get_table_for_invoice)
     cursor = conn.cursor()
 
@@ -655,9 +642,9 @@ def test_get_table_for_invoice_success(test_db_get_table_for_invoice):
     assert row["Open"] == 0
     assert row["Close"] == 10
     assert row["Sold"] == 10
-    
-def test_get_table_for_invoice_multiple_rows(test_db_get_table_for_invoice):
 
+
+def test_get_table_for_invoice_multiple_rows(test_db_get_table_for_invoice):
     conn = sqlite3.connect(test_db_get_table_for_invoice)
     cursor = conn.cursor()
 
@@ -678,9 +665,9 @@ def test_get_table_for_invoice_multiple_rows(test_db_get_table_for_invoice):
     result = get_table_for_invoice(test_db_get_table_for_invoice, 1)
 
     assert len(result) == 2
-    
-def test_get_table_for_invoice_sorted_by_price(test_db_get_table_for_invoice):
 
+
+def test_get_table_for_invoice_sorted_by_price(test_db_get_table_for_invoice):
     conn = sqlite3.connect(test_db_get_table_for_invoice)
     cursor = conn.cursor()
 
@@ -702,15 +689,15 @@ def test_get_table_for_invoice_sorted_by_price(test_db_get_table_for_invoice):
 
     assert result[0]["TicketPrice"] == 50
     assert result[1]["TicketPrice"] == 10
-    
-def test_get_table_for_invoice_no_rows(test_db_get_table_for_invoice):
 
+
+def test_get_table_for_invoice_no_rows(test_db_get_table_for_invoice):
     result = get_table_for_invoice(test_db_get_table_for_invoice, 99)
 
     assert result == []
-    
-def test_get_table_for_invoice_database_error(test_db_get_table_for_invoice):
 
+
+def test_get_table_for_invoice_database_error(test_db_get_table_for_invoice):
     mock_cursor = MagicMock()
     mock_cursor.execute.side_effect = sqlite3.Error("DB failure")
 
@@ -719,8 +706,7 @@ def test_get_table_for_invoice_database_error(test_db_get_table_for_invoice):
     mock_context.__exit__.return_value = False
 
     with patch(
-        "lottery_app.database.database_queries.get_db_cursor",
-        return_value=mock_context
+        "lottery_app.database.database_queries.get_db_cursor", return_value=mock_context
     ):
         result = get_table_for_invoice(test_db_get_table_for_invoice, 1)
 
@@ -728,13 +714,14 @@ def test_get_table_for_invoice_database_error(test_db_get_table_for_invoice):
     assert result[1] == "error"
     assert "DATABASE ERROR IN get_table_for_invoice" in result[0]
 
+
 # get_daily_report
 
 from lottery_app.database.database_queries import get_daily_report
 
+
 @pytest.fixture
 def test_db_get_daily_report(tmp_path):
-
     db_path = tmp_path / "test.db"
 
     conn = sqlite3.connect(db_path)
@@ -759,8 +746,8 @@ def test_db_get_daily_report(tmp_path):
 
     return str(db_path)
 
-def test_get_daily_report_success(test_db_get_daily_report):
 
+def test_get_daily_report_success(test_db_get_daily_report):
     conn = sqlite3.connect(test_db_get_daily_report)
     cursor = conn.cursor()
 
@@ -786,16 +773,16 @@ def test_get_daily_report_success(test_db_get_daily_report):
     assert result["CashOnHand"] == 300
     assert result["TotalDue"] == 150
 
-def test_get_daily_report_not_found(test_db_get_daily_report):
 
+def test_get_daily_report_not_found(test_db_get_daily_report):
     result = get_daily_report(test_db_get_daily_report, 99)
 
     assert isinstance(result, tuple)
     assert result[1] == "error"
     assert "NO DAILY REPORT FOUND FOR ReportID(99)" in result[0]
-    
-def test_get_daily_report_database_error(test_db_get_daily_report):
 
+
+def test_get_daily_report_database_error(test_db_get_daily_report):
     mock_cursor = MagicMock()
     mock_cursor.execute.side_effect = sqlite3.Error("DB failure")
 
@@ -804,22 +791,22 @@ def test_get_daily_report_database_error(test_db_get_daily_report):
     mock_context.__exit__.return_value = False
 
     with patch(
-        "lottery_app.database.database_queries.get_db_cursor",
-        return_value=mock_context
+        "lottery_app.database.database_queries.get_db_cursor", return_value=mock_context
     ):
         result = get_daily_report(test_db_get_daily_report, 1)
 
     assert isinstance(result, tuple)
     assert result[1] == "error"
     assert "DATABASE ERROR IN get_daily_report" in result[0]
-    
+
+
 # get_all_sales_reports
 
 from lottery_app.database.database_queries import get_all_sales_reports
 
+
 @pytest.fixture
 def test_db_get_all_sales_reports(tmp_path):
-
     db_path = tmp_path / "test.db"
 
     conn = sqlite3.connect(db_path)
@@ -844,8 +831,8 @@ def test_db_get_all_sales_reports(tmp_path):
 
     return str(db_path)
 
-def test_get_all_sales_reports_single(test_db_get_all_sales_reports):
 
+def test_get_all_sales_reports_single(test_db_get_all_sales_reports):
     conn = sqlite3.connect(test_db_get_all_sales_reports)
     cursor = conn.cursor()
 
@@ -873,9 +860,9 @@ def test_get_all_sales_reports_single(test_db_get_all_sales_reports):
     assert report["OnlineTicketCashed"] == 2
     assert report["CashOnHand"] == 300
     assert report["TotalDue"] == 150
-    
-def test_get_all_sales_reports_multiple(test_db_get_all_sales_reports):
 
+
+def test_get_all_sales_reports_multiple(test_db_get_all_sales_reports):
     conn = sqlite3.connect(test_db_get_all_sales_reports)
     cursor = conn.cursor()
 
@@ -893,9 +880,9 @@ def test_get_all_sales_reports_multiple(test_db_get_all_sales_reports):
     result = get_all_sales_reports(test_db_get_all_sales_reports)
 
     assert len(result) == 2
-    
-def test_get_all_sales_reports_sorted_desc(test_db_get_all_sales_reports):
 
+
+def test_get_all_sales_reports_sorted_desc(test_db_get_all_sales_reports):
     conn = sqlite3.connect(test_db_get_all_sales_reports)
     cursor = conn.cursor()
 
@@ -919,15 +906,15 @@ def test_get_all_sales_reports_sorted_desc(test_db_get_all_sales_reports):
     assert result[0]["ReportID"] == "10"
     assert result[1]["ReportID"] == "3"
     assert result[2]["ReportID"] == "1"
-    
-def test_get_all_sales_reports_empty(test_db_get_all_sales_reports):
 
+
+def test_get_all_sales_reports_empty(test_db_get_all_sales_reports):
     result = get_all_sales_reports(test_db_get_all_sales_reports)
 
     assert result == []
 
-def test_get_all_sales_reports_database_error(test_db_get_all_sales_reports):
 
+def test_get_all_sales_reports_database_error(test_db_get_all_sales_reports):
     mock_cursor = MagicMock()
     mock_cursor.execute.side_effect = sqlite3.Error("DB failure")
 
@@ -936,21 +923,21 @@ def test_get_all_sales_reports_database_error(test_db_get_all_sales_reports):
     mock_context.__exit__.return_value = False
 
     with patch(
-        "lottery_app.database.database_queries.get_db_cursor",
-        return_value=mock_context
+        "lottery_app.database.database_queries.get_db_cursor", return_value=mock_context
     ):
         with pytest.raises(RuntimeError) as excinfo:
             get_all_sales_reports(test_db_get_all_sales_reports)
 
     assert "DATABASE ERROR IN get_all_sales_reports" in str(excinfo.value)
-    
+
+
 # get_sales_log
 
 from lottery_app.database.database_queries import get_sales_log
 
+
 @pytest.fixture
 def test_db_get_sales_log(tmp_path):
-
     db_path = tmp_path / "test.db"
 
     conn = sqlite3.connect(db_path)
@@ -975,8 +962,8 @@ def test_db_get_sales_log(tmp_path):
 
     return str(db_path)
 
-def test_get_sales_log_success(test_db_get_sales_log):
 
+def test_get_sales_log_success(test_db_get_sales_log):
     conn = sqlite3.connect(test_db_get_sales_log)
     cursor = conn.cursor()
 
@@ -1001,9 +988,9 @@ def test_get_sales_log_success(test_db_get_sales_log):
     assert row["Sold"] == 10
     assert row["Game Name"] == "Lucky 7s"
     assert row["Game #"] == 1001
-    
-def test_get_sales_log_multiple_rows(test_db_get_sales_log):
 
+
+def test_get_sales_log_multiple_rows(test_db_get_sales_log):
     conn = sqlite3.connect(test_db_get_sales_log)
     cursor = conn.cursor()
 
@@ -1026,15 +1013,15 @@ def test_get_sales_log_multiple_rows(test_db_get_sales_log):
 
     assert "BOOK1" in ids
     assert "BOOK2" in ids
-    
-def test_get_sales_log_empty(test_db_get_sales_log):
 
+
+def test_get_sales_log_empty(test_db_get_sales_log):
     result = get_sales_log(test_db_get_sales_log, 99)
 
     assert result == []
 
-def test_get_sales_log_column_mapping(test_db_get_sales_log):
 
+def test_get_sales_log_column_mapping(test_db_get_sales_log):
     conn = sqlite3.connect(test_db_get_sales_log)
     cursor = conn.cursor()
 
@@ -1056,11 +1043,11 @@ def test_get_sales_log_column_mapping(test_db_get_sales_log):
         "Close": 30,
         "Sold": 10,
         "Game Name": "Mega Millions",
-        "Game #": 2000
+        "Game #": 2000,
     }
 
-def test_get_sales_log_database_error(test_db_get_sales_log):
 
+def test_get_sales_log_database_error(test_db_get_sales_log):
     mock_cursor = MagicMock()
     mock_cursor.execute.side_effect = sqlite3.Error("DB failure")
 
@@ -1069,8 +1056,7 @@ def test_get_sales_log_database_error(test_db_get_sales_log):
     mock_context.__exit__.return_value = False
 
     with patch(
-        "lottery_app.database.database_queries.get_db_cursor",
-        return_value=mock_context
+        "lottery_app.database.database_queries.get_db_cursor", return_value=mock_context
     ):
         result = get_sales_log(test_db_get_sales_log, 1)
 
@@ -1078,9 +1064,11 @@ def test_get_sales_log_database_error(test_db_get_sales_log):
     assert result[1] == "error"
     assert "Database ERROR IN get_sales_log" in result[0]
 
+
 # get_sales_log_with_bookid
 
 from lottery_app.database.database_queries import get_sales_log_with_bookid
+
 
 @pytest.fixture
 def test_db_get_sales_log(tmp_path):
@@ -1108,8 +1096,8 @@ def test_db_get_sales_log(tmp_path):
 
     return str(db_path)
 
-def test_get_sales_log_with_bookid_success(test_db_get_sales_log):
 
+def test_get_sales_log_with_bookid_success(test_db_get_sales_log):
     conn = sqlite3.connect(test_db_get_sales_log)
     cursor = conn.cursor()
 
@@ -1131,9 +1119,9 @@ def test_get_sales_log_with_bookid_success(test_db_get_sales_log):
     assert result["Sold"] == 20
     assert result["Game Name"] == "Lucky 7s"
     assert result["Game #"] == 1001
-    
-def test_get_sales_log_with_bookid_mapping(test_db_get_sales_log):
 
+
+def test_get_sales_log_with_bookid_mapping(test_db_get_sales_log):
     conn = sqlite3.connect(test_db_get_sales_log)
     cursor = conn.cursor()
 
@@ -1153,19 +1141,19 @@ def test_get_sales_log_with_bookid_mapping(test_db_get_sales_log):
         "Close": 30,
         "Sold": 20,
         "Game Name": "Mega Millions",
-        "Game #": 2000
+        "Game #": 2000,
     }
 
-def test_get_sales_log_with_bookid_not_found(test_db_get_sales_log):
 
+def test_get_sales_log_with_bookid_not_found(test_db_get_sales_log):
     result = get_sales_log_with_bookid(test_db_get_sales_log, 99, "BOOK999")
 
     assert isinstance(result, tuple)
     assert result[1] == "error"
     assert "NO ENTRY FOUND FOR REPORTID 99 AND BOOKID BOOK999" in result[0]
 
-def test_get_sales_log_with_bookid_database_error(test_db_get_sales_log):
 
+def test_get_sales_log_with_bookid_database_error(test_db_get_sales_log):
     mock_cursor = MagicMock()
     mock_cursor.execute.side_effect = sqlite3.Error("DB failure")
 
@@ -1174,8 +1162,7 @@ def test_get_sales_log_with_bookid_database_error(test_db_get_sales_log):
     mock_context.__exit__.return_value = False
 
     with patch(
-        "lottery_app.database.database_queries.get_db_cursor",
-        return_value=mock_context
+        "lottery_app.database.database_queries.get_db_cursor", return_value=mock_context
     ):
         result = get_sales_log_with_bookid(test_db_get_sales_log, 1, "BOOK1")
 
@@ -1183,9 +1170,11 @@ def test_get_sales_log_with_bookid_database_error(test_db_get_sales_log):
     assert result[1] == "error"
     assert "DATABASE ERROR IN get_sales_log_with_bookid" in result[0]
 
+
 # get_gm_from_lookup
 
 from lottery_app.database.database_queries import get_gm_from_lookup
+
 
 @pytest.fixture
 def test_db_get_gm_from_lookup(tmp_path):
@@ -1205,14 +1194,13 @@ def test_db_get_gm_from_lookup(tmp_path):
 
     return str(db_path)
 
-def test_get_gm_from_lookup_multiple(test_db_get_gm_from_lookup):
 
+def test_get_gm_from_lookup_multiple(test_db_get_gm_from_lookup):
     conn = sqlite3.connect(test_db_get_gm_from_lookup)
     cursor = conn.cursor()
 
     cursor.executemany(
-        "INSERT INTO TicketNameLookup VALUES (?)",
-        [(1001,), (1002,), (1003,)]
+        "INSERT INTO TicketNameLookup VALUES (?)", [(1001,), (1002,), (1003,)]
     )
 
     conn.commit()
@@ -1223,14 +1211,12 @@ def test_get_gm_from_lookup_multiple(test_db_get_gm_from_lookup):
     assert isinstance(result, set)
     assert result == {1001, 1002, 1003}
 
-def test_get_gm_from_lookup_single(test_db_get_gm_from_lookup):
 
+def test_get_gm_from_lookup_single(test_db_get_gm_from_lookup):
     conn = sqlite3.connect(test_db_get_gm_from_lookup)
     cursor = conn.cursor()
 
-    cursor.execute(
-        "INSERT INTO TicketNameLookup VALUES (2000)"
-    )
+    cursor.execute("INSERT INTO TicketNameLookup VALUES (2000)")
 
     conn.commit()
     conn.close()
@@ -1239,20 +1225,19 @@ def test_get_gm_from_lookup_single(test_db_get_gm_from_lookup):
 
     assert result == {2000}
 
-def test_get_gm_from_lookup_empty(test_db_get_gm_from_lookup):
 
+def test_get_gm_from_lookup_empty(test_db_get_gm_from_lookup):
     result = get_gm_from_lookup(test_db_get_gm_from_lookup)
 
     assert result == set()
 
-def test_get_gm_from_lookup_removes_duplicates(test_db_get_gm_from_lookup):
 
+def test_get_gm_from_lookup_removes_duplicates(test_db_get_gm_from_lookup):
     conn = sqlite3.connect(test_db_get_gm_from_lookup)
     cursor = conn.cursor()
 
     cursor.executemany(
-        "INSERT INTO TicketNameLookup VALUES (?)",
-        [(1001,), (1001,), (1002,)]
+        "INSERT INTO TicketNameLookup VALUES (?)", [(1001,), (1001,), (1002,)]
     )
 
     conn.commit()
@@ -1262,8 +1247,8 @@ def test_get_gm_from_lookup_removes_duplicates(test_db_get_gm_from_lookup):
 
     assert result == {1001, 1002}
 
-def test_get_gm_from_lookup_database_error(test_db_get_gm_from_lookup):
 
+def test_get_gm_from_lookup_database_error(test_db_get_gm_from_lookup):
     mock_cursor = MagicMock()
     mock_cursor.execute.side_effect = sqlite3.Error("DB failure")
 
@@ -1272,8 +1257,7 @@ def test_get_gm_from_lookup_database_error(test_db_get_gm_from_lookup):
     mock_context.__exit__.return_value = False
 
     with patch(
-        "lottery_app.database.database_queries.get_db_cursor",
-        return_value=mock_context
+        "lottery_app.database.database_queries.get_db_cursor", return_value=mock_context
     ):
         result = get_gm_from_lookup(test_db_get_gm_from_lookup)
 
@@ -1281,13 +1265,14 @@ def test_get_gm_from_lookup_database_error(test_db_get_gm_from_lookup):
     assert result[1] == "error"
     assert "DATABASE ERROR IN get_gm_from_lookup" in result[0]
 
+
 # get_ticket_name
 
 from lottery_app.database.database_queries import get_ticket_name
 
+
 @pytest.fixture
 def test_db_get_ticket_name(tmp_path):
-
     db_path = tmp_path / "test.db"
 
     conn = sqlite3.connect(db_path)
@@ -1305,15 +1290,12 @@ def test_db_get_ticket_name(tmp_path):
 
     return str(db_path)
 
-def test_get_ticket_name_success(test_db_get_ticket_name):
 
+def test_get_ticket_name_success(test_db_get_ticket_name):
     conn = sqlite3.connect(test_db_get_ticket_name)
     cursor = conn.cursor()
 
-    cursor.execute(
-        "INSERT INTO TicketNameLookup VALUES (?, ?)",
-        (1001, "Lucky 7s")
-    )
+    cursor.execute("INSERT INTO TicketNameLookup VALUES (?, ?)", (1001, "Lucky 7s"))
 
     conn.commit()
     conn.close()
@@ -1322,23 +1304,20 @@ def test_get_ticket_name_success(test_db_get_ticket_name):
 
     assert result == "Lucky 7s"
 
-def test_get_ticket_name_not_found(test_db_get_ticket_name):
 
+def test_get_ticket_name_not_found(test_db_get_ticket_name):
     result = get_ticket_name(test_db_get_ticket_name, 9999)
 
     assert result == "N/A"
 
-def test_get_ticket_name_multiple_entries_returns_first(test_db_get_ticket_name):
 
+def test_get_ticket_name_multiple_entries_returns_first(test_db_get_ticket_name):
     conn = sqlite3.connect(test_db_get_ticket_name)
     cursor = conn.cursor()
 
     cursor.executemany(
         "INSERT INTO TicketNameLookup VALUES (?, ?)",
-        [
-            (2000, "Mega Millions"),
-            (2000, "Duplicate Name")
-        ]
+        [(2000, "Mega Millions"), (2000, "Duplicate Name")],
     )
 
     conn.commit()
@@ -1348,8 +1327,8 @@ def test_get_ticket_name_multiple_entries_returns_first(test_db_get_ticket_name)
 
     assert result == "Mega Millions"
 
-def test_get_ticket_name_database_error(test_db_get_ticket_name):
 
+def test_get_ticket_name_database_error(test_db_get_ticket_name):
     mock_cursor = MagicMock()
     mock_cursor.execute.side_effect = sqlite3.Error("DB failure")
 
@@ -1358,12 +1337,10 @@ def test_get_ticket_name_database_error(test_db_get_ticket_name):
     mock_context.__exit__.return_value = False
 
     with patch(
-        "lottery_app.database.database_queries.get_db_cursor",
-        return_value=mock_context
+        "lottery_app.database.database_queries.get_db_cursor", return_value=mock_context
     ):
         result = get_ticket_name(test_db_get_ticket_name, 1001)
 
     assert isinstance(result, tuple)
     assert result[1] == "error"
     assert "DATABASE ERROR IN get_ticket_name" in result[0]
-

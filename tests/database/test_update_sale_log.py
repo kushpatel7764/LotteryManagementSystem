@@ -1,4 +1,3 @@
-import sqlite3
 from lottery_app.database.update_sale_log import (
     insert_sales_log,
     delete_sales_log_by_book_id,

@@ -1,6 +1,5 @@
 import sqlite3
 from lottery_app.database.setup_database import (
-    setup_database_schema_with_sql_file,
     initialize_database,
 )
 
@@ -22,9 +21,7 @@ def test_initialize_database_existing_file(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT name FROM sqlite_master WHERE type='table'"
-    )
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
     assert cursor.fetchall()
 
     conn.close()

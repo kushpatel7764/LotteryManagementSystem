@@ -2,7 +2,6 @@
 Database management module for the Books table in lottery database system.
 """
 
-
 import datetime
 import sqlite3
 
@@ -69,8 +68,7 @@ def book_is_sold(
     cursor,
     is_sold,
     book_id,
-    date=datetime.datetime.now(
-        datetime.timezone.utc).time().strftime("%H:%M:%S"),
+    date=datetime.datetime.now(datetime.timezone.utc).time().strftime("%H:%M:%S"),
 ):
     """
     Updates the 'Is_Sold' status of a book in the Books table.
@@ -153,7 +151,6 @@ def delete_book(database_path, book_id):
                 (book_id,),
             )
     except sqlite3.Error as e:
-        return f"Book deletion error for bookID({book_id}): ".upper(
-        ) + f"{e}", "error"
+        return f"Book deletion error for bookID({book_id}): ".upper() + f"{e}", "error"
 
     return "SUCCESSFULLY UPDATED BOOKS TABLE", "success"

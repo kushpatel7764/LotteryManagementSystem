@@ -4,10 +4,11 @@ from lottery_app.decorators import get_db_cursor
 from lottery_app.utils.config import db_path
 from flask import flash
 
-DATABASE = db_path # Update with your actual db path
+DATABASE = db_path  # Update with your actual db path
+
 
 class User(UserMixin):
-    def __init__(self, id, username, password_hash, role='standard'):
+    def __init__(self, id, username, password_hash, role="standard"):
         self.id = id
         self.username = username
         self.password_hash = password_hash
@@ -28,12 +29,12 @@ class User(UserMixin):
             return User(*row) if row else None
 
     @staticmethod
-    def create(username, password, role='standard'):
+    def create(username, password, role="standard"):
         hashed = generate_password_hash(password)
         with get_db_cursor(DATABASE) as cursor:
             cursor.execute(
                 "INSERT INTO Users (username, password_hash, role) VALUES (?, ?, ?)",
-                (username, hashed, role)
+                (username, hashed, role),
             )
 
     @staticmethod
@@ -44,14 +45,13 @@ class User(UserMixin):
                 flash(f"User '{username}' was deleted successfully.", "success")
         except Exception as e:
             flash(f"Error deleting user: {e}", "error")
-        
+
     @staticmethod
     def update_password(user_id, new_password):
         hashed = generate_password_hash(new_password)
         with get_db_cursor(DATABASE) as cursor:
             cursor.execute(
-                "UPDATE Users SET password_hash = ? WHERE id = ?",
-                (hashed, user_id)
+                "UPDATE Users SET password_hash = ? WHERE id = ?", (hashed, user_id)
             )
 
     def verify_password(self, password):

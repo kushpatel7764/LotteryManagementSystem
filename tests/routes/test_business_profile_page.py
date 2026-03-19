@@ -4,7 +4,6 @@ from unittest.mock import patch, MagicMock, mock_open
 from lottery_app.routes.business_profile import extract_business_profile_form_data
 from lottery_app.routes.business_profile import validate_and_update_business_info
 from lottery_app.routes.settings import update_invoice_output_path
-from lottery_app.utils.config import CONFIG_PATH
 from flask import template_rendered
 
 
@@ -33,16 +32,19 @@ def valid_data():
         "business_phone": "+12345678901",
         "business_email": "test@example.com",
     }
-    
+
+
 @pytest.fixture
 def app_context(app):
     """Provides a request context for tests that need flash/session."""
     with app.test_request_context():
         yield
 
+
 # ---------------------------------------------------
 #   TESTS
 # ---------------------------------------------------
+
 
 def test_business_profile_requires_login(client):
     """Unauthenticated users should be redirected to login."""
@@ -63,9 +65,14 @@ def test_business_profile_get_authenticated(client, auth, captured_templates):
 
     mock_users = [{"id": 1, "username": "admin"}]
 
-    with patch("lottery_app.routes.business_profile.load_config", return_value=mock_config), \
-         patch("lottery_app.routes.business_profile.get_all_users", return_value=mock_users):
-
+    with (
+        patch(
+            "lottery_app.routes.business_profile.load_config", return_value=mock_config
+        ),
+        patch(
+            "lottery_app.routes.business_profile.get_all_users", return_value=mock_users
+        ),
+    ):
         response = client.get("/business_profile", follow_redirects=True)
         print("CAPTURED:", captured_templates)
         assert response.status_code == 200
@@ -102,13 +109,23 @@ def test_business_profile_post_valid(client, auth, captured_templates):
 
     mock_users = [{"id": 1, "username": "admin"}]
 
-    with patch("lottery_app.routes.business_profile.load_config", return_value=initial_config), \
-         patch("lottery_app.routes.business_profile.extract_business_profile_form_data",
-               return_value=post_data), \
-         patch("lottery_app.routes.business_profile.validate_and_update_business_info",
-               mock_validate), \
-         patch("lottery_app.routes.business_profile.get_all_users", return_value=mock_users):
-
+    with (
+        patch(
+            "lottery_app.routes.business_profile.load_config",
+            return_value=initial_config,
+        ),
+        patch(
+            "lottery_app.routes.business_profile.extract_business_profile_form_data",
+            return_value=post_data,
+        ),
+        patch(
+            "lottery_app.routes.business_profile.validate_and_update_business_info",
+            mock_validate,
+        ),
+        patch(
+            "lottery_app.routes.business_profile.get_all_users", return_value=mock_users
+        ),
+    ):
         response = client.post("/business_profile", data=post_data)
         assert response.status_code == 200
 
@@ -133,14 +150,24 @@ def test_business_profile_post_invalid(client, auth):
 
     post_data = {"business_name": "", "business_email": "bad"}
 
-    with patch("lottery_app.routes.business_profile.load_config", return_value=initial_config), \
-         patch("lottery_app.routes.business_profile.extract_business_profile_form_data",
-               return_value=post_data), \
-         patch("lottery_app.routes.business_profile.validate_and_update_business_info",
-               return_value=["Invalid email"]), \
-         patch("lottery_app.routes.business_profile.get_all_users", return_value=[]):
-
-        response = client.post("/business_profile", data=post_data, follow_redirects=True)
+    with (
+        patch(
+            "lottery_app.routes.business_profile.load_config",
+            return_value=initial_config,
+        ),
+        patch(
+            "lottery_app.routes.business_profile.extract_business_profile_form_data",
+            return_value=post_data,
+        ),
+        patch(
+            "lottery_app.routes.business_profile.validate_and_update_business_info",
+            return_value=["Invalid email"],
+        ),
+        patch("lottery_app.routes.business_profile.get_all_users", return_value=[]),
+    ):
+        response = client.post(
+            "/business_profile", data=post_data, follow_redirects=True
+        )
         assert response.status_code == 200
 
         # Check flashed message
@@ -158,18 +185,21 @@ def test_extract_form_data_all_fields_present(app):
     }
 
     with app.test_request_context(
-        "/", method="POST", data={
+        "/",
+        method="POST",
+        data={
             "BusinessName": "New Shop",
             "BusinessAddress": "456 Park Ave",
             "BusinessPhone": "555-1234",
-            "BusinessEmail": "new@example.com"
-        }
+            "BusinessEmail": "new@example.com",
+        },
     ):
         form_data = extract_business_profile_form_data(test_config)
         assert form_data["business_name"] == "New Shop"
         assert form_data["business_address"] == "456 Park Ave"
         assert form_data["business_phone"] == "555-1234"
         assert form_data["business_email"] == "new@example.com"
+
 
 def test_extract_form_data_some_fields_missing(app):
     """Test when some fields are missing, fallback to config"""
@@ -181,10 +211,9 @@ def test_extract_form_data_some_fields_missing(app):
     }
 
     with app.test_request_context(
-        "/", method="POST", data={
-            "BusinessName": "New Shop",
-            "BusinessPhone": "555-1234"
-        }
+        "/",
+        method="POST",
+        data={"BusinessName": "New Shop", "BusinessPhone": "555-1234"},
     ):
         form_data = extract_business_profile_form_data(test_config)
         # Provided values override config
@@ -193,6 +222,7 @@ def test_extract_form_data_some_fields_missing(app):
         # Missing values fallback to config
         assert form_data["business_address"] == "123 Main St"
         assert form_data["business_email"] == "default@example.com"
+
 
 def test_extract_form_data_no_fields_provided(app):
     """Test when no fields are provided, fallback to config entirely"""
@@ -206,7 +236,8 @@ def test_extract_form_data_no_fields_provided(app):
     with app.test_request_context("/", method="POST", data={}):
         form_data = extract_business_profile_form_data(test_config)
         assert form_data == test_config
-        
+
+
 # -------------------------------
 # TEST: All fields valid
 # -------------------------------
@@ -319,6 +350,7 @@ def test_multiple_invalid_fields(mock_update, valid_data):
     mock_update.assert_any_call(name="business_phone", value="")
     mock_update.assert_any_call(name="business_email", value="")
 
+
 # -------------------------------------------
 # TEST: Path changes -> must update + flash
 # -------------------------------------------
@@ -344,7 +376,6 @@ def test_update_output_path_changed(mock_load_config, mock_flash, app_context):
     assert written_data["invoice_output_path"] == "/new/path"
 
     mock_flash.assert_called_once()
-
 
 
 # --------------------------------------------------------
@@ -386,12 +417,13 @@ def patched_mock_open():
     handle.write = write
     return m
 
+
 @patch("lottery_app.routes.settings.flash")
 @patch("lottery_app.utils.config.load_config")
 def test_json_written_correctly(mock_load_config, mock_flash, app_context):
     mock_load_config.return_value = {
         "invoice_output_path": "/old/path",
-        "other_setting": "unchanged"
+        "other_setting": "unchanged",
     }
 
     m = patched_mock_open()
@@ -403,5 +435,5 @@ def test_json_written_correctly(mock_load_config, mock_flash, app_context):
 
     assert written_data == {
         "invoice_output_path": "/abc/xyz",
-        "other_setting": "unchanged"
+        "other_setting": "unchanged",
     }

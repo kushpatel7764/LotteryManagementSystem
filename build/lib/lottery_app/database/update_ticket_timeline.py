@@ -162,8 +162,8 @@ def update_pending_ticket_timeline_report_id(database_path, report_id):
             )
     except sqlite3.Error as e:
         return (
-            f"Error adding reportID({report_id}) to pending ticket timeline entires: ".upper() +
-            f"{e}",
+            f"Error adding reportID({report_id}) to pending ticket timeline entires: ".upper()
+            + f"{e}",
             "error",
         )
 
@@ -171,7 +171,8 @@ def update_pending_ticket_timeline_report_id(database_path, report_id):
 
 
 def update_ticket_timeline_ticketnumber(
-        database_path, report_id, book_id, ticketnumber):
+    database_path, report_id, book_id, ticketnumber
+):
     """
     Updates the TicketNumber for a specific entry in the TicketTimeLine table.
 
@@ -204,8 +205,8 @@ def update_ticket_timeline_ticketnumber(
             )
     except sqlite3.Error as e:
         return (
-            f"Error updating TicketNumber in Timeline for ({report_id}, {book_id}): ".upper() +
-            f"{e}",
+            f"Error updating TicketNumber in Timeline for ({report_id}, {book_id}): ".upper()
+            + f"{e}",
             "error",
         )
 

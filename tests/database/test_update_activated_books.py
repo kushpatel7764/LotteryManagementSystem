@@ -5,8 +5,6 @@ from lottery_app.database.update_activated_books import (
     update_counting_ticket_number,
     deactivate_book,
     update_is_at_ticketnumbers,
-    update_is_at_ticketnumber_val,
-    clear_counting_ticket_numbers,
     clear_counting_ticket_number,
 )
 

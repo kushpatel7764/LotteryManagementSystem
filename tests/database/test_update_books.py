@@ -1,11 +1,8 @@
-import sqlite3
-
 from lottery_app.database.update_books import (
     insert_book_info_to_books_table,
     update_is_sold_for_book,
     delete_book,
 )
-
 
 BOOK = {
     "BookID": "BOOK1",

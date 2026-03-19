@@ -10,11 +10,13 @@ from lottery_app.utils.version_check import (
     restart_app,
 )
 
+
 @pytest.fixture
 def mock_app():
     app = MagicMock()
     app.logger = MagicMock()
     return app
+
 
 # Tests: check_for_updates
 # Update available → auto_update succeeds → restart called
@@ -30,9 +32,7 @@ def test_check_for_updates_new_version_success(
     mock_restart,
     mock_app,
 ):
-    mock_get.return_value.json.return_value = {
-        "info": {"version": "1.1.0"}
-    }
+    mock_get.return_value.json.return_value = {"info": {"version": "1.1.0"}}
     mock_auto_update.return_value = True
 
     check_for_updates(mock_app, "lottery_app")
@@ -48,6 +48,7 @@ def test_check_for_updates_new_version_success(
     mock_auto_update.assert_called_once()
     mock_restart.assert_called_once_with(mock_app)
 
+
 # Update available → auto_update fails → no restart
 @patch("lottery_app.utils.version_check.restart_app")
 @patch("lottery_app.utils.version_check.auto_update")
@@ -61,15 +62,14 @@ def test_check_for_updates_new_version_failure(
     mock_restart,
     mock_app,
 ):
-    mock_get.return_value.json.return_value = {
-        "info": {"version": "2.0.0"}
-    }
+    mock_get.return_value.json.return_value = {"info": {"version": "2.0.0"}}
     mock_auto_update.return_value = False
 
     check_for_updates(mock_app, "lottery_app")
 
     mock_auto_update.assert_called_once()
     mock_restart.assert_not_called()
+
 
 # No update available
 @patch("lottery_app.utils.version_check.auto_update")
@@ -80,16 +80,18 @@ def test_check_for_updates_no_update(
     mock_auto_update,
     mock_app,
 ):
-    mock_get.return_value.json.return_value = {
-        "info": {"version": "2.0.0"}
-    }
+    mock_get.return_value.json.return_value = {"info": {"version": "2.0.0"}}
 
     check_for_updates(mock_app)
 
     mock_auto_update.assert_not_called()
 
+
 # Exception during version check
-@patch("lottery_app.utils.version_check.requests.get", side_effect=Exception("network down"))
+@patch(
+    "lottery_app.utils.version_check.requests.get",
+    side_effect=Exception("network down"),
+)
 def test_check_for_updates_exception_handled(
     mock_get,
     mock_app,
@@ -97,7 +99,8 @@ def test_check_for_updates_exception_handled(
     check_for_updates(mock_app)
 
     mock_app.logger.warning.assert_called_once()
-    
+
+
 # Tests: auto_update
 # Successful pip upgrade
 @patch("lottery_app.utils.version_check.subprocess.run")
@@ -109,6 +112,7 @@ def test_auto_update_success(mock_run, mock_app):
     assert result is True
     mock_run.assert_called_once()
     mock_app.logger.info.assert_called()
+
 
 # pip upgrade fails
 @patch("lottery_app.utils.version_check.flash")
@@ -135,7 +139,6 @@ def test_auto_update_failure(mock_run, mock_flash, mock_app):
     assert "Auto-update failed" in logged_msg
     assert "pip install" in logged_msg
     assert "non-zero exit status" in logged_msg
-
 
 
 # Tests: restart_app

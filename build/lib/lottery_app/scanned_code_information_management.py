@@ -4,10 +4,10 @@ Module for managing scanned lottery code information.
 This module validates scanned barcodes, extracts relevant lottery ticket details,
 and ensures they conform to expected formats and game rules.
 """
+
 from pandas import DataFrame
 from lottery_app import game_number_lookup_table
 from lottery_app.utils.config import load_config
-
 
 
 class ScannedCodeManagement:
@@ -18,6 +18,7 @@ class ScannedCodeManagement:
         scanned_code (str): The scanned barcode string.
         db_path (str): Path to the database.
     """
+
     def __init__(self, scanned_code, db_path):
         self.scanned_code = scanned_code
         self.db_path = db_path
@@ -40,7 +41,9 @@ class ScannedCodeManagement:
         )  # Converting to int for easier comparison
         book_amount = self.get_book_amount()
 
-        lottery_lookup_table: DataFrame = game_number_lookup_table.get_lottery_net_lookup_table()
+        lottery_lookup_table: DataFrame = (
+            game_number_lookup_table.get_lottery_net_lookup_table()
+        )
         distinct_prices = lottery_lookup_table.get("Price").unique()
         cleaned_prices = [
             int(price.replace("$", "")) for price in distinct_prices
@@ -67,8 +70,7 @@ class ScannedCodeManagement:
         min_book_amount = book_sizes[ticket_price]
         max_book_amount = 700
 
-        if max_book_amount < int(book_amount) or int(
-                book_amount) < min_book_amount:
+        if max_book_amount < int(book_amount) or int(book_amount) < min_book_amount:
             return False
 
         return output
@@ -101,8 +103,7 @@ class ScannedCodeManagement:
             config_file = load_config()
             descending = config_file["ticket_order"] == "descending"
 
-            tick_num = str((int(self.get_book_amount()) - 1)
-                           if descending else 0)
+            tick_num = str((int(self.get_book_amount()) - 1) if descending else 0)
 
         return tick_num
 

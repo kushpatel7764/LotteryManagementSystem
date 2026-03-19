@@ -27,6 +27,7 @@ from lottery_app.routes.tickets import tickets_bp
 from lottery_app.routes.scanner import scanner_bp
 from lottery_app.routes.security import security_bp
 
+
 def encrypt_db_at_exit():
     enc_path = db_path + ".enc"
     if os.path.exists(db_path):
@@ -34,15 +35,18 @@ def encrypt_db_at_exit():
         os.remove(db_path)
         print("Database re-encrypted on app shutdown")
 
+
 def create_app():
-    my_instance_location = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance_folder')
+    my_instance_location = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)), "instance_folder"
+    )
     app = Flask(__name__, instance_path=my_instance_location)
     app.secret_key = "your_secret_key"  # Replace with strong key
-    
+
     enc_path = db_path + ".enc"
     # Load .env file from project root
     load_dotenv()
-    
+
     # Check for FERMENT_KEY in environment, else generate and save it
     fernet_key = os.getenv("FERNET_KEY")
 
@@ -56,7 +60,7 @@ def create_app():
     # Store it in Flask config
     app.config["FERNET_KEY"] = fernet_key
     app.fernet = Fernet(fernet_key.encode())
-    
+
     # --- Decrypt database at startup ---
     if os.path.exists(enc_path):
         decrypt_file(enc_path, db_path)
@@ -70,8 +74,7 @@ def create_app():
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = "security.login"
-        
-    
+
     @login_manager.user_loader
     def load_user(user_id):
         return User.get_by_id(user_id)
@@ -85,9 +88,8 @@ def create_app():
     app.register_blueprint(settings_bp)
     app.register_blueprint(business_profile_bp)
     app.register_blueprint(scanner_bp)
-    
+
     # Register the encrypt function to be called at exit
     atexit.register(encrypt_db_at_exit)
-    
-    return app
 
+    return app

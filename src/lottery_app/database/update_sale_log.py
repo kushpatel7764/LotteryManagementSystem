@@ -122,9 +122,9 @@ def delete_sales_log_by_book_id(database_path, book_id):
 
     Returns:
         tuple:
-            - ("Sales log entries deleted for BookID (<book_id>)", 
+            - ("Sales log entries deleted for BookID (<book_id>)",
             "success") on successful deletion.
-            - ("ERROR DELETING LOGGED SALE DATA FOR BOOKID(<book_id>): 
+            - ("ERROR DELETING LOGGED SALE DATA FOR BOOKID(<book_id>):
             <error>", "error") on SQLite error.
 
     Description:

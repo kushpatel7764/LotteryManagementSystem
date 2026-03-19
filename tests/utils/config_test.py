@@ -24,6 +24,7 @@ def test_update_ticket_order_updates_and_flashes(update_env, json_assert):
         "Ticket Order Updated to ['C', 'D'] sucessfully.", "settings_success"
     )
 
+
 def test_update_ticket_order_no_change_no_flash(update_env, json_assert):
     initial = {"ticket_order": ["X", "Y"]}
     load_cfg, flash_mock, m = update_env(initial)
@@ -33,6 +34,7 @@ def test_update_ticket_order_no_change_no_flash(update_env, json_assert):
     # Should still write the file but not flash
     json_assert(m, {"ticket_order": ["X", "Y"]})
     flash_mock.assert_not_called()
+
 
 def test_update_ticket_order_invalid_type(update_env):
     initial = {"ticket_order": ["A"]}
@@ -56,6 +58,7 @@ def test_update_invoice_output_path_updates_and_flashes(update_env, json_assert)
     args, kwargs = flash_mock.call_args
     assert "Updated" in args[0] or "updated" in args[0]
 
+
 def test_update_invoice_output_path_no_change_no_flash(update_env, json_assert):
     initial = {"invoice_output_path": "/same"}
     load_cfg, flash_mock, m = update_env(initial)
@@ -64,6 +67,7 @@ def test_update_invoice_output_path_no_change_no_flash(update_env, json_assert):
 
     json_assert(m, {"invoice_output_path": "/same"})
     flash_mock.assert_not_called()
+
 
 def test_update_invoice_output_path_invalid_type(update_env):
     initial = {"invoice_output_path": "/old"}
@@ -88,43 +92,33 @@ def test_update_should_poll_updates(update_env, json_assert):
     # Does not flash, so:
     flash_mock.assert_not_called()
 
+
 def test_update_should_poll_invalid_type(update_env):
     initial = {"should_poll": "false"}
     update_env(initial)
 
     with pytest.raises(TypeError):
         update_should_poll(True)  # expecting string
-        
-        
+
 
 # ============================================================
 # update_business_info tests
 # ============================================================
 @pytest.fixture
 def sample_config():
-    return {
-        "business_name": "Old Name",
-        "business_email": "old@email.com"
-    }
+    return {"business_name": "Old Name", "business_email": "old@email.com"}
 
 
 def test_update_business_info_raises_type_error(sample_config, monkeypatch):
-    monkeypatch.setattr(
-        config_utils,
-        "load_config",
-        lambda: sample_config.copy()
-    )
+    monkeypatch.setattr(config_utils, "load_config", lambda: sample_config.copy())
 
     with pytest.raises(TypeError):
         config_utils.update_business_info("business_name", 123)
 
+
 def test_update_business_info_success(sample_config, monkeypatch):
     # Mock load_config
-    monkeypatch.setattr(
-        config_utils,
-        "load_config",
-        lambda: sample_config.copy()
-    )
+    monkeypatch.setattr(config_utils, "load_config", lambda: sample_config.copy())
 
     # Mock CONFIG_PATH
     monkeypatch.setattr(config_utils, "CONFIG_PATH", "fake_config.json")
@@ -153,11 +147,7 @@ def test_update_business_info_success(sample_config, monkeypatch):
 
 
 def test_update_business_info_no_change_no_flash(sample_config, monkeypatch):
-    monkeypatch.setattr(
-        config_utils,
-        "load_config",
-        lambda: sample_config.copy()
-    )
+    monkeypatch.setattr(config_utils, "load_config", lambda: sample_config.copy())
 
     monkeypatch.setattr(config_utils, "CONFIG_PATH", "fake_config.json")
 
@@ -178,11 +168,7 @@ def test_update_business_info_no_change_no_flash(sample_config, monkeypatch):
 
 
 def test_update_business_info_empty_string_no_flash(sample_config, monkeypatch):
-    monkeypatch.setattr(
-        config_utils,
-        "load_config",
-        lambda: sample_config.copy()
-    )
+    monkeypatch.setattr(config_utils, "load_config", lambda: sample_config.copy())
 
     monkeypatch.setattr(config_utils, "CONFIG_PATH", "fake_config.json")
 
@@ -201,12 +187,9 @@ def test_update_business_info_empty_string_no_flash(sample_config, monkeypatch):
 
     assert flash_called is False
 
+
 def test_update_business_info_writes_updated_config(sample_config, monkeypatch):
-    monkeypatch.setattr(
-        config_utils,
-        "load_config",
-        lambda: sample_config.copy()
-    )
+    monkeypatch.setattr(config_utils, "load_config", lambda: sample_config.copy())
 
     monkeypatch.setattr(config_utils, "CONFIG_PATH", "fake_config.json")
 

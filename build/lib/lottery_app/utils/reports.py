@@ -32,8 +32,10 @@ def calculate_instant_tickets_sold(report_id):
     """
     msg_data = {"message": "", "message_type": ""}
     instant_tickets_sold_quantanties = check_error(
-        database_queries.get_all_instant_tickets_sold_quantity(
-            db_path, report_id), msg_data, fallback=[], )
+        database_queries.get_all_instant_tickets_sold_quantity(db_path, report_id),
+        msg_data,
+        fallback=[],
+    )
 
     result = 0
     for ticket_sold in instant_tickets_sold_quantanties:
@@ -41,10 +43,9 @@ def calculate_instant_tickets_sold(report_id):
         if not isinstance(ticket_sold, dict):
             return "ERROR: Invalid ticket sold data", "error"
         ticket_sold_quantity = ticket_sold.get("Ticket_Sold_Quantity", 0)  # pylint: disable=no-member
-        ticket_price = ticket_sold.get("TicketPrice", 0) # pylint: disable=no-member
+        ticket_price = ticket_sold.get("TicketPrice", 0)  # pylint: disable=no-member
         try:
-            result += ticket_sold_quantity * \
-                ticket_price
+            result += ticket_sold_quantity * ticket_price
         except (KeyError, TypeError) as e:
             if msg_data is not None:
                 msg_data["message"] = (
@@ -132,10 +133,8 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
         message_holder=msg_data,
     )
     ticket_name = check_error(
-        database_queries.get_ticket_name(
-            db_path,
-            game_number),
-        message_holder=msg_data)
+        database_queries.get_ticket_name(db_path, game_number), message_holder=msg_data
+    )
 
     # Build sales log entry
     sale_log_info = {
@@ -148,10 +147,9 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
     }
 
     check_error(
-        update_sale_log.insert_sales_log(
-            db_path,
-            sale_log_info),
-        message_holder=msg_data)
+        update_sale_log.insert_sales_log(db_path, sale_log_info),
+        message_holder=msg_data,
+    )
 
     return msg_data.get("message", ""), msg_data.get("message_type", "")
 
@@ -186,18 +184,20 @@ def do_submit_procedure():
 
         # Insert the daily_totals in the Daily_Report Database.
         check_error(
-            update_sale_report.insert_daily_totals(
-                db_path,
-                daily_totals),
-            msg_data)
+            update_sale_report.insert_daily_totals(db_path, daily_totals), msg_data
+        )
         # Update "Pending" SalesLog ReportID
         check_error(
-            update_sale_log.update_pending_sales_log_report_id(
-                db_path, next_report_id), msg_data, )
+            update_sale_log.update_pending_sales_log_report_id(db_path, next_report_id),
+            msg_data,
+        )
         # Update "Pending" TicketTimeLine ReportID
         check_error(
             update_ticket_timeline.update_pending_ticket_timeline_report_id(
-                db_path, next_report_id), msg_data, )
+                db_path, next_report_id
+            ),
+            msg_data,
+        )
 
         # Create a Invoice
         check_error(create_daily_invoice(next_report_id), msg_data)
@@ -205,24 +205,26 @@ def do_submit_procedure():
         # Remove sold out books from current ActivatedBooks table using there
         # book ids
         sold_out_books = check_error(
-            database_queries.get_all_sold_books(
-                db_path, next_report_id), msg_data)
+            database_queries.get_all_sold_books(db_path, next_report_id), msg_data
+        )
         for book in sold_out_books:
             # Ensure `book` is a dict, fallback to empty dict if not
             if not isinstance(book, dict):
                 return "ERROR: Invalid book data", "error"
             book_id = book.get("BookID")  # pylint: disable=no-member
             check_error(
-                update_activated_books.deactivate_book(
-                    db_path,
-                    book_id),
-                msg_data)
+                update_activated_books.deactivate_book(db_path, book_id), msg_data
+            )
         # Update Database
         # isAtTicketNumber in ActiviatedBooks needs to be set to current numbers from today's scans.
         # countingTicketNumber needs to be set to None since nothing is being
         # counted after submit.
-        check_error(update_activated_books.update_is_at_ticketnumbers(db_path), msg_data)
-        check_error(update_activated_books.clear_counting_ticket_numbers(db_path), msg_data)
+        check_error(
+            update_activated_books.update_is_at_ticketnumbers(db_path), msg_data
+        )
+        check_error(
+            update_activated_books.clear_counting_ticket_numbers(db_path), msg_data
+        )
         now = datetime.now()
         file_name = f"Invoice#{next_report_id}-{now.strftime('%m-%d-%Y')}.pdf"
         email_invoice(filename=file_name)

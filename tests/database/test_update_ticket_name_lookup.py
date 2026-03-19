@@ -15,7 +15,8 @@ def test_insert_ticket_name_success(temp_db):
             "SELECT TicketName FROM TicketNameLookup WHERE GameNumber='MM01';"
         )
         assert cursor.fetchone()[0] == "Mega Millions"
-        
+
+
 def test_insert_ticket_name_sql_error(monkeypatch, temp_db):
     def bad_cursor(*args, **kwargs):
         raise sqlite3.Error("boom")

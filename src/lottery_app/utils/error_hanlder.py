@@ -1,12 +1,17 @@
 """
 Utility functions for standardized error handling in database and utility operations.
 """
+
 from flask import flash
-def check_error(result_or_callable, message_holder=None, fallback=None, flash_prefix=None):
+
+
+def check_error(
+    result_or_callable, message_holder=None, fallback=None, flash_prefix=None
+):
     """
-    Evaluates a callable or result and handles standard (msg, 'error', 'success', 'warning') patterns. 
-    The message_holder is passed in then the message and message_type will be stored in it. Else if a flash_prefix is 
-    passed then the message is will displayed through flask's flash function. 
+    Evaluates a callable or result and handles standard (msg, 'error', 'success', 'warning') patterns.
+    The message_holder is passed in then the message and message_type will be stored in it. Else if a flash_prefix is
+    passed then the message is will displayed through flask's flash function.
 
     Args:
         result_or_callable: A callable or pre-evaluated result.
@@ -17,8 +22,9 @@ def check_error(result_or_callable, message_holder=None, fallback=None, flash_pr
         The original result if successful, or fallback if error is detected.
     """
     try:
-        result = (result_or_callable() if callable(
-            result_or_callable) else result_or_callable)
+        result = (
+            result_or_callable() if callable(result_or_callable) else result_or_callable
+        )
 
         if isinstance(result, tuple) and len(result) == 2:
             msg, msg_type = result
@@ -26,30 +32,35 @@ def check_error(result_or_callable, message_holder=None, fallback=None, flash_pr
                 if message_holder is not None:
                     if not (
                         # Don't let success overwrite warning/error
-                        (msg_type == "success" and message_holder["message_type"] in ["error", "warning"]) or
+                        (
+                            msg_type == "success"
+                            and message_holder["message_type"] in ["error", "warning"]
+                        )
+                        or
                         # Don't let warning overwrite error
-                        (msg_type == "warning" and message_holder["message_type"] == "error") or
+                        (
+                            msg_type == "warning"
+                            and message_holder["message_type"] == "error"
+                        )
+                        or
                         # Don't let error overwrite existing error
-                        (msg_type == "error" and message_holder["message_type"] == "error")
+                        (
+                            msg_type == "error"
+                            and message_holder["message_type"] == "error"
+                        )
                     ):
                         message_holder["message"] = msg
                         message_holder["message_type"] = msg_type
-                    
+
                 if flash_prefix:  # only flash if explicitly asked
-                    flash(
-                        msg, 
-                        f"{flash_prefix}_{msg_type}"
-                    )
+                    flash(msg, f"{flash_prefix}_{msg_type}")
                 return fallback
         return result
-    except Exception as e: # pylint: disable=broad-exception-caught
+    except Exception as e:  # pylint: disable=broad-exception-caught
         if message_holder is not None:
             message_holder["message"] = f"Unexpected Error: {e}"
             message_holder["message_type"] = "error"
-            
+
         if flash_prefix:
-            flash(
-                f"Unexpected Error: {e}", 
-                f"{flash_prefix}_error"
-            )
+            flash(f"Unexpected Error: {e}", f"{flash_prefix}_error")
         return fallback

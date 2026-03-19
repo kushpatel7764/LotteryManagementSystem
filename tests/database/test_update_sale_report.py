@@ -67,7 +67,5 @@ def test_update_sale_report_instant_sold(temp_db):
     assert status == "success"
 
     with get_db_cursor(temp_db) as cursor:
-        cursor.execute(
-            "SELECT InstantTicketSold FROM SaleReport WHERE ReportID='R3';"
-        )
+        cursor.execute("SELECT InstantTicketSold FROM SaleReport WHERE ReportID='R3';")
         assert cursor.fetchone()[0] == 99

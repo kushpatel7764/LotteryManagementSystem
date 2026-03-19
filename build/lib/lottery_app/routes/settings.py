@@ -6,15 +6,18 @@ This module provides:
 - Helpers to extract form data and validate user-provided settings.
 """
 
-
 import os
 
 from flask import Blueprint, render_template, request, flash
 from flask_login import login_required
 
-from lottery_app.utils.config import (DEFAULT_DOWNLOADS_PATH, load_config,
-                          update_invoice_output_path, update_ticket_order,
-                          update_should_poll)
+from lottery_app.utils.config import (
+    DEFAULT_DOWNLOADS_PATH,
+    load_config,
+    update_invoice_output_path,
+    update_ticket_order,
+    update_should_poll,
+)
 
 settings_bp = Blueprint("settings", __name__)
 
@@ -43,7 +46,7 @@ def settings():
             form_data["output_path"]
         )
         if warning_message:
-            flash(warning_message, 'settings_warning')
+            flash(warning_message, "settings_warning")
         update_invoice_output_path(valid_output)
         update_should_poll(form_data["should_poll"])
 
@@ -70,7 +73,7 @@ def extract_setting_form_data(config):
     return {
         "ticket_order": request.form.get("ticket_order") or config["ticket_order"],
         "output_path": request.form.get("outputPath") or config["invoice_output_path"],
-        "should_poll": request.form.get("polling_state") or config["should_poll"]
+        "should_poll": request.form.get("polling_state") or config["should_poll"],
     }
 
 
