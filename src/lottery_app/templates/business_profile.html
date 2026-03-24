@@ -1,0 +1,140 @@
+{% extends "navButton.html" %}
+{% block title %}Business Profile{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='business_profile.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+{{ super() }}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const sections = document.querySelectorAll('section');
+            const dots = document.querySelectorAll('.dot');
+
+            function updateDots(index){
+                dots.forEach((d,i)=>d.classList.toggle('active', i===index));
+            }
+
+            window.scrollToSection = (index) => {
+                sections[index].scrollIntoView({ behavior: 'smooth' });
+                updateDots(index);
+            }
+
+            // Add User toggle
+            const showAddBtn = document.getElementById("showAddUserBtn");
+            const backBtn = document.getElementById("backToListBtn");
+            const userList = document.getElementById("users-list");
+            const addUserForm = document.getElementById("add-user-form");
+
+            showAddBtn.addEventListener("click", () => {
+                userList.style.display = "none";
+                addUserForm.style.display = "block";
+            });
+
+            backBtn.addEventListener("click", () => {
+                addUserForm.style.display = "none";
+                userList.style.display = "block";
+            });
+
+            // Toggle password visibility buttons
+            document.querySelectorAll(".toggle-password").forEach(button => {
+                button.addEventListener("click", (e) => {
+                    e.preventDefault(); // avoid form submission
+                    const targetId = button.getAttribute("data-target");
+                    const input = document.getElementById(targetId);
+                    const icon = button.querySelector("i");
+
+                    if (!input) return; // safety check
+
+                    // Toggle the specific input’s type
+                    if (input.type === "password") {
+                        input.type = "text";
+                        icon.classList.replace("fa-eye", "fa-eye-slash");
+                    } else {
+                        input.type = "password";
+                        icon.classList.replace("fa-eye-slash", "fa-eye");
+                    }
+                });
+            });
+        });
+    </script>  
+{% endblock %}
+{% block header %} Business Profile {% endblock %}  
+{% block content %}
+
+    <div class="sections-container">
+        <!-- Section 1: General Info -->
+        <section id="general-info">
+            <form id="generalInfoForm" method="POST" action="/business_profile">
+                <h2>General Information</h2>
+                <label>Business Name: <input type="text" name="BusinessName" value="{{ business_Info['Name'] }}"></label>
+                <label>Address: <input type="text" name="BusinessAddress" value="{{ business_Info['Address'] }}"></label>
+                <label>Phone: <input type="tel" name="BusinessPhone" value="{{ business_Info['Phone'] }}"></label>
+                <label>Email: <input type="email" name="BusinessEmail" value="{{ business_Info['Email'] }}"></label>
+                <button type="submit">Save Profile</button>
+            </form>
+        </section>
+
+        <!-- Section 2: Users -->
+        <section id="users-section">
+            <div class="users-list-container" id="users-list">
+                <h3>Existing Users</h3>
+                <ul class="user-list-modern">
+                    {% for user in users %}
+                    <li class="user-item">
+                        <div class="user-left">
+                            <div class="user-avatar">{{ user.username[0]|upper }}</div>
+                            <div class="user-info">
+                                <div class="user-name">{{ user.username }}</div>
+                                <div class="user-role">{{ user.role }}</div>
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            {% if user.username != session['username'] %}
+                            <form class="inline-form" method="POST" action="{{ url_for('security.delete_user') }}">
+                                <input type="hidden" name="username" value="{{ user.username }}">
+                                <button type="submit" class="btn-action btn-delete">Delete</button>
+                            </form>
+                            {% else %}
+                            <span class="self-badge">You</span>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <button class="btn-action btn-role" id="showAddUserBtn">+ Add User</button>
+            </div>
+
+            <div class="add-user-container" id="add-user-form" style="display:none;">
+                <form method="POST" action="{{ url_for('security.signup') }}">
+                    <h2>Add New User</h2>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" name="username" id="username" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" name="password" id="password" required />
+                            <button type="button" class="toggle-password" data-target="password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select name="role" id="role" required>
+                            <option value="standard" selected>Standard</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-action">
+                        <button type="button" class="btn-action btn-role" id="backToListBtn"><i class="fas fa-arrow-left"></i></button>
+                        <button type="submit">Add User</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+{% endblock %}

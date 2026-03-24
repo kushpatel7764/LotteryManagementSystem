@@ -1,0 +1,2 @@
+[console_scripts]
+lottery_app = lottery_app.app:main

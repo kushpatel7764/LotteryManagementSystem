@@ -1,0 +1,78 @@
+{% extends "navButton.html" %}
+{% block title %}Edit Reports{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='edit_reports.css') }}">
+{% endblock %}
+{% block extra_js %}
+{{ super() }}
+{% endblock %}
+
+{% block header %} Edit Reports {% endblock %}
+{% block content %}
+    <div class="edit-reports-container">
+
+        <section class="filter-section">
+            <h2>Filter Sales Reports</h2>
+            <form method="GET" action="/edit_reports" class="filter-form">
+                <div class="filter-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" value="{{ request.args.get('date', '') }}">
+                </div>
+                <div class="filter-group">
+                    <label for="time">Time</label>
+                    <input type="time" id="time" name="time" value="{{ request.args.get('time', '') }}">
+                </div>
+                <div class="filter-buttons">
+                    <button type="submit" class="primary-btn">
+                        Apply Filters
+                    </button>
+                    <a href="/edit_reports">
+                        <button type="button" class="secondary-btn">Clear</button>
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <section class="table-section">
+            <h2>Filtered Results</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Report ID</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for report in sales_reports %}
+                        <tr class="row">
+                            <td>{{ report['ReportID'] }}</td>
+                            <td>{{ report['ReportDate'] }}</td>
+                            <td>{{ report['ReportTime'] }}</td>
+                            <td>
+                                {% if user_role == 'admin' %}
+                                    <form method="GET" action="/edit_report/{{ report['ReportID'] }}">
+                                        <button type="submit" class="edit-btn">Edit</button>
+                                    </form>
+                                {% else %}
+                                    <button type="button" class="edit-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                                        Edit
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="empty-msg">
+                                No reports match the current filters.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+{% endblock %}
