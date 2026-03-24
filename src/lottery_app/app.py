@@ -24,7 +24,7 @@ def open_browser():
 
 # On app click run the flask server
 def run_server():
-    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port=PORT, debug=True, use_reloader=False)
     
 def launch_app():
     threading.Thread(target=run_server).start()
