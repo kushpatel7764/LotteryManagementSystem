@@ -1,8 +1,25 @@
+"""
+Database encryption and decryption utilities using Fernet symmetric encryption.
+
+Provides helper functions to encrypt and decrypt the SQLite database file
+at application startup and shutdown.
+"""
+
 import os
+
 from cryptography.fernet import Fernet
 
 
 def get_cipher():
+    """
+    Build and return a Fernet cipher instance using the FERNET_KEY environment variable.
+
+    Returns:
+        Fernet: A ready-to-use cipher object.
+
+    Raises:
+        RuntimeError: If the FERNET_KEY environment variable is not set.
+    """
     key = os.getenv("FERNET_KEY")
     if not key:
         raise RuntimeError("Missing FERNET_KEY environment variable")
@@ -10,6 +27,20 @@ def get_cipher():
 
 
 def encrypt_file(input_path, output_path=None):
+    """
+    Encrypt a file using Fernet symmetric encryption.
+
+    Args:
+        input_path (str): Path to the plaintext file to encrypt.
+        output_path (str, optional): Destination path for the encrypted file.
+            Defaults to ``input_path + '.enc'`` if not provided.
+
+    Raises:
+        TypeError: If either path argument is not a string.
+
+    Notes:
+        Silently skips encryption if the input file does not exist or is empty.
+    """
     if not isinstance(input_path, str):
         raise TypeError("input_path must be a string")
 
@@ -39,9 +70,25 @@ def encrypt_file(input_path, output_path=None):
 
 
 def decrypt_file(input_path, output_path=None):
+    """
+    Decrypt a Fernet-encrypted file.
+
+    Args:
+        input_path (str): Path to the encrypted ``.enc`` file.
+        output_path (str, optional): Destination path for the decrypted file.
+            If omitted, the ``.enc`` suffix is stripped from ``input_path``.
+
+    Raises:
+        TypeError: If either path argument is not a string.
+        ValueError: If ``input_path`` does not end with ``.enc`` and no
+            ``output_path`` is provided.
+
+    Notes:
+        Silently skips decryption if the input file does not exist or is empty,
+        to handle first-run and corruption edge cases gracefully.
+    """
     cipher = get_cipher()
 
-    # --- input validation ---
     if not isinstance(input_path, str):
         raise TypeError("input_path must be a string")
 
@@ -57,9 +104,7 @@ def decrypt_file(input_path, output_path=None):
                 "Encrypted file must end with .enc or output_path must be provided"
             )
         output_path = input_path[:-4]  # strip ".enc"
-    # --- end input validation ---
 
-    # --- decrypt ---
     with open(input_path, "rb") as f:
         encrypted_bytes = f.read()
 

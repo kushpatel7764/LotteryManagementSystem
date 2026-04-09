@@ -5,15 +5,8 @@ download locations, and application configuration settings.
 
 import json
 import os
+
 from flask import flash
-
-# Define project and database paths
-# project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# db_dir = os.path.join(project_dir, "database")
-# os.makedirs(db_dir, exist_ok=True)
-
-# db_path = os.path.join(db_dir, "Lottery_Management_Database.db")
-# sql_file_path = os.path.join(db_dir, "Lottery_DB_Schema.sql")
 
 instance_path = os.path.join(
     os.path.abspath(os.path.dirname(os.path.dirname(__file__))), "instance_folder"
@@ -57,10 +50,8 @@ def update_ticket_order(order):
     """
     if not isinstance(order, str):
         raise TypeError("ticket_order must be a string")
-    updated = False
     config = load_config()
-    if config["ticket_order"] != order:
-        updated = True
+    updated = config["ticket_order"] != order
     config["ticket_order"] = order
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)
@@ -77,10 +68,8 @@ def update_invoice_output_path(invoice_output_path):
     """
     if not isinstance(invoice_output_path, str):
         raise TypeError("invoice_output_path must be a string")
-    updated = False
     config = load_config()
-    if config["invoice_output_path"] != invoice_output_path:
-        updated = True
+    updated = config["invoice_output_path"] != invoice_output_path
     config["invoice_output_path"] = invoice_output_path
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)
@@ -105,8 +94,7 @@ def update_business_info(name, value):
     updated = False
     config = load_config()
 
-    if config[name] != value and value != "":
-        updated = True
+    updated = value not in (config[name], "")
 
     config[name] = value
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:

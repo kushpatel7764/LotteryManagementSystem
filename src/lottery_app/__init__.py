@@ -5,18 +5,16 @@ This module initializes the Flask app
 and registers all the blueprints for different routes.
 """
 
-from flask import Flask
-
-from flask_login import LoginManager
-from dotenv import load_dotenv
-from cryptography.fernet import Fernet
 import os
 import atexit
 
-from lottery_app.database.user_model import User
-from lottery_app.utils.version_check import check_for_updates
+from cryptography.fernet import Fernet
+from dotenv import load_dotenv
+from flask import Flask
+from flask_login import LoginManager
+
 from lottery_app.database import setup_database
-from lottery_app.utils.encrypted_db import decrypt_file, encrypt_file
+from lottery_app.database.user_model import User
 from lottery_app.utils.config import db_path
 from lottery_app.routes.books import books_bp
 from lottery_app.routes.business_profile import business_profile_bp
@@ -25,9 +23,13 @@ from lottery_app.routes.settings import settings_bp
 from lottery_app.routes.tickets import tickets_bp
 from lottery_app.routes.scanner import scanner_bp
 from lottery_app.routes.security import security_bp
+from lottery_app.utils.version_check import check_for_updates
+from lottery_app.utils.encrypted_db import decrypt_file, encrypt_file
 
 
 def encrypt_db_at_exit():
+    """Encrypt the database file on application shutdown and 
+    remove the plaintext copy."""
     enc_path = db_path + ".enc"
     if os.path.exists(db_path):
         encrypt_file(db_path, enc_path)
@@ -36,6 +38,12 @@ def encrypt_db_at_exit():
 
 
 def create_app():
+    """
+    Create and configure the Flask application.
+ 
+    Returns:
+        Flask: The fully configured Flask application instance.
+    """
     my_instance_location = os.path.join(
         os.path.abspath(os.path.dirname(__file__)), "instance_folder"
     )
@@ -52,7 +60,7 @@ def create_app():
     if not fernet_key:  # Generate fernet key if not found
         fernet_key = Fernet.generate_key().decode()
         # Write it to .env for future use
-        with open(".env", "a") as f:
+        with open(".env", "a", encoding="utf-8") as f:
             f.write(f"\nFERNET_KEY={fernet_key}\n")
 
     # Store it in Flask config

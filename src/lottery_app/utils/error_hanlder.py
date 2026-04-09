@@ -9,17 +9,22 @@ def check_error(
     result_or_callable, message_holder=None, fallback=None, flash_prefix=None
 ):
     """
-    Evaluates a callable or result and handles standard (msg, 'error', 'success', 'warning') patterns.
-    The message_holder is passed in then the message and message_type will be stored in it. Else if a flash_prefix is
-    passed then the message is will displayed through flask's flash function.
+    Evaluate a callable or result and handle standard message/status tuple patterns.
+
+    If ``message_holder`` is provided, the message and status are stored in it.
+    If ``flash_prefix`` is provided, the message is displayed via Flask's flash.
 
     Args:
-        result_or_callable: A callable or pre-evaluated result.
-        message_holder (dict, optional): A dictionary that holds "message" and "message_type".
-        fallback (Any, optional): A fallback value to return if an error is detected.
+        result_or_callable: A callable or pre-evaluated result. When callable,
+            it is invoked before inspection.
+        message_holder (dict, optional): A dict with ``"message"`` and
+            ``"message_type"`` keys. Populated when a status tuple is detected.
+        fallback (Any, optional): Value returned when an error is detected.
+        flash_prefix (str, optional): Prefix used to namespace the flash category,
+            e.g. ``"tickets"`` produces ``"tickets_error"``.
 
     Returns:
-        The original result if successful, or fallback if error is detected.
+        The original result on success, or ``fallback`` when an error is detected.
     """
     try:
         result = (
@@ -30,29 +35,18 @@ def check_error(
             msg, msg_type = result
             if msg_type in ("error", "warning", "success"):
                 if message_holder is not None:
-                    if not (
-                        # Don't let success overwrite warning/error
-                        (
-                            msg_type == "success"
-                            and message_holder["message_type"] in ["error", "warning"]
-                        )
-                        or
-                        # Don't let warning overwrite error
-                        (
-                            msg_type == "warning"
-                            and message_holder["message_type"] == "error"
-                        )
-                        or
-                        # Don't let error overwrite existing error
-                        (
-                            msg_type == "error"
-                            and message_holder["message_type"] == "error"
-                        )
-                    ):
+                    existing = message_holder["message_type"]
+                    # Priority rules: error > warning > success; never downgrade
+                    should_skip = (
+                        (msg_type == "success" and existing in ("error", "warning"))
+                        or (msg_type == "warning" and existing == "error")
+                        or (msg_type == "error" and existing == "error")
+                    )
+                    if not should_skip:
                         message_holder["message"] = msg
                         message_holder["message_type"] = msg_type
 
-                if flash_prefix:  # only flash if explicitly asked
+                if flash_prefix:
                     flash(msg, f"{flash_prefix}_{msg_type}")
                 return fallback
         return result
