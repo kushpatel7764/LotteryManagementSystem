@@ -3,9 +3,11 @@ Database setup module for the lottery database system.
 """
 
 import os
+
+from werkzeug.security import generate_password_hash
+
 from lottery_app.decorators import get_db_cursor
 from lottery_app.utils.config import sql_file_path
-from werkzeug.security import generate_password_hash
 
 
 # Connect to database
@@ -34,14 +36,20 @@ def setup_database_schema_with_sql_file(cursor):
         raise
 
 def create_default_user(cursor):
+    """
+    Insert the default admin user if one does not already exist.
+ 
+    Args:
+        cursor (sqlite3.Cursor): The cursor object used to execute SQL commands.
+    """
+    cursor.execute("""
+        SELECT * FROM Users WHERE username = ?
+        """, ("admin", ))
+    if cursor.fetchone() is None:
+        hashed = generate_password_hash("adminpass")
         cursor.execute("""
-            SELECT * FROM Users WHERE username = ?
-            """, ("admin", ))
-        if cursor.fetchone() is None:
-            hashed = generate_password_hash("adminpass")
-            cursor.execute("""
-            INSERT INTO Users (username, password_hash, role) VALUES (?, ?, ?)
-            """, ("admin", hashed, "default_admin"))
+        INSERT INTO Users (username, password_hash, role) VALUES (?, ?, ?)
+        """, ("admin", hashed, "default_admin"))
 
 def initialize_database(db_path):
     """

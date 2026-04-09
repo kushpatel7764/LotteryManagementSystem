@@ -19,7 +19,6 @@ scanner_bp = Blueprint("scanner", __name__)
 
 
 @scanner_bp.route("/receive", methods=["POST"])
-@login_required
 def receive():
     """
     Receives a barcode via POST request and emits it to connected clients.
@@ -32,7 +31,7 @@ def receive():
     if not should_poll:
         return "Ignored"
     barcode = request.form.get("barcode")
-    # print(f"Received barcode: {barcode}")
+    print(f"Received barcode: {barcode}")
     # with app.app_context():
     BARCODE_STACK.append(barcode)
     # socketio.emit("barcode_scanned", {"barcode": barcode})

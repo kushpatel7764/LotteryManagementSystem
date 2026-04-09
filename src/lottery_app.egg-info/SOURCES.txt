@@ -28,7 +28,6 @@ src/lottery_app/database/user_model.py
 src/lottery_app/routes/__init__.py
 src/lottery_app/routes/books.py
 src/lottery_app/routes/business_profile.py
-src/lottery_app/routes/home.py
 src/lottery_app/routes/reports.py
 src/lottery_app/routes/scanner.py
 src/lottery_app/routes/security.py
@@ -44,7 +43,6 @@ src/lottery_app/static/book_managment.css
 src/lottery_app/static/business_profile.css
 src/lottery_app/static/edit_reports.css
 src/lottery_app/static/edit_single_report.css
-src/lottery_app/static/index.css
 src/lottery_app/static/login.css
 src/lottery_app/static/scan_tickets.css
 src/lottery_app/static/settings.css
@@ -52,7 +50,6 @@ src/lottery_app/templates/books_managment.html
 src/lottery_app/templates/business_profile.html
 src/lottery_app/templates/edit_reports.html
 src/lottery_app/templates/edit_single_report.html
-src/lottery_app/templates/index.html
 src/lottery_app/templates/login.html
 src/lottery_app/templates/navButton.html
 src/lottery_app/templates/scan_tickets.html
@@ -65,5 +62,3 @@ src/lottery_app/utils/error_hanlder.py
 src/lottery_app/utils/reports.py
 src/lottery_app/utils/tickets.py
 src/lottery_app/utils/version_check.py
-tests/test_login.py
-tests/test_rout_auth.py

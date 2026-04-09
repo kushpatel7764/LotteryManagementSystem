@@ -20,8 +20,10 @@
                 // Check for successful response
                 if (response.ok) {
                     const data = await response.json();
+                    console.log("Data from server:", data);
                     // Check for barcode presence
                     if (data.barcode) {
+                        console.log("RECEIVED BARCODE");
                         const activeElement = document.activeElement;
 
                         // Only insert if the focused element is an input field.

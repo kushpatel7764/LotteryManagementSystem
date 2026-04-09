@@ -53,10 +53,10 @@ def update_ticket_order(order):
     Updates the ticket order in the configuration file.
 
     Args:
-        order (list): New ticket order to be saved.
+        order (string): New ticket order to be saved.
     """
-    if not isinstance(order, list):
-        raise TypeError("ticket_order must be a list")
+    if not isinstance(order, str):
+        raise TypeError("ticket_order must be a string")
     updated = False
     config = load_config()
     if config["ticket_order"] != order:

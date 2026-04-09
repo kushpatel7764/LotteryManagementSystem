@@ -494,4 +494,4 @@ def download_modified_report(report_id):
     if msg_data.get("message"):
         return msg_data["message"], 500
 
-    return result
+    return result[0]

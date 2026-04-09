@@ -1,3 +1,10 @@
+"""
+Security routes for the Flask application.
+ 
+Provides user authentication routes including login, logout,
+signup, password change, and user deletion.
+"""
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from lottery_app.database.user_model import User
@@ -8,13 +15,13 @@ security_bp = Blueprint("security", __name__)
 @security_bp.route("/signup", methods=["GET", "POST"])
 @login_required
 def signup():
+    """Create a new user account. Only accessible by logged-in users."""
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
         role = request.form.get("role", "standard")
 
         User.create(username, password, role)
-        
         return redirect(url_for("business_profile.business_profile"))
 
     return redirect(url_for("business_profile.business_profile"))
@@ -22,6 +29,7 @@ def signup():
 
 @security_bp.route("/login", methods=["GET", "POST"])
 def login():
+    """Authenticate a user and redirect to the ticket scanning page on success."""
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
@@ -33,8 +41,7 @@ def login():
             return redirect(
                 url_for("tickets.scan_tickets")
             )  # change this route as needed
-        else:
-            flash("Invalid username or password", "login_error")
+        flash("Invalid username or password", "login_error")
 
     return render_template("login.html")
 
@@ -42,6 +49,7 @@ def login():
 @security_bp.route("/logout")
 @login_required
 def logout():
+    """Log out the current user and redirect to the login page."""
     logout_user()
     flash("You’ve been logged out.", "login_success")
     return redirect(url_for("security.login"))
@@ -50,6 +58,7 @@ def logout():
 @security_bp.route("/change_password", methods=["GET", "POST"])
 @login_required
 def change_password():
+    """Allow the current user to change their password."""
     if request.method == "POST":
         current_password = request.form["current_password"]
         new_password = request.form["new_password"]
@@ -71,6 +80,7 @@ def change_password():
 @security_bp.route("/delete_user", methods=["POST"])
 @login_required
 def delete_user():
+    """Delete a user account. Prevents deletion of the currently logged-in user."""
     username_to_delete = request.form.get("username", "").strip()
     c_user = User.get_by_id(current_user.id)
     # Protect self-delete

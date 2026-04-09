@@ -3,11 +3,13 @@ decorator==5.1.1
 etelemetry==0.3.1
 Flask==3.0.3
 pandas
-pytest
 reportlab
 requests==2.31.0
 Gunicorn==21.2.0
-ruff
 simplejson
 urllib3
 util-functions
+
+[dev]
+pytest
+ruff
