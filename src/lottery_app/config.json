@@ -1,0 +1,9 @@
+{
+    "ticket_order": "ascending",
+    "should_poll": "false",
+    "invoice_output_path": "",
+    "business_name": "",
+    "business_address": "",
+    "business_phone": "",
+    "business_email": ""
+}

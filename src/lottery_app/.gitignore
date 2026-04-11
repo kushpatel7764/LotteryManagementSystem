@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Mac
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Database
+*.db
+
+# PyInstaller
+dist/
+build/
+*.spec
+
+.env
