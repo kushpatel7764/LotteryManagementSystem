@@ -1,3 +1,5 @@
+"""Tests for lottery_app.database.update_activated_books."""
+
 import sqlite3
 
 from lottery_app.database.update_activated_books import (
@@ -10,7 +12,8 @@ from lottery_app.database.update_activated_books import (
 
 
 def test_insert_activated_book_success(db_path):
-    msg, status = insert_book_to_activated_book_table(
+    """Test that a book can be inserted into the ActivatedBooks table."""
+    _, status = insert_book_to_activated_book_table(
         db_path,
         {
             "ActivationID": "A1",
@@ -31,6 +34,7 @@ def test_insert_activated_book_success(db_path):
 
 
 def test_update_counting_ticket_number(db_path):
+    """Test that the counting ticket number can be updated for an activated book."""
     insert_book_to_activated_book_table(
         db_path,
         {
@@ -40,11 +44,12 @@ def test_update_counting_ticket_number(db_path):
         },
     )
 
-    msg, status = update_counting_ticket_number(db_path, "B2", 50)
+    _, status = update_counting_ticket_number(db_path, "B2", 50)
     assert status == "success"
 
 
 def test_deactivate_book(db_path):
+    """Test that a book can be deactivated successfully."""
     insert_book_to_activated_book_table(
         db_path,
         {
@@ -54,11 +59,12 @@ def test_deactivate_book(db_path):
         },
     )
 
-    msg, status = deactivate_book(db_path, "B3")
+    _, status = deactivate_book(db_path, "B3")
     assert status == "success"
 
 
 def test_update_is_at_ticketnumbers(db_path):
+    """Test that isAtTicketNumber values can be bulk-updated."""
     insert_book_to_activated_book_table(
         db_path,
         {
@@ -68,11 +74,12 @@ def test_update_is_at_ticketnumbers(db_path):
         },
     )
 
-    msg, status = update_is_at_ticketnumbers(db_path)
+    _, status = update_is_at_ticketnumbers(db_path)
     assert status == "success"
 
 
 def test_clear_counting_ticket_number(db_path):
+    """Test that the counting ticket number can be cleared for an activated book."""
     insert_book_to_activated_book_table(
         db_path,
         {
@@ -82,5 +89,5 @@ def test_clear_counting_ticket_number(db_path):
         },
     )
 
-    msg, status = clear_counting_ticket_number(db_path, "B5")
+    _, status = clear_counting_ticket_number(db_path, "B5")
     assert status == "success"

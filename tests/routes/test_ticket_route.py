@@ -1,4 +1,6 @@
+"""Tests for ticket scanning, undo, book sold-out, and submit routes."""
 from unittest.mock import patch
+
 
 # -----------------------------
 # Helpers
@@ -6,6 +8,7 @@ from unittest.mock import patch
 
 
 def post_scan(client, barcode="123456"):
+    """POST a barcode to /scan_tickets and follow redirects."""
     return client.post(
         "/scan_tickets", data={"scanned_code": barcode}, follow_redirects=True
     )
@@ -18,6 +21,7 @@ def post_scan(client, barcode="123456"):
 @patch("lottery_app.database.database_queries.get_all_active_book_ids")
 @patch("lottery_app.routes.tickets.ScannedCodeManagement")
 def test_scan_invalid_barcode(mock_scan_mgr, mock_active_ids, mock_flash, client, auth):
+    """An invalid barcode flashes an error without redirecting."""
     auth.login()
 
     mock_active_ids.return_value = ["B1"]
@@ -28,7 +32,6 @@ def test_scan_invalid_barcode(mock_scan_mgr, mock_active_ids, mock_flash, client
     )
 
     assert resp.status_code == 200
-
     mock_flash.assert_any_call("INVALID BARCODE", "tickets_error")
 
 
@@ -38,6 +41,7 @@ def test_scan_invalid_barcode(mock_scan_mgr, mock_active_ids, mock_flash, client
 def test_scan_book_not_activated(
     mock_scan_mgr, mock_active_ids, mock_flash, client, auth
 ):
+    """Scanning a book that is not activated flashes an activation error."""
     auth.login()
     mock_active_ids.return_value = ["B1"]
 
@@ -66,7 +70,7 @@ def test_scan_book_not_activated(
 @patch("lottery_app.database.database_queries.is_counting_ticket_number_set")
 @patch("lottery_app.database.database_queries.get_all_active_book_ids")
 @patch("lottery_app.routes.tickets.ScannedCodeManagement")
-def test_scan_ticket_success(
+def test_scan_ticket_success(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     mock_scan_mgr,
     mock_active_ids,
     mock_is_set,
@@ -78,6 +82,7 @@ def test_scan_ticket_success(
     client,
     auth,
 ):
+    """A valid scan for an activated book records the ticket and flashes success."""
     auth.login()
     mock_active_ids.return_value = ["B1"]
     mock_is_set.return_value = False
@@ -103,9 +108,10 @@ def test_scan_ticket_success(
 @patch("lottery_app.database.database_queries.is_counting_ticket_number_set")
 @patch("lottery_app.database.database_queries.get_all_active_book_ids")
 @patch("lottery_app.routes.tickets.ScannedCodeManagement")
-def test_scan_duplicate_ticket(
+def test_scan_duplicate_ticket(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     mock_scan_mgr, mock_active_ids, mock_is_set, mock_flash, client, auth
 ):
+    """Scanning an already-counted ticket flashes a duplicate error."""
     auth.login()
     mock_active_ids.return_value = ["B1"]
     mock_is_set.return_value = True
@@ -137,7 +143,7 @@ def test_scan_duplicate_ticket(
 @patch(
     "lottery_app.routes.tickets.update_ticket_timeline.delete_ticket_timeline_by_book_id"
 )
-def test_undo_scan_success(
+def test_undo_scan_success(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     mock_delete_timeline,
     mock_delete_sales,
     mock_clear_count,
@@ -146,6 +152,7 @@ def test_undo_scan_success(
     client,
     auth,
 ):
+    """A successful undo removes the scan records and flashes confirmation."""
     auth.login()
     resp = client.post("/undo_scan", data={"book_id": "B1"}, follow_redirects=True)
     assert resp.status_code == 200
@@ -162,6 +169,7 @@ def test_undo_scan_success(
     "lottery_app.routes.tickets.update_ticket_timeline.delete_ticket_timeline_by_book_id"
 )
 def test_undo_scan_error(mock_delete, mock_flash, client, auth):
+    """An exception during undo flashes an unexpected-error message."""
     auth.login()
     mock_delete.side_effect = Exception("boom")
 
@@ -183,7 +191,7 @@ def test_undo_scan_error(mock_delete, mock_flash, client, auth):
     "lottery_app.routes.tickets.update_activated_books.update_counting_ticket_number"
 )
 @patch("lottery_app.routes.tickets.update_books.update_is_sold_for_book")
-def test_book_sold_out_success(
+def test_book_sold_out_success(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     mock_mark_sold,
     mock_update_count,
     mock_get_book,
@@ -194,6 +202,7 @@ def test_book_sold_out_success(
     auth,
     monkeypatch,
 ):
+    """POST /book_sold_out marks the book sold and flashes the confirmation."""
     auth.login()
     monkeypatch.setattr(
         "lottery_app.utils.config.load_config", lambda: {"ticket_order": "ascending"}
@@ -212,6 +221,7 @@ def test_book_sold_out_success(
 
 
 def test_book_sold_out_no_book_id(client, auth):
+    """POST /book_sold_out without a book_id flashes an error."""
     auth.login()
     resp = client.post("/book_sold_out", data={}, follow_redirects=True)
 
@@ -226,6 +236,7 @@ def test_book_sold_out_no_book_id(client, auth):
 @patch("lottery_app.routes.tickets.do_submit_procedure")
 @patch("lottery_app.database.database_queries.can_submit")
 def test_submit_success(mock_can_submit, mock_submit, client, auth):
+    """POST /submit when can_submit is True runs the submit procedure."""
     auth.login()
     mock_can_submit.return_value = True
     mock_submit.return_value = None
@@ -237,6 +248,7 @@ def test_submit_success(mock_can_submit, mock_submit, client, auth):
 
 @patch("lottery_app.routes.tickets.database_queries.can_submit")
 def test_submit_blocked(mock_can_submit, client, auth):
+    """POST /submit when can_submit is False does not run the procedure."""
     auth.login()
     mock_can_submit.return_value = False
 
@@ -248,6 +260,7 @@ def test_submit_blocked(mock_can_submit, client, auth):
 @patch("lottery_app.routes.tickets.do_submit_procedure")
 @patch("lottery_app.database.database_queries.can_submit")
 def test_submit_error(mock_can_submit, mock_submit, client, auth):
+    """POST /submit when the procedure returns an error flashes it."""
     auth.login()
     mock_can_submit.return_value = True
     mock_submit.return_value = ("ERROR", "error")

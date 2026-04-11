@@ -1,31 +1,35 @@
-import pytest
+# pylint: disable=redefined-outer-name
+"""
+Test suite for books management functions in lottery_app.utils.books.
+
+Testing Code: 35600949981000515070000000091
+
+activate_book_procedure:
+    - invalid barcode
+    - book does not exist
+    - already activated
+    - previous activation restores ticket number
+    - normal activation success path
+    - unexpected exception handling
+    - correct propagation of check_error messages
+
+add_book_procedure:
+    - invalid barcode
+    - lookup table update fails -> still inserts book, returns warning
+    - lookup table success -> successful insertion
+    - book insertion error
+    - combines messages correctly
+"""
 from unittest.mock import MagicMock
+
+import pytest
 
 from lottery_app.utils.books import (
     activate_book_procedure,
     add_book_procedure,
+    db_path,
 )
 
-# ------------------------------------------------------------------------------
-# Pytest: test suite for books management functions in lottery_app.utils.books
-# ------------------------------------------------------------------------------
-"""
-Testing Code: 35600949981000515070000000091
-activate_book_procedure:
-✔ invalid barcode
-✔ book does not exist
-✔ already activated
-✔ previous activation restores ticket number
-✔ normal activation success path
-✔ unexpected exception handling
-✔ correct propagation of check_error messages
-add_book_procedure:
-✔ invalid barcode
-✔ lookup table update fails → still inserts book, returns warning
-✔ lookup table success → successful insertion
-✔ book insertion error
-✔ combines messages correctly
-"""
 # ============================================================
 # activate_book_procedure tests
 # ============================================================
@@ -40,6 +44,7 @@ def scanned_info_mock(mocker):
 
 
 def test_activate_book_invalid_barcode(scanned_info_mock):
+    """An invalid barcode returns an error tuple immediately."""
     scanned_info_mock.extract_all_scanned_code.return_value = "INVALID BARCODE"
 
     result = activate_book_procedure("ANY")
@@ -47,6 +52,7 @@ def test_activate_book_invalid_barcode(scanned_info_mock):
 
 
 def test_activate_book_book_not_exists(scanned_info_mock, mocker):
+    """A barcode for a book not in the database returns a 'does not exist' error."""
     scanned_info_mock.extract_all_scanned_code.return_value = {
         "book_id": "094998",
         "ticket_number": "100",
@@ -66,6 +72,7 @@ def test_activate_book_book_not_exists(scanned_info_mock, mocker):
 
 
 def test_activate_book_already_activated(scanned_info_mock, mocker):
+    """A book that is already activated returns an 'already activated' error."""
     scanned_info_mock.extract_all_scanned_code.return_value = {
         "book_id": "094998",
         "ticket_number": "11",
@@ -87,6 +94,7 @@ def test_activate_book_already_activated(scanned_info_mock, mocker):
 def test_activate_book_previous_activation_sets_ticket_number(
     mocker, scanned_info_mock
 ):
+    """A previous activation record causes the stored ticket number to be used."""
     scanned_info_mock.extract_all_scanned_code.return_value = {
         "book_id": "094995",
         "ticket_number": "011",
@@ -99,11 +107,8 @@ def test_activate_book_previous_activation_sets_ticket_number(
     mocker.patch(
         "lottery_app.database.database_queries.is_activated_book", return_value=False
     )
-
-    # was_activated returns an earlier ticket index
     mocker.patch("lottery_app.database.database_queries.was_activated", return_value=5)
 
-    # make check_error write to msg_data
     def fake_check_error(*args, **kwargs):
         message_holder = kwargs.get("message_holder") or args[1]
         message_holder["message"] = "ACTIVATION SUCCESS"
@@ -119,26 +124,18 @@ def test_activate_book_previous_activation_sets_ticket_number(
     assert msg == "ACTIVATION SUCCESS"
     assert msg_type == "success"
 
-    # ---- CRITICAL ASSERTIONS ----
-    # Ensure the mock was actually called
     insert_mock.assert_called_once()
 
-    # Extract the activation info passed to DB insert
-    called_args = insert_mock.call_args[1]  # keyword arguments
-
+    called_args = insert_mock.call_args[1]
     active_book_info = called_args["active_book_info"]
 
-    # Assert the previous activation ticket number overwrote the scanned one
     assert active_book_info["isAtTicketNumber"] == "011"
-
-    # Quick sanity checks
     assert active_book_info["ActiveBookID"] == "094998"
     assert active_book_info["ActivationID"] == "35600949980110515070000000091"
 
 
 def test_activate_book_no_previous_activation(mocker, scanned_info_mock):
-    from lottery_app.utils.books import db_path
-
+    """Without a prior activation record the scanned ticket number is used."""
     scanned_info_mock.extract_all_scanned_code.return_value = {
         "book_id": "094998",
         "ticket_number": "99",
@@ -147,17 +144,14 @@ def test_activate_book_no_previous_activation(mocker, scanned_info_mock):
         "ticket_price": "5",
     }
 
-    # Patch db_path used inside the function
     mocker.patch("lottery_app.database.database_queries.is_book", return_value=True)
     mocker.patch(
         "lottery_app.database.database_queries.is_activated_book", return_value=False
     )
-    # No previous activation
     was_activated_mock = mocker.patch(
         "lottery_app.database.database_queries.was_activated", return_value=None
     )
 
-    # make check_error write to msg_data
     def fake_check_error(*args, **kwargs):
         message_holder = kwargs.get("message_holder") or args[1]
         message_holder["message"] = "ADDED SUCCESSFULLY"
@@ -173,25 +167,19 @@ def test_activate_book_no_previous_activation(mocker, scanned_info_mock):
     assert msg == "ADDED SUCCESSFULLY"
     assert msg_type == "success"
 
-    # ---- REAL VERIFICATION ----
-    # Ensure we actually checked for previous activation
     was_activated_mock.assert_called_once_with(db_path, "094998")
 
-    # Verify insert call happened
     insert_mock.assert_called_once()
 
-    # Extract activation data
     active_book_info = insert_mock.call_args[1]["active_book_info"]
 
-    # The ticket number must stay as scanned (99)
     assert active_book_info["isAtTicketNumber"] == "100"
-
-    # Sanity checks
     assert active_book_info["ActiveBookID"] == "094998"
     assert active_book_info["ActivationID"] == "35600949981000515070000000091"
 
 
 def test_activate_book_unexpected_exception(mocker, scanned_info_mock):
+    """An unexpected DB exception returns a descriptive error tuple."""
     mocker.patch(
         "lottery_app.database.database_queries.is_book",
         side_effect=Exception("DB Failure"),
@@ -217,13 +205,14 @@ def test_activate_book_unexpected_exception(mocker, scanned_info_mock):
 
 @pytest.fixture
 def scan_info_add_mock(mocker):
+    """Patch ScannedCodeManagement for add_book_procedure tests."""
     obj = MagicMock()
     mocker.patch("lottery_app.scanned_code_information_management", return_value=obj)
     return obj
 
 
 def test_add_book_invalid_barcode(scan_info_add_mock):
-    # Book: 356-094998-100
+    """An invalid barcode returns an error tuple immediately."""
     scan_info_add_mock.extract_all_scanned_code.return_value = "INVALID BARCODE"
 
     result = add_book_procedure("ANY")
@@ -231,7 +220,7 @@ def test_add_book_invalid_barcode(scan_info_add_mock):
 
 
 def test_add_book_lookup_insert_error(scan_info_add_mock, mocker):
-    # Book: 356-094998-100
+    """A lookup table failure still inserts the book and returns a warning."""
     scan_info_add_mock.extract_all_scanned_code.return_value = {
         "book_id": "094998",
         "game_number": "100",
@@ -255,7 +244,7 @@ def test_add_book_lookup_insert_error(scan_info_add_mock, mocker):
 
 
 def test_add_book_lookup_success(mocker, scan_info_add_mock):
-    # Book info to be returned by the mock
+    """A successful lookup and insert returns the DB success message."""
     scan_info_add_mock.extract_all_scanned_code.return_value = {
         "book_id": "094998",
         "game_number": "100",
@@ -279,6 +268,7 @@ def test_add_book_lookup_success(mocker, scan_info_add_mock):
 
 
 def test_add_book_insert_error(mocker, scan_info_add_mock):
+    """A book insert failure propagates the DB error message."""
     scan_info_add_mock.extract_all_scanned_code.return_value = {
         "book_id": "094998",
         "game_number": "100",

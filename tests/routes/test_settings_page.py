@@ -1,27 +1,12 @@
-import pytest
+"""Tests for the settings page route and its helper functions."""
 from unittest.mock import patch
-from flask import template_rendered
+
+import pytest
+
 from lottery_app.routes.settings import (
     extract_setting_form_data,
     validate_invoice_output_path,
 )
-
-
-# -------------------------------------------------------------------------
-# Helper: capture template context (for GET route test)
-# -------------------------------------------------------------------------
-@pytest.fixture
-def captured_templates(app):
-    recorded = []
-
-    def record(sender, template, context, **extra):
-        recorded.append((template, context))
-
-    template_rendered.connect(record, app)
-    try:
-        yield recorded
-    finally:
-        template_rendered.disconnect(record, app)
 
 
 # -------------------------------------------------------------------------
@@ -93,7 +78,8 @@ def test_validate_invoice_output_path_invalid_returns_default():
 # GET /settings route
 # -------------------------------------------------------------------------
 @patch("lottery_app.routes.settings.load_config")
-def test_settings_get_route(load_config_mock, auth, client, captured_templates):
+def test_settings_get_route(load_config_mock, auth, client, captured_templates):  # pylint: disable=redefined-outer-name
+    """GET /settings renders settings.html with the correct context."""
     auth.login()
     load_config_mock.return_value = {
         "ticket_order": "asc",
@@ -105,7 +91,6 @@ def test_settings_get_route(load_config_mock, auth, client, captured_templates):
 
     assert response.status_code == 200
 
-    # Ensure correct template + vars passed
     template, context = captured_templates[-1]
     assert template.name == "settings.html"
     assert context["counting_order"] == "asc"
@@ -122,7 +107,7 @@ def test_settings_get_route(load_config_mock, auth, client, captured_templates):
 @patch("lottery_app.routes.settings.update_ticket_order")
 @patch("lottery_app.routes.settings.validate_invoice_output_path")
 @patch("lottery_app.routes.settings.load_config")
-def test_settings_post_route(
+def test_settings_post_route(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     load_config_mock,
     validate_mock,
     update_order_mock,
@@ -147,7 +132,6 @@ def test_settings_post_route(
         "should_poll": "false",
     }
 
-    # Fake validation result
     if valid_dir:
         validate_mock.return_value = ("/valid/path", None)
     else:
@@ -165,22 +149,16 @@ def test_settings_post_route(
 
     assert response.status_code == 200
 
-    # update_ticket_order must be called
     update_order_mock.assert_called_once_with("desc")
-
-    # validate_invoice_output_path must be called
     validate_mock.assert_called_once_with("/requested/path")
 
-    # update_invoice_output_path must be called with validated path
     if valid_dir:
         update_path_mock.assert_called_once_with("/valid/path")
     else:
         update_path_mock.assert_called_once_with("/fallback/path")
 
-    # update_should_poll must be called
     update_poll_mock.assert_called_once_with("true")
 
-    # Check for flash only on invalid path
     if valid_dir:
         assert b"DEFAULT" not in response.data
     else:

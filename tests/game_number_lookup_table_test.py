@@ -1,9 +1,14 @@
-import pytest
+"""Tests for the game_number_lookup_table module."""
+
+from unittest.mock import MagicMock, patch
+
 import pandas
+import pytest
 import requests
-from unittest.mock import patch, MagicMock
 
 import lottery_app.game_number_lookup_table as lookup
+
+# pylint: disable=redefined-outer-name
 
 # ------------------------------------------------------------------------------
 # Pytest: test suite for books management functions in lottery_app.game_number_lookup_table
@@ -12,11 +17,13 @@ import lottery_app.game_number_lookup_table as lookup
 
 @pytest.fixture
 def temp_db_dir(tmp_path, monkeypatch):
+    """Monkeypatch db_dir to a temporary directory and return it."""
     monkeypatch.setattr(lookup, "db_dir", tmp_path)
     return tmp_path
 
 
 def test_get_lottery_net_lookup_table_success(monkeypatch):
+    """Test that get_lottery_net_lookup_table parses HTML table into a DataFrame."""
     html = """
     <table class="bordered scratchOffs table-sort">
         <tr>
@@ -50,6 +57,7 @@ def test_get_lottery_net_lookup_table_success(monkeypatch):
 
 
 def test_load_from_gm_track_file(temp_db_dir):
+    """Test that load_from_gm_track_file reads lines from a tracking file."""
     file_name = "track.txt"
     path = temp_db_dir / file_name
     path.write_text("100\n200\n300\n")
@@ -60,6 +68,7 @@ def test_load_from_gm_track_file(temp_db_dir):
 
 
 def test_is_gm_in_lookup_table_true(temp_db_dir):
+    """Test that is_gm_in_lookup_table returns True when game number exists."""
     file_name = "track.txt"
     (temp_db_dir / file_name).write_text("111\n222\n")
 
@@ -67,6 +76,7 @@ def test_is_gm_in_lookup_table_true(temp_db_dir):
 
 
 def test_is_gm_in_lookup_table_false(temp_db_dir):
+    """Test that is_gm_in_lookup_table returns False when game number is absent."""
     file_name = "track.txt"
     (temp_db_dir / file_name).write_text("111\n222\n")
 
@@ -74,6 +84,7 @@ def test_is_gm_in_lookup_table_false(temp_db_dir):
 
 
 def test_remove_ticketname_gm_track(temp_db_dir):
+    """Test that remove_ticketname_gm_track deletes the tracking file."""
     file_name = "track.txt"
     path = temp_db_dir / file_name
     path.write_text("test")
@@ -85,6 +96,7 @@ def test_remove_ticketname_gm_track(temp_db_dir):
 
 @patch("lottery_app.database.database_queries.get_gm_from_lookup")
 def test_track_gms_in_lookup_table(mock_get_gm, temp_db_dir):
+    """Test that track_gms_in_lookup_table writes game numbers to the tracking file."""
     mock_get_gm.return_value = {"101", "202"}
 
     lookup.track_gms_in_lookup_table("fake.db")
@@ -97,6 +109,7 @@ def test_track_gms_in_lookup_table(mock_get_gm, temp_db_dir):
 
 @patch("lottery_app.database.database_queries.get_gm_from_lookup")
 def test_compare_game_numbers(mock_get_gm, temp_db_dir):
+    """Test that compare_game_numbers correctly identifies common and divergent entries."""
     mock_get_gm.return_value = {"100", "200"}
 
     file_name = "track.txt"
@@ -109,13 +122,15 @@ def test_compare_game_numbers(mock_get_gm, temp_db_dir):
 
 
 def test_is_lottery_db_present_true(temp_db_dir):
+    """Test that is_lottery_db_present returns True when the database file exists."""
     db_name = "Lottery_Management_Database.db"
     (temp_db_dir / db_name).touch()
 
     assert lookup.is_lottery_db_present(db_name) is True
 
 
-def test_is_lottery_db_present_false(temp_db_dir):
+def test_is_lottery_db_present_false(temp_db_dir):  # pylint: disable=unused-argument
+    """Test that is_lottery_db_present returns False when the database file is missing."""
     assert lookup.is_lottery_db_present("missing.db") is False
 
 
@@ -125,13 +140,14 @@ def test_is_lottery_db_present_false(temp_db_dir):
 )
 @patch("lottery_app.game_number_lookup_table.compare_game_numbers")
 @patch("lottery_app.game_number_lookup_table.get_lottery_net_lookup_table")
-def test_insert_new_ticket_name_success(
+def test_insert_new_ticket_name_success(  # pylint: disable=unused-argument
     mock_fetch,
     mock_compare,
     mock_insert,
     mock_track,
     temp_db_dir,
 ):
+    """Test successful insertion of new ticket names into the lookup table."""
     mock_compare.return_value = {"in_file_not_in_db": set()}
     mock_fetch.return_value = pandas.DataFrame(
         [{"Game No.": "101", "Game Name": "Test Game"}]
@@ -147,11 +163,12 @@ def test_insert_new_ticket_name_success(
 
 @patch("lottery_app.game_number_lookup_table.compare_game_numbers")
 @patch("lottery_app.game_number_lookup_table.get_lottery_net_lookup_table")
-def test_insert_new_ticket_name_fetch_error(
+def test_insert_new_ticket_name_fetch_error(  # pylint: disable=unused-argument
     mock_fetch,
     mock_compare,
     temp_db_dir,
 ):
+    """Test that a fetch error returns an error status and message."""
     mock_compare.return_value = {"in_file_not_in_db": set()}
     mock_fetch.side_effect = requests.RequestException("boom")
 

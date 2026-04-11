@@ -1,3 +1,4 @@
+"""Tests that all non-login routes are protected and require authentication."""
 import pytest
 from lottery_app.app import app as flask_app
 
@@ -7,11 +8,11 @@ def client():
     """Return a test client using the actual Flask app."""
     flask_app.config["TESTING"] = True
     flask_app.config["WTF_CSRF_ENABLED"] = False
-    with flask_app.test_client() as client:
-        yield client
+    with flask_app.test_client() as test_client:
+        yield test_client
 
 
-def test_all_protected_routes_blocked_without_login(app, client):
+def test_all_protected_routes_blocked_without_login(app, client):  # pylint: disable=redefined-outer-name
     """
     Ensures all routes EXCEPT /login do not allow access
     when the user is not logged in.
@@ -20,17 +21,14 @@ def test_all_protected_routes_blocked_without_login(app, client):
 
     unprotected = {"/login", "/static"}
 
-    # Gather all routes in the app
     routes = []
     for rule in app.url_map.iter_rules():
         if any(rule.rule.startswith(p) for p in unprotected):
             continue
-        # Skip routes with parameters like <id> or <username>
         if "<" in rule.rule:
             continue
         routes.append(rule)
 
-    4
     assert routes, "No routes found — test setup issue."
 
     for rule in routes:
@@ -38,19 +36,18 @@ def test_all_protected_routes_blocked_without_login(app, client):
             if method in ("HEAD", "OPTIONS"):
                 continue
 
-            # Determine how to call the route
             if method == "GET":
                 response = client.get(rule.rule)
             elif method == "POST":
                 response = client.post(rule.rule)
             else:
-                continue  # ignore PUT/DELETE if unused
+                continue
 
             print(f"Checked protection for: {method} {rule.rule}")
 
-            # Valid blocked status codes
             allowed = {301, 302, 401, 403}
 
             assert response.status_code in allowed, (
-                f"Route {rule.rule} method {method} not protected — got {response.status_code}"
+                f"Route {rule.rule} method {method} not protected "
+                f"— got {response.status_code}"
             )

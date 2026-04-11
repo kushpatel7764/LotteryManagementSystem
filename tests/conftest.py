@@ -1,28 +1,34 @@
-import os
-import tempfile
-import pytest
+"""Shared pytest fixtures and helpers for the lottery app test suite."""
+
 import json
+import os
+import sqlite3
+import tempfile
 from unittest.mock import MagicMock
+
+import pytest
+
+import lottery_app.utils.config
 from lottery_app import create_app
 from lottery_app.database import setup_database
+from lottery_app.database.setup_database import initialize_database
 from lottery_app.database.user_model import User
-import sqlite3
 
-from lottery_app.database.setup_database import (
-    initialize_database,
-)
+# pylint: disable=redefined-outer-name
 
 SCHEMA_SQL = "lottery_app/database/Lottery_DB_Schema.sql"  # adjust if needed
 
 
 @pytest.fixture
 def temp_db(tmp_path):
+    """Return a path to a temporary SQLite database file."""
     db_path = tmp_path / "test.db"
     return str(db_path)
 
 
 @pytest.fixture
 def sample_ticket_info():
+    """Return a sample ticket info dictionary for testing."""
     return {
         "ActiveBookID": "BOOK123",
         "prev_TicketNum": 100,
@@ -34,11 +40,13 @@ def sample_ticket_info():
 
 @pytest.fixture
 def db_path(tmp_path):
+    """Return the path to a temporary database file."""
     return str(tmp_path / "test.db")
 
 
 @pytest.fixture
 def db_cursor(db_path):
+    """Yield an SQLite cursor connected to an initialized test database."""
     initialize_database(db_path)
 
     conn = sqlite3.connect(db_path)
@@ -51,9 +59,8 @@ def db_cursor(db_path):
 
 @pytest.fixture
 def app():
+    """Create and configure a Flask app instance backed by a temporary database."""
     db_fd, temp_db = tempfile.mkstemp()
-
-    import lottery_app.utils.config
 
     lottery_app.utils.config.db_path = temp_db
 
@@ -76,14 +83,19 @@ def app():
 
 @pytest.fixture
 def client(app):
+    """Return a Flask test client for the app fixture."""
     return app.test_client()
 
 
 class AuthActions:
+    """Helper class for performing login/logout actions in tests."""
+
     def __init__(self, client):
+        """Initialize with a Flask test client."""
         self._client = client
 
     def login(self, username="testuser", password="testpassword"):
+        """Post login credentials and follow redirects."""
         return self._client.post(
             "/login",
             data={"username": username, "password": password},
@@ -91,11 +103,13 @@ class AuthActions:
         )
 
     def logout(self):
+        """Send a logout request and follow redirects."""
         return self._client.get("/logout", follow_redirects=True)
 
 
 @pytest.fixture
 def auth(client):
+    """Return an AuthActions helper bound to the test client."""
     return AuthActions(client)
 
 
@@ -151,6 +165,7 @@ def update_env(monkeypatch, tmp_path):
 # Make helper available globally to all tests
 @pytest.fixture
 def json_assert():
+    """Return a callable that asserts a matcher against an expected value."""
     def _assert(matcher, expected):
         matcher(expected)
 

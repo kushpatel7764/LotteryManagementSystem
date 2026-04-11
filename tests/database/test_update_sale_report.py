@@ -1,3 +1,5 @@
+"""Tests for lottery_app.database.update_sale_report."""
+
 from lottery_app.database.update_sale_report import (
     insert_daily_totals,
     update_sale_report,
@@ -7,6 +9,7 @@ from lottery_app.decorators import get_db_cursor
 
 
 def test_insert_daily_totals(temp_db):
+    """Test that daily totals can be inserted into the SaleReport table."""
     daily_totals = {
         "ReportID": "R1",
         "instant_sold": 10,
@@ -16,7 +19,7 @@ def test_insert_daily_totals(temp_db):
         "cash_on_hand": 200.0,
     }
 
-    msg, status = insert_daily_totals(temp_db, daily_totals)
+    _, status = insert_daily_totals(temp_db, daily_totals)
     assert status == "success"
 
     with get_db_cursor(temp_db) as cursor:
@@ -25,6 +28,7 @@ def test_insert_daily_totals(temp_db):
 
 
 def test_update_sale_report(temp_db):
+    """Test that a sale report can be updated with new totals."""
     insert_daily_totals(
         temp_db,
         {
@@ -37,7 +41,7 @@ def test_update_sale_report(temp_db):
         },
     )
 
-    msg, status = update_sale_report(
+    _, status = update_sale_report(
         temp_db,
         instant_sold=10,
         online_sold=5,
@@ -51,6 +55,7 @@ def test_update_sale_report(temp_db):
 
 
 def test_update_sale_report_instant_sold(temp_db):
+    """Test that the instant_sold field can be updated on an existing sale report."""
     insert_daily_totals(
         temp_db,
         {
@@ -63,7 +68,7 @@ def test_update_sale_report_instant_sold(temp_db):
         },
     )
 
-    msg, status = update_sale_report_instant_sold(temp_db, 99, "R3")
+    _, status = update_sale_report_instant_sold(temp_db, 99, "R3")
     assert status == "success"
 
     with get_db_cursor(temp_db) as cursor:

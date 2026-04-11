@@ -1,10 +1,14 @@
+"""Tests for lottery_app.database.update_ticket_name_lookup."""
+
+import sqlite3
+
 from lottery_app.database.update_ticket_name_lookup import insert_ticket_name
 from lottery_app.decorators import get_db_cursor
-import sqlite3
 
 
 def test_insert_ticket_name_success(temp_db):
-    msg, status = insert_ticket_name(
+    """Test that a ticket name can be inserted into the TicketNameLookup table."""
+    _, status = insert_ticket_name(
         temp_db, ticket_name="Mega Millions", ticket_gamenumber="MM01"
     )
 
@@ -18,6 +22,7 @@ def test_insert_ticket_name_success(temp_db):
 
 
 def test_insert_ticket_name_sql_error(monkeypatch, temp_db):
+    """Test that a database error during insert returns an error status."""
     def bad_cursor(*args, **kwargs):
         raise sqlite3.Error("boom")
 
@@ -26,5 +31,5 @@ def test_insert_ticket_name_sql_error(monkeypatch, temp_db):
         bad_cursor,
     )
 
-    msg, status = insert_ticket_name(temp_db, "Bad", "X")
+    _, status = insert_ticket_name(temp_db, "Bad", "X")
     assert status == "error"

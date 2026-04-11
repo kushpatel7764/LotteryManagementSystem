@@ -1,7 +1,10 @@
+"""Tests for the reports route: helper functions and HTTP endpoints."""
 import json
 from urllib.parse import parse_qs, urlparse
-import pytest
+
 from unittest.mock import MagicMock
+
+import pytest
 
 from lottery_app.routes.reports import (
     _create_scan_id,
@@ -16,6 +19,7 @@ from lottery_app.routes.reports import (
 
 @pytest.fixture
 def admin_user(mocker):
+    """Return a mocked admin User and patch User.get_by_id."""
     user = MagicMock()
     user.id = 1
     user.role = "admin"
@@ -25,6 +29,7 @@ def admin_user(mocker):
 
 @pytest.fixture
 def normal_user(mocker):
+    """Return a mocked standard User and patch User.get_by_id."""
     user = MagicMock()
     user.id = 2
     user.role = "user"
@@ -33,14 +38,16 @@ def normal_user(mocker):
 
 
 @pytest.fixture
-def login_admin(client, admin_user):
+def login_admin(client, admin_user):  # pylint: disable=redefined-outer-name
+    """Inject an admin session into the test client."""
     with client.session_transaction() as sess:
         sess["_user_id"] = str(admin_user.id)
     return client
 
 
 @pytest.fixture
-def login_user(client, normal_user):
+def login_user(client, normal_user):  # pylint: disable=redefined-outer-name
+    """Inject a standard-user session into the test client."""
     with client.session_transaction() as sess:
         sess["_user_id"] = str(normal_user.id)
     return client
@@ -52,6 +59,7 @@ def login_user(client, normal_user):
 
 
 def test_create_scan_id():
+    """_create_scan_id concatenates all parts in the correct order."""
     scan_id = _create_scan_id(
         game_number="123",
         book_id="B1",
@@ -63,6 +71,7 @@ def test_create_scan_id():
 
 
 def test_get_latest_report_id_success(mocker):
+    """_get_latest_report_id returns next_report_id minus one on success."""
     mocker.patch(
         "lottery_app.routes.reports.database_queries.next_report_id",
         return_value=10,
@@ -74,6 +83,7 @@ def test_get_latest_report_id_success(mocker):
 
 
 def test_get_latest_report_id_error(mocker):
+    """_get_latest_report_id returns 0 when the database raises."""
     mocker.patch(
         "lottery_app.routes.reports.database_queries.next_report_id",
         side_effect=Exception("DB fail"),
@@ -86,6 +96,7 @@ def test_get_latest_report_id_error(mocker):
 
 
 def test_get_book_metadata_success(mocker):
+    """_get_book_metadata returns game number, book tuple, and ticket name."""
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_game_num_of",
         return_value="123",
@@ -113,6 +124,7 @@ def test_get_book_metadata_success(mocker):
 
 
 def test_edit_reports_success(client, auth, mocker):
+    """GET /edit_reports renders the page with report data."""
     auth.login()
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_all_sales_reports",
@@ -131,7 +143,10 @@ def test_edit_reports_success(client, auth, mocker):
     assert b"12:00 PM" in resp.data
 
 
-def test_edit_reports_invalid_report_format(client, login_admin, mocker):
+def test_edit_reports_invalid_report_format(  # pylint: disable=redefined-outer-name
+    client, login_admin, mocker  # pylint: disable=unused-argument
+):
+    """GET /edit_reports handles malformed report rows gracefully."""
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_all_sales_reports",
         return_value=["bad-data"],
@@ -146,7 +161,10 @@ def test_edit_reports_invalid_report_format(client, login_admin, mocker):
 # ------------------------------------------------------------------
 
 
-def test_edit_single_report_admin_access(client, login_admin, mocker):
+def test_edit_single_report_admin_access(  # pylint: disable=redefined-outer-name
+    client, login_admin, mocker  # pylint: disable=unused-argument
+):
+    """Admin can GET /edit_report/<id> and receives the edit template."""
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_sales_log", return_value=[]
     )
@@ -167,7 +185,10 @@ def test_edit_single_report_admin_access(client, login_admin, mocker):
     assert b"edit_single_report" in resp.data
 
 
-def test_edit_single_report_non_admin_redirect(client, login_user):
+def test_edit_single_report_non_admin_redirect(  # pylint: disable=redefined-outer-name
+    client, login_user  # pylint: disable=unused-argument
+):
+    """Non-admin users are redirected away from /edit_report/<id>."""
     resp = client.get("/edit_report/1", follow_redirects=True)
     assert resp.status_code == 200
     assert b"Unauthorized access" in resp.data
@@ -178,7 +199,10 @@ def test_edit_single_report_non_admin_redirect(client, login_user):
 # ------------------------------------------------------------------
 
 
-def test_update_sales_log_success(client, login_admin, mocker):
+def test_update_sales_log_success(  # pylint: disable=redefined-outer-name
+    client, login_admin, mocker  # pylint: disable=unused-argument
+):
+    """Valid POST to /update_salesLog returns a redirect URL."""
     mocker.patch(
         "lottery_app.routes.reports.database_queries.is_sold", return_value=False
     )
@@ -223,7 +247,10 @@ def test_update_sales_log_success(client, login_admin, mocker):
     assert "redirect_url" in data
 
 
-def test_update_sales_log_ticket_exceeds_book(client, login_admin, mocker):
+def test_update_sales_log_ticket_exceeds_book(  # pylint: disable=redefined-outer-name
+    client, login_admin, mocker  # pylint: disable=unused-argument
+):
+    """Ticket number exceeding book amount returns an error redirect URL."""
     mocker.patch(
         "lottery_app.routes.reports.database_queries.get_book",
         return_value=("id", "x", "y", 20, 5),
@@ -263,7 +290,10 @@ def test_update_sales_log_ticket_exceeds_book(client, login_admin, mocker):
 # ------------------------------------------------------------------
 
 
-def test_update_sale_report_success(client, login_admin, mocker):
+def test_update_sale_report_success(  # pylint: disable=redefined-outer-name
+    client, login_admin, mocker  # pylint: disable=unused-argument
+):
+    """Valid POST to /update_sale_report/<id> returns 200."""
     mocker.patch(
         "lottery_app.routes.reports.update_sale_report.update_sale_report",
         return_value=("OK", "success"),
@@ -289,7 +319,10 @@ def test_update_sale_report_success(client, login_admin, mocker):
 # ------------------------------------------------------------------
 
 
-def test_download_report_success(client, login_admin, mocker):
+def test_download_report_success(  # pylint: disable=redefined-outer-name
+    client, login_admin, mocker  # pylint: disable=unused-argument
+):
+    """GET /download/<id> returns the PDF bytes on success."""
     mocker.patch(
         "lottery_app.routes.reports.create_daily_invoice", return_value="PDF_BYTES"
     )
@@ -299,7 +332,10 @@ def test_download_report_success(client, login_admin, mocker):
     assert resp.data == b"PDF_BYTES"
 
 
-def test_download_report_error(client, login_admin, mocker):
+def test_download_report_error(  # pylint: disable=redefined-outer-name
+    client, login_admin, mocker  # pylint: disable=unused-argument
+):
+    """GET /download/<id> returns 500 when invoice generation raises."""
     mocker.patch(
         "lottery_app.routes.reports.create_daily_invoice", side_effect=Exception("fail")
     )

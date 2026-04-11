@@ -1,17 +1,21 @@
+"""Tests for the insert_ticket utility in lottery_app.utils.tickets."""
 from unittest.mock import patch
 
 from lottery_app.utils.tickets import insert_ticket
+
 
 # ---------- Helpers ----------
 
 
 def success_check_error(return_value, message_holder):
+    """Stub that injects a success result into message_holder."""
     message_holder["message"] = "SUCCESS"
     message_holder["message_type"] = "success"
     return return_value
 
 
 def error_check_error(return_value, message_holder):
+    """Stub that injects a DB error into message_holder."""
     message_holder["message"] = "DB ERROR"
     message_holder["message_type"] = "error"
     return return_value
@@ -28,6 +32,7 @@ def test_insert_ticket_success_without_report_id(
     mock_check_error,
     mock_insert_ticket,
 ):
+    """A successful insert with no report_id sets message to SUCCESS."""
     mock_insert_ticket.return_value = None
     mock_check_error.side_effect = success_check_error
 
@@ -45,7 +50,6 @@ def test_insert_ticket_success_without_report_id(
     mock_insert_ticket.assert_called_once()
     args, _ = mock_insert_ticket.call_args
 
-    # db_path is first arg, ticket_info second
     ticket_info = args[1]
 
     assert ticket_info == {
@@ -65,6 +69,7 @@ def test_insert_ticket_success_with_report_id(
     mock_check_error,
     mock_insert_ticket,
 ):
+    """A successful insert with a report_id includes ReportID in the ticket info."""
     mock_insert_ticket.return_value = None
     mock_check_error.side_effect = success_check_error
 
@@ -94,6 +99,7 @@ def test_insert_ticket_db_error(
     mock_check_error,
     mock_insert_ticket,
 ):
+    """A DB error during insert sets message to DB ERROR."""
     mock_insert_ticket.return_value = None
     mock_check_error.side_effect = error_check_error
 
@@ -117,6 +123,7 @@ def test_insert_ticket_calls_check_error_with_message_holder(
     mock_check_error,
     mock_insert_ticket,
 ):
+    """check_error is called with a message_holder keyword argument."""
     mock_insert_ticket.return_value = None
 
     insert_ticket(
@@ -127,7 +134,6 @@ def test_insert_ticket_calls_check_error_with_message_holder(
         ticket_price=7.0,
     )
 
-    # Ensure check_error is called with message_holder kwarg
     _, kwargs = mock_check_error.call_args
     assert "message_holder" in kwargs
     assert kwargs["message_holder"] == {"message": "", "message_type": ""}

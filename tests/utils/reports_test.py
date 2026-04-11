@@ -1,25 +1,30 @@
-from pathlib import Path
+# pylint: disable=redefined-outer-name
+"""Tests for report utilities: calculate_instant_tickets_sold, create_daily_invoice,
+add_sales_log, and do_submit_procedure in lottery_app.utils.reports."""
 from datetime import datetime
+from pathlib import Path
+from unittest.mock import ANY, Mock, patch
+
 import pytest
-from unittest.mock import Mock
 from flask import Flask
-from unittest.mock import ANY
 
-from unittest.mock import patch
 import lottery_app.utils.reports as reports_utils
-
-# Import the function under test
 from lottery_app.utils.reports import do_submit_procedure
 
 
-# Helper: patch db_path (required dependency)
+# Patch db_path for every test in this module
 @pytest.fixture(autouse=True)
 def fake_db_path(monkeypatch):
+    """Replace the module-level db_path with a dummy value."""
     monkeypatch.setattr(reports_utils, "db_path", "fake.db")
 
 
-# Test: normal calculation (happy path)
+# ============================================================
+# calculate_instant_tickets_sold tests
+# ============================================================
+
 def test_calculate_instant_tickets_sold_success(monkeypatch):
+    """Happy path: quantities * prices are summed correctly."""
     fake_data = [
         {"Ticket_Sold_Quantity": 10, "TicketPrice": 2.0},
         {"Ticket_Sold_Quantity": 5, "TicketPrice": 3.0},
@@ -40,8 +45,8 @@ def test_calculate_instant_tickets_sold_success(monkeypatch):
     assert total == (10 * 2.0 + 5 * 3.0)
 
 
-# Test: empty result → returns 0
 def test_calculate_instant_tickets_sold_empty(monkeypatch):
+    """An empty ticket list returns 0."""
     monkeypatch.setattr(
         reports_utils.database_queries,
         "get_all_instant_tickets_sold_quantity",
@@ -57,8 +62,8 @@ def test_calculate_instant_tickets_sold_empty(monkeypatch):
     assert total == 0
 
 
-# Test: check_error fallback returns empty list
 def test_calculate_instant_tickets_sold_check_error_fallback(monkeypatch):
+    """A DB error tuple causes check_error to return the fallback (0)."""
     monkeypatch.setattr(
         reports_utils.database_queries,
         "get_all_instant_tickets_sold_quantity",
@@ -74,8 +79,8 @@ def test_calculate_instant_tickets_sold_check_error_fallback(monkeypatch):
     assert total == 0
 
 
-# Test: non-dict ticket entry → error tuple
 def test_calculate_instant_tickets_sold_invalid_ticket_data(monkeypatch):
+    """A non-dict entry in the ticket list returns an error tuple."""
     fake_data = [
         {"Ticket_Sold_Quantity": 1, "TicketPrice": 2},
         "not-a-dict",
@@ -96,12 +101,12 @@ def test_calculate_instant_tickets_sold_invalid_ticket_data(monkeypatch):
     assert result == ("ERROR: Invalid ticket sold data", "error")
 
 
-# Test: missing keys → defaults to 0
 def test_calculate_instant_tickets_sold_missing_keys(monkeypatch):
+    """Missing keys in a ticket dict default to 0, so the total is 0."""
     fake_data = [
-        {},  # both keys missing → 0 * 0
-        {"Ticket_Sold_Quantity": 5},  # price missing → 5 * 0
-        {"TicketPrice": 10},  # quantity missing → 0 * 10
+        {},
+        {"Ticket_Sold_Quantity": 5},
+        {"TicketPrice": 10},
     ]
 
     monkeypatch.setattr(
@@ -119,8 +124,8 @@ def test_calculate_instant_tickets_sold_missing_keys(monkeypatch):
     assert total == 0
 
 
-# Test: TypeError during multiplication → returns 0
 def test_calculate_instant_tickets_sold_type_error(monkeypatch):
+    """A non-numeric quantity causes a TypeError which is caught and returns 0."""
     fake_data = [
         {"Ticket_Sold_Quantity": "ten", "TicketPrice": 2},
     ]
@@ -140,9 +145,8 @@ def test_calculate_instant_tickets_sold_type_error(monkeypatch):
     assert total == 0
 
 
-# Test: check_error returns unexpected non-list
-# This locks in current behavior.
 def test_calculate_instant_tickets_sold_non_iterable(monkeypatch):
+    """A non-iterable return from the DB raises TypeError."""
     monkeypatch.setattr(
         reports_utils.database_queries,
         "get_all_instant_tickets_sold_quantity",
@@ -157,27 +161,22 @@ def test_calculate_instant_tickets_sold_non_iterable(monkeypatch):
         reports_utils.calculate_instant_tickets_sold("r1")
 
 
-# =======================================================================
+# ============================================================
+# create_daily_invoice fixtures
+# ============================================================
 
 
-# Shared fixtures (critical)
-# Patch db_path
-@pytest.fixture(autouse=True)
-def fake_db_path(monkeypatch):
-    monkeypatch.setattr(reports_utils, "db_path", "fake.db")
-
-
-# Patch datetime.now()
 @pytest.fixture
 def fixed_datetime(monkeypatch):
+    """Patch datetime.now() to a fixed value."""
     fixed = datetime(2025, 1, 1)
     monkeypatch.setattr(reports_utils, "datetime", Mock(now=lambda: fixed))
     return fixed
 
 
-# Patch load_config()
 @pytest.fixture
 def fake_config(tmp_path, monkeypatch):
+    """Patch load_config with a minimal config pointing to tmp_path."""
     config = {
         "business_name": "Test Store",
         "business_address": "123 Main St",
@@ -189,9 +188,9 @@ def fake_config(tmp_path, monkeypatch):
     return config
 
 
-# Patch PDF generator
 @pytest.fixture
 def mock_pdf(monkeypatch):
+    """Patch the PDF generator with a Mock."""
     mock = Mock()
     monkeypatch.setattr(
         reports_utils.generate_invoice, "generate_lottery_invoice_pdf", mock
@@ -199,16 +198,20 @@ def mock_pdf(monkeypatch):
     return mock
 
 
-# Patch send_file
 @pytest.fixture
 def mock_send_file(monkeypatch):
+    """Patch send_file to return a sentinel response."""
     mock = Mock(return_value="SEND_FILE_RESPONSE")
     monkeypatch.setattr(reports_utils, "send_file", mock)
     return mock
 
 
-# Test: invoice table DB error
+# ============================================================
+# create_daily_invoice tests
+# ============================================================
+
 def test_create_daily_invoice_invoice_log_error(monkeypatch):
+    """A DB error on get_table_for_invoice returns an error tuple."""
     monkeypatch.setattr(
         reports_utils.database_queries,
         "get_table_for_invoice",
@@ -229,11 +232,10 @@ def test_create_daily_invoice_invoice_log_error(monkeypatch):
     assert result == ("ERROR: Unable to get the invoice table", "error")
 
 
-# Test: daily report DB error
 def test_create_daily_invoice_daily_report_error(monkeypatch):
+    """A DB error on get_daily_report returns an error tuple."""
     report_id = "R123"
 
-    # Mock config
     monkeypatch.setattr(
         "lottery_app.utils.reports.load_config",
         lambda: {
@@ -245,19 +247,16 @@ def test_create_daily_invoice_daily_report_error(monkeypatch):
         },
     )
 
-    # Invoice table succeeds
     monkeypatch.setattr(
         "lottery_app.utils.reports.database_queries.get_table_for_invoice",
         lambda db_path, rid: [{"some": "data"}],
     )
 
-    # Daily report fails
     monkeypatch.setattr(
         "lottery_app.utils.reports.database_queries.get_daily_report",
         lambda db_path, rid: None,
     )
 
-    # check_error behavior:
     def mock_check_error(result, msg_data, fallback=None):
         if result is None:
             msg_data["message"] = "error"
@@ -272,10 +271,10 @@ def test_create_daily_invoice_daily_report_error(monkeypatch):
     assert result == ("ERROR: Unable to create daily invoice", "error")
 
 
-# Test: successful invoice, return path only
 def test_create_daily_invoice_return_path_only(
-    monkeypatch, fake_config, mock_pdf, fixed_datetime
+    monkeypatch, fake_config, mock_pdf, fixed_datetime  # pylint: disable=unused-argument
 ):
+    """Successful invoice creation with return_path_only=True returns the file path."""
     monkeypatch.setattr(
         reports_utils.database_queries,
         "get_table_for_invoice",
@@ -295,10 +294,10 @@ def test_create_daily_invoice_return_path_only(
     mock_pdf.assert_called_once()
 
 
-# Test: successful invoice, send_file returned
 def test_create_daily_invoice_send_file(
-    monkeypatch, fake_config, mock_pdf, mock_send_file, fixed_datetime
+    monkeypatch, fake_config, mock_pdf, mock_send_file, fixed_datetime  # pylint: disable=unused-argument
 ):
+    """Successful invoice creation without return_path_only returns the send_file response."""
     monkeypatch.setattr(
         reports_utils.database_queries,
         "get_table_for_invoice",
@@ -318,10 +317,10 @@ def test_create_daily_invoice_send_file(
     mock_send_file.assert_called_once()
 
 
-# Test: fallback to ~/Downloads when output dir invalid
 def test_create_daily_invoice_fallback_directory(
-    monkeypatch, tmp_path, mock_pdf, fixed_datetime
+    monkeypatch, tmp_path, mock_pdf, fixed_datetime  # pylint: disable=unused-argument
 ):
+    """An invalid output path falls back to ~/Downloads."""
     monkeypatch.setattr(
         reports_utils, "load_config", lambda: {"invoice_output_path": "/bad/path"}
     )
@@ -336,13 +335,13 @@ def test_create_daily_invoice_fallback_directory(
 
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
-    path, status = reports_utils.create_daily_invoice("R1", return_path_only=True)
+    path, _ = reports_utils.create_daily_invoice("R1", return_path_only=True)
 
     assert str(tmp_path / "Downloads") in path
 
 
-# Test: PDF generation failure
-def test_create_daily_invoice_generation_failure(monkeypatch, fake_config):
+def test_create_daily_invoice_generation_failure(monkeypatch, fake_config):  # pylint: disable=unused-argument
+    """An OSError during PDF generation returns a 500 error tuple."""
     monkeypatch.setattr(
         reports_utils.database_queries, "get_table_for_invoice", lambda *_: []
     )
@@ -363,19 +362,23 @@ def test_create_daily_invoice_generation_failure(monkeypatch, fake_config):
     assert "Error generating invoice" in result[0]
 
 
-# ===============================================================================
-# -------------------------------------------------------------------
-# Helpers
-# -------------------------------------------------------------------
+# ============================================================
+# add_sales_log helper stubs
+# ============================================================
 
 
-def success_check_error(result, message_holder=None, fallback=None, flash_prefix=None):
+def success_check_error(result, message_holder=None, fallback=None, flash_prefix=None):  # pylint: disable=unused-argument
+    """Stub that passes all results through unchanged."""
     return result
 
 
 def error_check_error(message="DB error"):
+    """Return a check_error stub that injects an error into message_holder."""
     def _inner(
-        result_or_callable, message_holder=None, fallback=None, flash_prefix=None
+        result_or_callable,  # pylint: disable=unused-argument
+        message_holder=None,
+        fallback=None,
+        flash_prefix=None,  # pylint: disable=unused-argument
     ):
         if message_holder is not None:
             message_holder["message"] = message
@@ -385,14 +388,13 @@ def error_check_error(message="DB error"):
     return _inner
 
 
-# -------------------------------------------------------------------
-# Tests
-# -------------------------------------------------------------------
+# ============================================================
+# add_sales_log tests
+# ============================================================
 
 
 def test_add_sales_log_success(monkeypatch):
-    """Happy path: everything succeeds"""
-
+    """Happy path: all DB calls succeed and the log is inserted correctly."""
     monkeypatch.setattr(reports_utils, "check_error", success_check_error)
 
     monkeypatch.setattr(
@@ -409,9 +411,8 @@ def test_add_sales_log_success(monkeypatch):
 
     inserted = {}
 
-    def mock_insert(db_path, data):
+    def mock_insert(_db_path, data):
         inserted.update(data)
-        return None
 
     monkeypatch.setattr(reports_utils.update_sale_log, "insert_sales_log", mock_insert)
 
@@ -432,9 +433,7 @@ def test_add_sales_log_success(monkeypatch):
 
 
 def test_add_sales_log_activated_book_error(monkeypatch):
-    """Failure while fetching activated book"""
-
-    # Force DB call to return an error tuple
+    """A DB error fetching the activated book is propagated as an error tuple."""
     monkeypatch.setattr(
         reports_utils.database_queries,
         "get_activated_book_is_at_ticketnumber",
@@ -458,15 +457,14 @@ def test_add_sales_log_activated_book_error(monkeypatch):
 
 
 def test_add_sales_log_ticket_name_error(monkeypatch):
-    """Failure while fetching ticket name"""
-
+    """A DB error fetching the ticket name is propagated as an error tuple."""
     calls = {"count": 0}
 
     def selective_check_error(
-        result, message_holder=None, fallback=None, flash_prefix=None
+        result, message_holder=None, fallback=None, flash_prefix=None  # pylint: disable=unused-argument
     ):
         calls["count"] += 1
-        if calls["count"] == 2:  # ticket_name call
+        if calls["count"] == 2:
             message_holder["message"] = "Ticket name lookup failed"
             message_holder["message_type"] = "error"
             return fallback
@@ -495,10 +493,12 @@ def test_add_sales_log_ticket_name_error(monkeypatch):
 
 
 def test_add_sales_log_insert_error(monkeypatch):
-    """Failure when inserting sales log"""
-
+    """A DB error during insert is propagated as an error tuple."""
     def insert_error(
-        result_or_callable, message_holder=None, fallback=None, flash_prefix=None
+        result_or_callable,  # pylint: disable=unused-argument
+        message_holder=None,
+        fallback=None,
+        flash_prefix=None,  # pylint: disable=unused-argument
     ):
         message_holder["message"] = "Insert failed"
         message_holder["message_type"] = "error"
@@ -526,19 +526,22 @@ def test_add_sales_log_insert_error(monkeypatch):
     assert msg_type == "error"
 
 
-# -----------------------------------------------------------------
-# Tests for do_submit_procedure
-# -----------------------------------------------------------------
-@pytest.fixture
-def app():
-    app = Flask(__name__)
-    app.secret_key = "test"
-    return app
+# ============================================================
+# do_submit_procedure fixtures
+# ============================================================
 
 
 @pytest.fixture
-def form_context(app):
-    """Provides a Flask request context with form data"""
+def app():  # pylint: disable=redefined-outer-name
+    """Return a minimal Flask app for request-context tests."""
+    flask_app = Flask(__name__)
+    flask_app.secret_key = "test"
+    return flask_app
+
+
+@pytest.fixture
+def form_context(app):  # pylint: disable=redefined-outer-name
+    """Provide a Flask request context pre-loaded with valid form data."""
     with app.test_request_context(
         method="POST",
         data={
@@ -552,11 +555,13 @@ def form_context(app):
         yield
 
 
-# Full success path
-def test_do_submit_procedure_success(
-    mocker,
-    form_context,
-):
+# ============================================================
+# do_submit_procedure tests
+# ============================================================
+
+
+def test_do_submit_procedure_success(mocker, form_context):  # pylint: disable=unused-argument
+    """All mocks succeed: the procedure returns a success message."""
     mock_check_error = mocker.patch("lottery_app.utils.reports.check_error")
     mock_db_queries = mocker.patch("lottery_app.utils.reports.database_queries")
     mock_update_sale_report = mocker.patch(
@@ -571,7 +576,6 @@ def test_do_submit_procedure_success(
     )
     mock_email_invoice = mocker.patch("lottery_app.utils.reports.email_invoice")
 
-    # Arrange
     mock_check_error.side_effect = lambda result, *_: result
 
     mock_db_queries.next_report_id.return_value = 10
@@ -580,10 +584,8 @@ def test_do_submit_procedure_success(
         {"BookID": 2},
     ]
 
-    # Act
     message, message_type = do_submit_procedure()
 
-    # Assert
     assert message == "SCANS SUBMITTED SUCCESSFULLY"
     assert message_type == "success"
 
@@ -600,26 +602,22 @@ def test_do_submit_procedure_success(
     mock_email_invoice.assert_called_once()
 
 
-# check_error reports an error
 @patch("lottery_app.utils.reports.email_invoice")
 @patch("lottery_app.utils.reports.database_queries.get_all_sold_books")
 @patch("lottery_app.utils.reports.check_error")
 def test_do_submit_procedure_check_error_failure(
     mock_check_error,
     mock_get_sold_books,
-    mock_email_invoice,
-    app,
-    client,
+    mock_email_invoice,  # pylint: disable=unused-argument
+    app,  # pylint: disable=redefined-outer-name
 ):
-    # Make check_error inject a DB error
-    def check_error_side_effect(result, msg_data, *args):
+    """check_error injecting an error causes the procedure to return that error."""
+    def check_error_side_effect(result, msg_data, *_args):
         msg_data["message"] = "DB ERROR"
         msg_data["message_type"] = "error"
         return result
 
     mock_check_error.side_effect = check_error_side_effect
-
-    # IMPORTANT: valid book data
     mock_get_sold_books.return_value = [{"BookID": 123}]
 
     with app.test_request_context(
@@ -638,12 +636,12 @@ def test_do_submit_procedure_check_error_failure(
     assert message_type == "error"
 
 
-# Invalid book data (not a dict)
 @patch("lottery_app.utils.reports.database_queries")
 @patch("lottery_app.utils.reports.check_error")
 def test_do_submit_procedure_invalid_book_data(
-    mock_check_error, mock_db_queries, form_context
+    mock_check_error, mock_db_queries, form_context  # pylint: disable=unused-argument
 ):
+    """A non-dict entry in get_all_sold_books returns an error tuple."""
     mock_check_error.side_effect = lambda result, *_: result
     mock_db_queries.next_report_id.return_value = 1
     mock_db_queries.get_all_sold_books.return_value = ["BAD_BOOK"]
@@ -654,12 +652,12 @@ def test_do_submit_procedure_invalid_book_data(
     assert message_type == "error"
 
 
-# ValueError handling
 @patch("lottery_app.utils.reports.database_queries")
 @patch("lottery_app.utils.reports.check_error")
 def test_do_submit_procedure_value_error(
-    mock_check_error, mock_db_queries, form_context
+    mock_check_error, mock_db_queries, form_context  # pylint: disable=unused-argument
 ):
+    """A ValueError from next_report_id is caught and returned as an error."""
     mock_db_queries.next_report_id.side_effect = ValueError("Invalid report id")
 
     message, message_type = do_submit_procedure()
@@ -668,12 +666,12 @@ def test_do_submit_procedure_value_error(
     assert message_type == "error"
 
 
-# FileNotFoundError handling
 @patch("lottery_app.utils.reports.create_daily_invoice")
 @patch("lottery_app.utils.reports.check_error")
 def test_do_submit_procedure_file_not_found(
-    mock_check_error, mock_create_invoice, form_context
+    mock_check_error, mock_create_invoice, form_context  # pylint: disable=unused-argument
 ):
+    """A FileNotFoundError during invoice creation returns an 'Invoice not found' error."""
     mock_check_error.side_effect = lambda result, *_: result
     mock_create_invoice.side_effect = FileNotFoundError("invoice.pdf")
 
@@ -683,12 +681,12 @@ def test_do_submit_procedure_file_not_found(
     assert message_type == "error"
 
 
-# Unexpected exception (TypeError / OSError)
 @patch("lottery_app.utils.reports.database_queries")
 @patch("lottery_app.utils.reports.check_error")
 def test_do_submit_procedure_unexpected_exception(
-    mock_check_error, mock_db_queries, form_context
+    mock_check_error, mock_db_queries, form_context  # pylint: disable=unused-argument
 ):
+    """An unexpected TypeError is caught and returned as an error with 'Unexpected error:'."""
     mock_check_error.side_effect = lambda result, *_: result
     mock_db_queries.next_report_id.side_effect = TypeError("Boom")
 
@@ -698,7 +696,6 @@ def test_do_submit_procedure_unexpected_exception(
     assert message_type == "error"
 
 
-# No sold books (edge case)
 @patch("lottery_app.utils.reports.database_queries")
 @patch("lottery_app.utils.reports.update_activated_books")
 @patch("lottery_app.utils.reports.check_error")
@@ -706,8 +703,9 @@ def test_do_submit_procedure_no_sold_books(
     mock_check_error,
     mock_update_activated_books,
     mock_db_queries,
-    form_context,
+    form_context,  # pylint: disable=unused-argument
 ):
+    """When there are no sold books the procedure still returns success."""
     mock_check_error.side_effect = lambda result, *_: result
     mock_db_queries.next_report_id.return_value = 5
     mock_db_queries.get_all_sold_books.return_value = []
