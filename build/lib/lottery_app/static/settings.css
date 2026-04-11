@@ -1,0 +1,196 @@
+/* --- Color Palette & Typography --- */
+:root {
+    --color-action-button: #1D4ED8; /* NEW: Darker Royal Blue for primary actions (Save) */
+    --color-action-hover: #1E40AF;  /* NEW: Slightly darker for hover */
+    --color-background: #fcfcfc;   /* Very Light Grey/Blue */
+    --color-input-selected: #90a9fc; /* Light Indigo for selected dropdown */
+    --color-nav-links-settings-buttons: #696d78; /* Bright Blue for Nav Links and Settings Buttons */
+    --color-nav-links-settings-buttons-hover: #383a40;
+    --color-text-dark: #1f2937;    /* Dark Text */
+    --color-success: #10b981;      /* Emerald Green */
+    --color-error: #ef4444;        /* Red */
+    --color-warning: #f59e0b;      /* Amber */
+    --border-radius-reg: 2px;
+}
+
+.settings_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    padding: 20px;
+    max-width: 800px; /* Limits the max width of the settings area */
+    margin: 30px auto;
+}
+
+/* --- Setting Card Styling --- */
+.setting-card {
+    background: var(--color-background);
+    padding: 30px;
+    border-radius: var(--border-radius-reg);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.setting-card h2 {
+    font-size: 1.5em;
+    color: var(--color-text-dark);
+    margin-bottom: 10px;
+}
+
+.setting-card p {
+    color: #6b7280;
+    margin-bottom: 25px;
+    font-size: 0.95em;
+}
+
+.setting-card:hover{
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* --- Form and Input Styling --- */
+.setting-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #374151;
+    text-align: left;
+    width: 100%; /* Important for alignment */
+    max-width: 300px; /* Matches input width */
+}
+
+select, input[type="text"] {
+    padding: 10px 15px;
+    font-size: 1em;
+    width: 100%;
+    max-width: 300px;
+    border-radius: var(--border-radius-reg);
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+select:focus, input[type="text"]:focus {
+    border-color: var(--color-action-button);
+    box-shadow: 0 0 0 3px #90a9fc;
+}
+
+/* --- Button Styling (General) --- */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: var(--color-action-button);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-reg);
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+    max-width: 300px;
+    transform: scale(1);
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+button:hover{
+    background-color: var(--color-action-hover);
+    transform:scale(1.1);
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.input-group input{
+    padding: 10px 15px;
+    font-size: 1em;
+    width: 100%;
+    max-width: 300px;
+    border-radius: var(--border-radius-reg);
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-group input:focus{
+    border-color: var(--color-action-button);
+    box-shadow: 0 0 0 3px #90a9fc;
+}
+
+/* --- Toggle Button Styling (Specific) --- */
+.toggle-button {
+    margin-top: 10px;
+}
+
+/* Style when polling is currently DISABLED (shows 'Enable' button - Primary Blue) */
+.enable-btn-style {
+    background-color: var(--color-action-button); 
+}
+.enable-btn-style:hover {
+    background-color: var(--color-action-hover);
+}
+
+/* Style when polling is currently ENABLED (shows 'Disable' button - Red) */
+.disable-btn-style {
+    background-color: #ef4444; 
+}
+.disable-btn-style:hover {
+    background-color: #dc2626;
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px; /* Space for the eye button */
+}
+
+.toggle-password {
+    display: flex;
+    flex-direction: row-reverse;
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 1em;
+    width: fit-content;
+    padding: unset;
+    transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+    background-color: unset;
+    color: var(--color-action-button);
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 600px) {
+    .settings-container {
+        padding: 10px;
+        margin-top: 20px;
+    }
+    .setting-card {
+        padding: 20px;
+    }
+    .setting-form {
+        width: 100%;
+    }
+    select, input[type="text"], button {
+        max-width: 100%; /* Full width on smaller screens */
+    }
+}

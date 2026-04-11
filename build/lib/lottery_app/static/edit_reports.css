@@ -1,0 +1,210 @@
+/* --- Color Palette & Typography (Copied for reference, but use variables) --- */
+:root {
+    /* ... (Existing color variables) ... */
+    --color-action-button: #1D4ED8; /* Darker Royal Blue for primary actions (Save) */
+    --color-action-hover: #1E40AF;  /* Slightly darker for hover */
+    --color-background: #f5f7fa;   /* Very Light Grey/Blue */
+    --color-nav-links-settings-buttons: #696d78;
+    --color-nav-links-settings-buttons-hover: #383a40;
+    --color-text-dark: #1f2937;
+    --color-success: #10b981;
+    --color-error: #ef4444;
+    --color-warning: #f59e0b;
+    --border-radius-reg: 2px; /* Slightly increased for softer look */
+}
+
+/* --- General Container --- */
+.edit-reports-container {
+    padding: 0 25px; /* Add some horizontal padding */
+}
+
+/* --- Filter & Table Section (Unified Look) --- */
+.filter-section, .table-section {
+    background: #ffffffb5;
+    padding: 20px 25px;
+    border-radius: 8px; /* Softer corners */
+    /*box-shadow: 0 4px 12px rgba(0,0,0,0.06);*/ /* More pronounced, soft shadow */
+    margin-bottom: 25px;
+    border: 1px solid #e5e7eb; /* Subtle border for definition */
+}
+
+.filter-section {
+    padding-bottom: 15px; /* Reduce bottom padding for a tighter fit with the table */
+}
+
+.filter-section h2, .table-section h2 {
+    font-size: 1.4rem; /* Slightly larger title */
+    margin-bottom: 15px;
+    color: var(--color-text-dark);
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 10px;
+}
+
+.filter-form {
+    display: flex;
+    flex-direction: row; /* Change to row for better horizontal layout */
+    align-items: flex-end; /* Align items to the bottom */
+    gap: 20px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 150px; /* Ensure date/time fields have enough space */
+}
+
+.filter-group label {
+    font-weight: 600; /* Bolder label */
+    font-size: 0.85rem;
+    color: var(--color-nav-links-settings-buttons); /* Grey color for secondary text */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-group input {
+    padding: 9px 12px; /* Slightly larger padding */
+    border-radius: var(--border-radius-reg);
+    border: 1px solid #d1d5db;
+    font-size: 0.95rem;
+    background: white; /* Clearer background for input fields */
+    color: var(--color-text-dark);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-group input:focus {
+    border-color: var(--color-action-button);
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2); /* Subtle focus ring */
+    outline: none;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* --- Buttons (Redefined for Consistency with Action Variables) --- */
+.primary-btn, .secondary-btn, .edit-btn, .filter-buttons button, .filter-buttons a button {
+    border: none;
+    border-radius: var(--border-radius-reg);
+    padding: 10px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transform: scale(1);
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    white-space: nowrap; /* Prevent button text from wrapping */
+}
+
+/* Primary Action Button (Apply Filters/Edit) */
+.primary-btn, .filter-buttons button[type="submit"], .edit-btn {
+    background: var(--color-action-button);
+    transform: scale(1);
+    color: white;
+}
+
+.primary-btn:hover, .filter-buttons button[type="submit"]:hover, .edit-btn:hover {
+    background: var(--color-action-hover);
+    transform: scale(1.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: transform 0.1s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Secondary Button (Clear Filters) */
+.secondary-btn, .filter-buttons button[type="button"] {
+    background: #e5e7eb;
+    transform: scale(1);
+    color: #374151;
+}
+
+.secondary-btn:hover, .filter-buttons button[type="button"]:hover {
+    background: #d1d5db;
+    transform: scale(1.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: transform 0.1s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Specific Edit Button in Table (Uses primary style now) */
+.edit-btn {
+    padding: 6px 12px; /* Smaller size for table */
+    font-size: 0.85rem;
+}
+
+
+/* --- Table --- */
+.table-wrapper {
+    overflow-x: auto;
+    margin-top: 15px; /* Space between filter/table title and the table */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0);
+    /*box-shadow: 0 4px 10px rgba(0,0,0,0.05);*/
+}
+
+th{
+    background-color: #eef2ff; /* soft indigo */
+    color: #374151;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 13px;
+    padding: 12px 10px;
+}
+
+th, td {
+    text-align: center;
+    padding: 12px;
+    /*border: 1px solid #ddd;*/
+}
+
+/*Delete and Deactivate option CSS*/
+tr .x_button_container{
+    box-shadow: none;
+    position: relative;
+    padding: 5px;
+    background-color: rgba(249, 250, 251, 0);
+    border-color: rgba(249, 250, 251, 0);
+    width: 0;
+    height: 0;
+    overflow: visible; /* allow contents to escape bounds */
+}
+
+th {
+    background-color: rgb(230, 230, 230);
+}
+
+tr.row{
+    background-color: rgb(243, 244, 246); 
+    font-weight: bold;
+}
+
+tr.row:hover{
+  background-color: #f1f5ff;
+  transition: background-color 0.2s ease;
+}
+
+tr.row.scanned {
+    background-color: #10b953a7;
+}
+
+/* Ensure the Book Sold Out button aligns vertically with table text */
+td form {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Centers the button vertically */
+    margin: 0;
+    padding: 0;
+}
+
+.empty-msg {
+    text-align: center;
+    color: #6b7280;
+    padding: 20px;
+    font-style: italic;
+}
