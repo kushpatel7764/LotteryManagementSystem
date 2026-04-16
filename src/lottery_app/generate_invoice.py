@@ -5,10 +5,13 @@ This module provides functions to create invoices, populate them with client
 and product data, and export them in desired formats (e.g., PDF or Excel).
 """
 
+import logging
 from datetime import datetime
 
 from reportlab.lib.pagesizes import LETTER
 from reportlab.pdfgen import canvas
+
+logger = logging.getLogger(__name__)
 
 
 def generate_lottery_invoice_pdf(
@@ -90,7 +93,7 @@ def _draw_ticket_table(c, y, invoice_log):
             c.drawString(520, y, str(log["Sold"]))
             y -= 18
     else:
-        print("Error: Invoice log is None")
+        logger.error("Invoice log is None; skipping PDF generation")
 
     return y
 

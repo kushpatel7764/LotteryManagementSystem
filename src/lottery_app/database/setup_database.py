@@ -2,9 +2,12 @@
 Database setup module for the lottery database system.
 """
 
+import logging
 import os
 
 from werkzeug.security import generate_password_hash
+
+logger = logging.getLogger(__name__)
 
 from lottery_app.decorators import get_db_cursor
 from lottery_app.utils.config import sql_file_path
@@ -32,7 +35,7 @@ def setup_database_schema_with_sql_file(cursor):
             sql_script = file.read()
             cursor.executescript(sql_script)
     except Exception as e:
-        print(f"Error setting up database schema: {e}")
+        logger.error("Error setting up database schema: %s", e)
         raise
 
 def create_default_user(cursor):
@@ -67,7 +70,7 @@ def initialize_database(db_path):
             return
 
         if not cursor.fetchall():
-            print("Creating new database and schema...")
+            logger.debug("Creating new database and schema...")
             # Pass the path through
             setup_database_schema_with_sql_file(cursor)
             create_default_user(cursor)

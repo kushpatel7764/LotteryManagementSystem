@@ -3,8 +3,12 @@ Utility module for handling daily sales reports, invoice creation,
 and sales log updates in the lottery database system.
 """
 
+import logging
 import os
+import sqlite3
 import traceback
+
+logger = logging.getLogger(__name__)
 from datetime import datetime
 from pathlib import Path
 
@@ -13,7 +17,6 @@ from flask import request, send_file
 from lottery_app import generate_invoice
 from lottery_app.database import database_queries
 from lottery_app.database import update_sale_log, update_sale_report
-from lottery_app.database import update_ticket_timeline, update_activated_books
 from lottery_app.email_invoice import email_invoice
 from lottery_app.utils.config import db_path, load_config
 from lottery_app.utils.error_hanlder import check_error
@@ -109,7 +112,7 @@ def create_daily_invoice(report_id, return_path_only=False):
         return send_file(full_path, as_attachment=True), "success"
     except (ValueError, TypeError, OSError) as e:
         # Log or handle error appropriately
-        print(f"Failed to generate/send invoice: {e}")
+        logger.error("Failed to generate/send invoice: %s", e)
         return f"Error generating invoice: {e}", 500
 
 
@@ -159,25 +162,88 @@ def add_sales_log(book_id, lastest_ticket_number, game_number):
     return msg_data.get("message", ""), msg_data.get("message_type", "")
 
 
+def _execute_submit_writes(cursor, daily_totals, next_report_id):
+    """
+    Execute every database write for a day's submission against a single cursor.
+
+    This function must be called inside an open transaction.  The caller is
+    responsible for commit on success and rollback on any exception so that
+    all writes succeed together or none of them do.
+
+    Steps (in order):
+      1. Insert the daily SaleReport row.
+      2. Stamp all Pending SalesLog rows with the real ReportID.
+      3. Stamp all Pending TicketTimeline rows with the real ReportID.
+      4. Read sold-out books (must happen after step 2 so the JOIN sees the
+         newly stamped rows on this same connection).
+      5. Remove sold-out books from ActivatedBooks.
+      6. Advance isAtTicketNumber to today's closing numbers.
+      7. Clear countingTicketNumber for the next day.
+    """
+    # 1. Insert daily report totals
+    update_sale_report.add_daily_totals(cursor, daily_totals)
+
+    # 2. Stamp Pending SalesLog rows
+    cursor.execute(
+        "UPDATE SalesLog SET ReportID = ? WHERE ReportID = 'Pending'",
+        (next_report_id,),
+    )
+
+    # 3. Stamp Pending TicketTimeline rows
+    cursor.execute(
+        "UPDATE TicketTimeLine SET ReportID = ? WHERE ReportID = 'Pending'",
+        (next_report_id,),
+    )
+
+    # 4. Find sold-out books — readable here because steps 2-3 already ran on
+    #    this connection; SQLite surfaces a connection's own uncommitted writes
+    #    to subsequent reads on the same connection.
+    cursor.execute(
+        """
+        SELECT SalesLog.ActiveBookID
+        FROM SalesLog
+        JOIN Books ON SalesLog.ActiveBookID = Books.BookID
+        WHERE SalesLog.ReportID = ? AND Books.Is_Sold = 1
+        """,
+        (next_report_id,),
+    )
+    sold_book_ids = [row[0] for row in cursor.fetchall()]
+
+    # 5. Deactivate sold-out books
+    for book_id in sold_book_ids:
+        cursor.execute(
+            "DELETE FROM ActivatedBooks WHERE ActiveBookID = ?",
+            (book_id,),
+        )
+
+    # 6. Advance open-ticket marker to today's closing number
+    cursor.execute(
+        "UPDATE ActivatedBooks SET isAtTicketNumber = countingTicketNumber"
+    )
+
+    # 7. Clear counting numbers ready for tomorrow
+    cursor.execute(
+        "UPDATE ActivatedBooks SET countingTicketNumber = NULL"
+    )
+
+
 def do_submit_procedure():
     """
-    Handles the submission procedure for daily lottery sales reporting.
-    This includes:
-      - Inserting daily totals
-      - Updating pending logs
-      - Generating invoice
-      - Deactivating sold books
-      - Updating ticket numbers
+    Submit the day's lottery sales in three explicit phases:
+
+    Phase 1 — read-only queries (no writes, no transaction).
+    Phase 2 — atomic database transaction: all writes succeed or none do.
+    Phase 3 — post-commit side effects: invoice PDF (fatal), email (non-fatal).
 
     Returns:
         tuple: (message, message_type)
     """
-    msg_data = {"message": "", "message_type": ""}
     try:
-        next_report_id = check_error(
-            database_queries.next_report_id(db_path), msg_data
-        )  # STRING
-        # Get form values
+        # --- Phase 1: read-only setup ---
+        next_report_id = database_queries.next_report_id(db_path)
+        if isinstance(next_report_id, tuple):
+            return next_report_id  # propagate ("error message", "error")
+
         daily_totals = {
             "ReportID": next_report_id,
             "instant_sold": request.form.get("instant_sold"),
@@ -187,60 +253,42 @@ def do_submit_procedure():
             "cash_on_hand": request.form.get("cash_on_hand"),
         }
 
-        # Insert the daily_totals in the Daily_Report Database.
-        check_error(
-            update_sale_report.insert_daily_totals(db_path, daily_totals), msg_data
-        )
-        # Update "Pending" SalesLog ReportID
-        check_error(
-            update_sale_log.update_pending_sales_log_report_id(db_path, next_report_id),
-            msg_data,
-        )
-        # Update "Pending" TicketTimeLine ReportID
-        check_error(
-            update_ticket_timeline.update_pending_ticket_timeline_report_id(
-                db_path, next_report_id
-            ),
-            msg_data,
-        )
+        # --- Phase 2: atomic transaction ---
+        # A single connection owns every write. On any exception the entire
+        # day's submission is rolled back — no partial state is committed.
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        try:
+            _execute_submit_writes(conn.cursor(), daily_totals, next_report_id)
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
 
-        # Create a Invoice
-        check_error(create_daily_invoice(next_report_id), msg_data)
+        # --- Phase 3: post-commit side effects ---
+        # Invoice generation reads committed data so it must happen after commit.
+        invoice_result = create_daily_invoice(next_report_id)
+        if isinstance(invoice_result, tuple) and invoice_result[1] == "error":
+            return invoice_result[0], invoice_result[1]
 
-        # Remove sold out books from current ActivatedBooks table using there
-        # book ids
-        sold_out_books = check_error(
-            database_queries.get_all_sold_books(db_path, next_report_id), msg_data
-        )
-        for book in sold_out_books:
-            # Ensure `book` is a dict, fallback to empty dict if not
-            if not isinstance(book, dict):
-                return "ERROR: Invalid book data", "error"
-            book_id = book.get("BookID")  # pylint: disable=no-member
-            check_error(
-                update_activated_books.deactivate_book(db_path, book_id), msg_data
-            )
-        # Update Database
-        # isAtTicketNumber in ActiviatedBooks needs to be set to current numbers from today's scans.
-        # countingTicketNumber needs to be set to None since nothing is being
-        # counted after submit.
-        check_error(
-            update_activated_books.update_is_at_ticketnumbers(db_path), msg_data
-        )
-        check_error(
-            update_activated_books.clear_counting_ticket_numbers(db_path), msg_data
-        )
+        # Email is best-effort: a network failure must not surface as a failed
+        # submission when all the database work already committed successfully.
         now = datetime.now()
         file_name = f"Invoice#{next_report_id}-{now.strftime('%m-%d-%Y')}.pdf"
-        email_invoice(filename=file_name)
+        try:
+            email_invoice(filename=file_name)
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Failed to email invoice: %s", e)
 
-        if msg_data.get("message_type") == "error":
-            return msg_data["message"], msg_data["message_type"]
         return "SCANS SUBMITTED SUCCESSFULLY", "success"
+
+    except sqlite3.Error as e:
+        traceback.print_exc()
+        return f"Database error during submission: {str(e)}", "error"
     except ValueError as ve:
         return str(ve), "error"
-    except FileNotFoundError as fnf:
-        return f"Invoice not found: {str(fnf)}", "error"
     except (TypeError, OSError) as e:
         traceback.print_exc()
         return f"Unexpected error: {str(e)}", "error"

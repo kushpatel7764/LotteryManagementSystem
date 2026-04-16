@@ -1,20 +1,52 @@
-# Python
+# ── Secrets & environment ──────────────────────────────────────────────────────
+.env
+*.env
+
+# ── Python ─────────────────────────────────────────────────────────────────────
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyd
+*.pyo
 
-# Virtual environment
+# ── Virtual environment ─────────────────────────────────────────────────────────
 .venv/
+venv/
+env/
 
-# Mac
-.DS_Store
-
-# VS Code
-.vscode/
-
-# Database
-*.db
-
-# PyInstaller
+# ── Distribution / packaging ────────────────────────────────────────────────────
 dist/
 build/
+*.egg-info/
+*.egg
+MANIFEST
+
+# ── PyInstaller ─────────────────────────────────────────────────────────────────
 *.spec
+
+# ── Database files ──────────────────────────────────────────────────────────────
+*.db
+*.db.enc
+*.tmp
+
+# ── Flask instance folder (holds runtime DB, keys) ──────────────────────────────
+src/lottery_app/instance_folder/
+
+# ── Testing & coverage ──────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ── Logs ────────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── OS metadata ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editors & IDEs ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo

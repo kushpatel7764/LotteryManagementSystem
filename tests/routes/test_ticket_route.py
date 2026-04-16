@@ -1,4 +1,5 @@
 """Tests for ticket scanning, undo, book sold-out, and submit routes."""
+import sqlite3
 from unittest.mock import patch
 
 
@@ -171,7 +172,7 @@ def test_undo_scan_success(  # pylint: disable=too-many-arguments,too-many-posit
 def test_undo_scan_error(mock_delete, mock_flash, client, auth):
     """An exception during undo flashes an unexpected-error message."""
     auth.login()
-    mock_delete.side_effect = Exception("boom")
+    mock_delete.side_effect = sqlite3.OperationalError("boom")
 
     resp = client.post("/undo_scan", data={"book_id": "B1"}, follow_redirects=True)
     assert resp.status_code == 200

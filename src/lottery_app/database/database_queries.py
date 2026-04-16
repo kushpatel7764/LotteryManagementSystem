@@ -4,10 +4,13 @@ and SaleReport tables. Provides standardized database operations and error handl
 for the lottery system.
 """
 
+import logging
 import sqlite3
 
 from lottery_app.database import setup_database
 from lottery_app.decorators import get_db_cursor
+
+logger = logging.getLogger(__name__)
 
 
 def get_books(db):
@@ -640,7 +643,7 @@ def next_report_id(db):
                 "SELECT ReportID FROM SaleReport ORDER BY CAST(ReportID AS INTEGER) DESC LIMIT 1"
             )
             row = cursor.fetchone()
-            print(row)
+            logger.debug("next_report_id row: %s", row)
             return str(int(row[0]) + 1) if row else "1"
     except sqlite3.Error as e:
         return f"DATABASE ERROR IN next_report_ID: {e}", "error"

@@ -7,7 +7,7 @@ backed by a SQLite database via Flask-Login.
 
 import sqlite3
 
-from flask import flash
+from flask import current_app, flash
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -92,7 +92,8 @@ class User(UserMixin):
                 "error",
             )
         except sqlite3.Error as e:
-            flash(f"Database error creating user: {e}", "error")
+            current_app.logger.error("DB error creating user %r: %s", username, e)
+            flash("An error occurred. Please try again.", "error")
 
     @staticmethod
     def delete(username):
@@ -116,9 +117,11 @@ class User(UserMixin):
                     )
                     flash(f"User '{username}' was deleted successfully.", "success")
         except sqlite3.IntegrityError as e:
-            flash(f"SQL IntegrityError occurred while deleting user: {e}", "error")
+            current_app.logger.error("DB integrity error deleting user %r: %s", username, e)
+            flash("An error occurred. Please try again.", "error")
         except sqlite3.Error as e:
-            flash(f"Database error deleting user: {e}", "error")
+            current_app.logger.error("DB error deleting user %r: %s", username, e)
+            flash("An error occurred. Please try again.", "error")
 
     @staticmethod
     def update_password(user_id, new_password):

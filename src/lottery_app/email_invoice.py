@@ -5,11 +5,14 @@ This module loads configuration settings, attaches the generated PDF invoice, an
 to the configured business email using Gmail's SMTP over SSL.
 """
 
+import logging
 import os
 import smtplib
 import ssl
 from datetime import datetime
 from email.message import EmailMessage
+
+logger = logging.getLogger(__name__)
 from lottery_app.utils.config import load_config
 
 
@@ -24,8 +27,8 @@ def email_invoice(filename):
         None
     """
     # CONFIGURATION
-    email_sender = "kushpatelrp1234@gmail.com"
-    email_password = "kuon pyps cxqk agft"  # Use App Password if 2FA is enabled
+    email_sender = os.environ["GMAIL_SENDER"]
+    email_password = os.environ["GMAIL_APP_PASSWORD"]
     email_receiver = load_config()["business_email"]
     folder_path = load_config()["invoice_output_path"]
 
@@ -53,4 +56,4 @@ def email_invoice(filename):
         smtp.login(email_sender, email_password)
         smtp.send_message(msg)
 
-    print("Email sent successfully.")
+    logger.debug("Invoice email sent successfully.")

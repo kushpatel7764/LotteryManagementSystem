@@ -5,6 +5,8 @@ download locations, and application configuration settings.
 
 import json
 import os
+import queue
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from flask import flash
 
@@ -27,7 +29,7 @@ DEFAULT_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
 CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.json"
 )
-BARCODE_STACK = []
+BARCODE_QUEUE: queue.Queue = queue.Queue()
 
 
 def load_config():
@@ -103,19 +105,36 @@ def update_business_info(name, value):
         flash(f"{name} is updated to {value} successfully.", "business-profile_success")
 
 
+_DEFAULT_TIMEZONE = "America/New_York"
+
+
+def get_timezone() -> str:
+    """
+    Return the configured IANA timezone string.
+
+    Falls back to 'America/New_York' if the config key is missing or contains
+    an unrecognised timezone name so the app never crashes on a bad value.
+    """
+    tz_str = load_config().get("timezone", _DEFAULT_TIMEZONE)
+    try:
+        ZoneInfo(tz_str)  # validate — raises ZoneInfoNotFoundError if invalid
+        return tz_str
+    except ZoneInfoNotFoundError:
+        return _DEFAULT_TIMEZONE
+
+
 def update_should_poll(set_val):
     """
-    Updates a specific business information field in the configuration file.
+    Persists the barcode-scanner polling toggle.
 
     Args:
-        name (str): The configuration field to update.
-        value (str): The new value for the field.
+        set_val (str): Any string — canonicalized to "true" or "false" before
+            writing so the config file always contains a known value.
     """
-    # Name of the business info you want to change in the config file
-    # Value is the value it should be changed to
     if not isinstance(set_val, str):
         raise TypeError("should_poll value must be a string")
+    canonical = "true" if set_val.strip().lower() == "true" else "false"
     config = load_config()
-    config["should_poll"] = set_val
+    config["should_poll"] = canonical
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)

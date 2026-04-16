@@ -37,6 +37,7 @@
 <div class="login-container">
 
     <form method="POST" action="{{ url_for('security.login') }}" class="login-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <h2>Welcome Back</h2>
         <p class="subtitle">Sign in to continue</p>
 

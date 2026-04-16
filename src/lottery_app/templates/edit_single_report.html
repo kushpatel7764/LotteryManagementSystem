@@ -206,7 +206,7 @@
 
     <h2>Report Totals</h2>
     <form method="POST" action="/update_sale_report/{{report_id}}" class="daily-totals-form">
-        
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-group">
             <label for="instant_sold">Instant Tickets Sold</label>
             <div class="currency-input-wrapper">

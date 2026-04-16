@@ -66,6 +66,7 @@
         <!-- Section 1: General Info -->
         <section id="general-info">
             <form id="generalInfoForm" method="POST" action="/business_profile">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <h2>General Information</h2>
                 <label>Business Name: <input type="text" name="BusinessName" value="{{ business_Info['Name'] }}"></label>
                 <label>Address: <input type="text" name="BusinessAddress" value="{{ business_Info['Address'] }}"></label>
@@ -92,6 +93,7 @@
                         <div class="user-actions">
                             {% if user.username != session['username'] %}
                             <form class="inline-form" method="POST" action="{{ url_for('security.delete_user') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="username" value="{{ user.username }}">
                                 <button type="submit" class="btn-action btn-delete">Delete</button>
                             </form>
@@ -107,6 +109,7 @@
 
             <div class="add-user-container" id="add-user-form" style="display:none;">
                 <form method="POST" action="{{ url_for('security.signup') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <h2>Add New User</h2>
                     <div class="form-group">
                         <label for="username">Username</label>

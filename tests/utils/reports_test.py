@@ -696,6 +696,7 @@ def test_do_submit_procedure_unexpected_exception(
     assert message_type == "error"
 
 
+@patch("lottery_app.utils.reports.email_invoice")
 @patch("lottery_app.utils.reports.database_queries")
 @patch("lottery_app.utils.reports.update_activated_books")
 @patch("lottery_app.utils.reports.check_error")
@@ -703,6 +704,7 @@ def test_do_submit_procedure_no_sold_books(
     mock_check_error,
     mock_update_activated_books,
     mock_db_queries,
+    mock_email_invoice,  # pylint: disable=unused-argument
     form_context,  # pylint: disable=unused-argument
 ):
     """When there are no sold books the procedure still returns success."""

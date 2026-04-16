@@ -18,6 +18,7 @@ from lottery_app.database import (
     update_ticket_timeline,
 )
 from lottery_app.utc_to_local_time import convert_utc_to_local
+from lottery_app.utils.config import get_timezone
 from lottery_app.utils.config import db_path, load_config
 from lottery_app.utils.error_hanlder import check_error
 from lottery_app.utils.reports import (
@@ -80,10 +81,10 @@ def edit_reports():
                 raise ValueError("Invalid report data format")
             utc_date = datetime.strptime(report.get("ReportDate"), "%Y-%m-%d").date()
             utc_time = datetime.strptime(report.get("ReportTime"), "%H:%M:%S").time()
-            local_date = convert_utc_to_local(utc_date, "America/New_York").strftime(
+            local_date = convert_utc_to_local(utc_date, get_timezone()).strftime(
                 "%Y-%m-%d"
             )
-            local_time = convert_utc_to_local(utc_time, "America/New_York").strftime(
+            local_time = convert_utc_to_local(utc_time, get_timezone()).strftime(
                 "%I:%M %p"
             )
             # Filter logic
@@ -117,7 +118,7 @@ def edit_single_report(report_id):
     Also calculates instant tickets sold for display.
     """
     c_user_role = User.get_by_id(current_user.id).role
-    if c_user_role != "admin":  # or current_user.role != 'admin'
+    if c_user_role not in ("admin", "default_admin"): # or current_user.role != 'admin'
         flash("Unauthorized access.", "edit-reports_error")
         return redirect("/edit_reports")
 

@@ -5,10 +5,14 @@ This module provides routes for managing books, including listing,
 adding, activating, deactivating, and deleting books in the system.
 """
 
+import logging
 import sqlite3
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for, flash
+
+logger = logging.getLogger(__name__)
 from flask_login import login_required
 
+from lottery_app.decorators import admin_required
 from lottery_app.database import database_queries
 from lottery_app.database import update_books, update_activated_books
 from lottery_app.utils.books import activate_book_procedure, add_book_procedure
@@ -88,6 +92,7 @@ def books_managment():
 
 @books_bp.route("/delete_book", methods=["POST", "GET"])
 @login_required
+@admin_required
 def delete_book():
     """
     Deletes a book after deactivating it.
@@ -101,7 +106,7 @@ def delete_book():
         if not data or "bookID" not in data:
             raise ValueError("Missing 'bookID' in request data.")
         book_id = data.get("bookID")
-        print(f"Deleting: {book_id}")
+        logger.debug("Deleting book: %s", book_id)
         # Deactivate first, then delete
         # Safely run deactivation and deletion with error checking
         check_error(

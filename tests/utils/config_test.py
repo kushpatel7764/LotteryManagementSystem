@@ -16,37 +16,40 @@ from lottery_app.utils.config import (
 # ============================================================
 # update_ticket_order tests
 # ============================================================
+# MODIFIED: update_ticket_order() requires a *string* (isinstance check on str).
+# The original tests incorrectly passed lists, which would raise TypeError.
+# Tests have been corrected to use string values ("ascending" / "descending").
 def test_update_ticket_order_updates_and_flashes(update_env, json_assert):
     """Changing ticket order writes the new value and flashes a success message."""
-    initial = {"ticket_order": ["A", "B"]}
+    initial = {"ticket_order": "ascending"}
     _, flash_mock, m = update_env(initial)
 
-    update_ticket_order(["C", "D"])
+    update_ticket_order("descending")
 
-    json_assert(m, {"ticket_order": ["C", "D"]})
+    json_assert(m, {"ticket_order": "descending"})
     flash_mock.assert_called_once_with(
-        "Ticket Order Updated to ['C', 'D'] sucessfully.", "settings_success"
+        "Ticket Order Updated to descending sucessfully.", "settings_success"
     )
 
 
 def test_update_ticket_order_no_change_no_flash(update_env, json_assert):
     """Setting the same ticket order writes the file but does not flash."""
-    initial = {"ticket_order": ["X", "Y"]}
+    initial = {"ticket_order": "ascending"}
     _, flash_mock, m = update_env(initial)
 
-    update_ticket_order(["X", "Y"])
+    update_ticket_order("ascending")
 
-    json_assert(m, {"ticket_order": ["X", "Y"]})
+    json_assert(m, {"ticket_order": "ascending"})
     flash_mock.assert_not_called()
 
 
 def test_update_ticket_order_invalid_type(update_env):
-    """Passing a non-list raises TypeError."""
-    initial = {"ticket_order": ["A"]}
+    """Passing a non-string (e.g. a list) raises TypeError."""
+    initial = {"ticket_order": "ascending"}
     update_env(initial)
 
     with pytest.raises(TypeError):
-        update_ticket_order("not a list")
+        update_ticket_order(["ascending", "descending"])  # list is not a string
 
 
 # ============================================================

@@ -5,9 +5,13 @@ Provides helper functions to encrypt and decrypt the SQLite database file
 at application startup and shutdown.
 """
 
+import logging
 import os
+import tempfile
 
 from cryptography.fernet import Fernet
+
+logger = logging.getLogger(__name__)
 
 
 def get_cipher():
@@ -51,7 +55,7 @@ def encrypt_file(input_path, output_path=None):
         return
 
     if os.path.getsize(input_path) == 0:
-        print("DB is empty. Skipping encryption.")
+        logger.debug("DB is empty. Skipping encryption.")
         return
 
     cipher = get_cipher()
@@ -63,10 +67,16 @@ def encrypt_file(input_path, output_path=None):
         data = f.read()
     encrypted = cipher.encrypt(data)
 
-    with open(output_path, "wb") as f:
-        f.write(encrypted)
+    # Write to a temporary file in the same directory, then atomically
+    # replace the destination.  os.replace() is atomic on POSIX (same
+    # filesystem), so a crash mid-write never leaves a corrupt .enc file.
+    enc_dir = os.path.dirname(output_path) or "."
+    with tempfile.NamedTemporaryFile(dir=enc_dir, delete=False, suffix=".tmp") as tmp:
+        tmp.write(encrypted)
+        tmp_path = tmp.name
+    os.replace(tmp_path, output_path)
 
-    print("Encrypted file created:", os.path.exists(output_path))
+    logger.debug("Encrypted file created: %s", output_path)
 
 
 def decrypt_file(input_path, output_path=None):
@@ -110,7 +120,7 @@ def decrypt_file(input_path, output_path=None):
 
     # Safety: empty .enc file → skip (likely corruption or first run)
     if len(encrypted_bytes) == 0:
-        print("Encrypted file is empty — skipping decryption.")
+        logger.warning("Encrypted file is empty — skipping decryption.")
         return
 
     decrypted = cipher.decrypt(encrypted_bytes)
@@ -118,4 +128,4 @@ def decrypt_file(input_path, output_path=None):
     with open(output_path, "wb") as f:
         f.write(decrypted)
 
-    print("Decrypted file created:", os.path.exists(output_path))
+    logger.debug("Decrypted file created: %s", output_path)

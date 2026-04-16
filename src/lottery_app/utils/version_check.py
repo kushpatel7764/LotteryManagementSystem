@@ -11,6 +11,7 @@ can download and replace the executable manually.
 """
 
 import sys
+import threading
 import webbrowser
 
 import requests
@@ -20,8 +21,8 @@ from packaging import version
 from lottery_app.utils.config import __version__
 
 # Replace with your actual GitHub username and repository name
-GITHUB_USER = "your-github-username"
-GITHUB_REPO = "your-repo-name"
+GITHUB_USER = "kushpatel7764"
+GITHUB_REPO = "LotteryManagementSystem"
 
 GITHUB_API_URL = (
     f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/releases/latest"
@@ -73,6 +74,80 @@ def get_latest_github_version():
 def open_releases_page():
     """Open the GitHub releases page in the user's default web browser."""
     webbrowser.open(GITHUB_RELEASES_URL)
+
+
+def start_version_check(app):
+    """Fetch the latest GitHub release in a background daemon thread.
+
+    Stores the outcome in ``app.config["_version_info"]`` as either a
+    ``(version_str, release_url)`` tuple on success, or ``None`` on any error.
+    Call :func:`notify_if_update_available` from a ``before_request`` hook to
+    flash the result once the check has completed.
+
+    Args:
+        app (Flask): The active Flask application instance, used for logging.
+    """
+
+    def _worker():
+        try:
+            latest, release_url = get_latest_github_version()
+            app.config["_version_info"] = (latest, release_url)
+        except requests.RequestException as e:
+            app.logger.warning("Version check failed (network): %s", e)
+            app.config["_version_info"] = None
+        except (KeyError, ValueError) as e:
+            app.logger.warning("Version check failed (parse error): %s", e)
+            app.config["_version_info"] = None
+
+    threading.Thread(target=_worker, daemon=True, name="version-check").start()
+
+
+def notify_if_update_available(app):
+    """Flash an update notice the first time a request arrives after the
+    background version check (started by :func:`start_version_check`) has
+    completed.
+
+    Safe to call on every request — it does nothing once the notification has
+    been delivered or if the background check is still in progress.
+
+    Args:
+        app (Flask): The active Flask application instance.
+    """
+    if app.config.get("_version_notified"):
+        return
+    if "_version_info" not in app.config:
+        # Background check still running — try again on the next request.
+        return
+
+    app.config["_version_notified"] = True
+    info = app.config["_version_info"]
+    if info is None:
+        # Check failed; warning already logged in the worker thread.
+        return
+
+    latest, release_url = info
+    if version.parse(latest) > version.parse(__version__):
+        app.logger.info(
+            "New version available: %s (running %s). Release: %s",
+            latest,
+            __version__,
+            release_url,
+        )
+        if is_bundled():
+            flash(
+                f"A new version ({latest}) is available! "
+                "Opening the download page in your browser...",
+                "warning",
+            )
+            open_releases_page()
+        else:
+            flash(
+                f"A new version ({latest}) is available. "
+                f"Download it from: {release_url}",
+                "warning",
+            )
+    else:
+        app.logger.info("Application is up to date (version %s).", __version__)
 
 
 def check_for_updates(app):

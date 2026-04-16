@@ -118,7 +118,8 @@
                 fetch('/deactivate_book', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
                     },
                     body: JSON.stringify({ bookID: bookID })
                 })
@@ -135,7 +136,8 @@
                     fetch('/delete_book', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
                         },
                         body: JSON.stringify({ bookID: bookID })
                     })
@@ -190,6 +192,7 @@
 {% block header %} Books {% endblock %}  
 {% block content %}
     <form method="POST" id="AddBookForm" class="scan-box">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="add_book_code"><strong>Add Book:</strong></label>
         <div class="input-group-scan"> <input type="text"
                 name="add_book_code"
@@ -202,6 +205,7 @@
     </form>
 
     <form method="POST" id="ActivateBookForm" class="scan-box">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="activate_book_code"><strong>Activate Book:</strong></label>
         <div class="input-group-scan"> <input type="text"
                 name="activate_book_code"

@@ -152,6 +152,7 @@
         </div>
 
         <form method="POST" id="scanForm" class="scan-box">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <label for="scanned_code"><strong>Scan Ticket: </strong></label><br>
             <div class="input-group-scan">
                 <input type="text"
@@ -196,6 +197,7 @@
                             {% else %}
                             <!-- if no input for close column then show a button sold out button -->
                                 <form method="POST" action="/book_sold_out">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
                                     <button type="submit" id="SoldOutButton" class="soldout-btn"><i class="fa-solid fa-book-bookmark"></i><span class="soldout-text">Book Sold Out</span></button>
                                 </form>
@@ -215,6 +217,7 @@
                         <td class="x_button_container">
                             {% if book['countingTicketNumber'] is not none %}
                                 <form method="POST" action="/undo_scan">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
                                     <button type="Submit" class="icon-btn close-btn"><i class="fa-solid fa-xmark"></i></button>
                                 </form>
@@ -230,6 +233,7 @@
     <section class="totals-section">
         <h2>Report Totals</h2>
         <form method="POST" action="/submit" class="daily-totals-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-input-grid">
                 <div class="form-group">
                     <label for="instant_sold">Instant Tickets Sold</label>

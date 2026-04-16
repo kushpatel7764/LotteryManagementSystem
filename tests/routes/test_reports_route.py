@@ -323,8 +323,10 @@ def test_download_report_success(  # pylint: disable=redefined-outer-name
     client, login_admin, mocker  # pylint: disable=unused-argument
 ):
     """GET /download/<id> returns the PDF bytes on success."""
+    # Route does `return result[0]`; wrapping in a 1-tuple lets check_error pass
+    # it through unchanged so result[0] becomes the response body.
     mocker.patch(
-        "lottery_app.routes.reports.create_daily_invoice", return_value="PDF_BYTES"
+        "lottery_app.routes.reports.create_daily_invoice", return_value=("PDF_BYTES",)
     )
 
     resp = client.get("/download/1")

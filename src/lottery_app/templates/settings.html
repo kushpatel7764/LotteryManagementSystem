@@ -90,6 +90,7 @@
             <h2>Ticket Scan Order</h2>
             <p>Define the default order for scanning book tickets (e.g., first ticket is 000, next is 001).</p>
             <form method="post" action="/settings" id="orderForm" class="setting-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="setting_type" value="ticket_order">
                 <label for="ticket_order_select">Order:</label>
                 <select name="ticket_order" id="ticket_order_select" onchange="this.form.submit();">
@@ -105,6 +106,7 @@
             <h2>Invoice Output Path</h2>
             <p>Set the default folder location for generated PDF reports and invoices.</p>
             <form method="post" action="/settings" id="invoice_output_path"  class="setting-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="setting_type" value="output_path">
                 <label for="invoice_output_path_input">File Path:</label>
                 <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder" value="{{ invoice_output_path if invoice_output_path else '' }}">
@@ -116,6 +118,7 @@
             <h2>Barcode Scanner Polling</h2>
             <p>Control whether the system actively checks for input from a connected barcode scanner.</p>
             <form method="post" action="/settings" id="pollingForm" class="setting-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="setting_type" value="polling_state">
                 <input type="hidden" name="polling_state" id="pollingStateInput" value="{{ 'true' if should_poll == 'true' else 'false' }}">
                 <button type="submit" name="togglePollingBtn" id="togglePollingBtn" class="toggle-button">
@@ -128,6 +131,7 @@
             <h2>Change Password</h2>
             <p>Update your account password to keep your account secure.</p>
             <form method="post" action="/change_password" class="setting-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="input-group">
                     <label for="current_password">Current Password:</label>
                     <div class="password-wrapper">

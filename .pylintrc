@@ -1,0 +1,2 @@
+[MAIN]
+# lottery_app lives under src/ — install with `pip install -e .` so all tools can find it

@@ -6,7 +6,7 @@ This module provides:
 - Helpers to extract form data and validate user-provided settings.
 """
 
-import os
+from pathlib import Path
 
 from flask import Blueprint, render_template, request, flash
 from flask_login import login_required
@@ -73,7 +73,7 @@ def extract_setting_form_data(config):
     return {
         "ticket_order": request.form.get("ticket_order") or config["ticket_order"],
         "output_path": request.form.get("outputPath") or config["invoice_output_path"],
-        "should_poll": request.form.get("polling_state") or config["should_poll"],
+        "should_poll": "true" if request.form.get("polling_state", "").strip().lower() == "true" else "false",
     }
 
 
@@ -81,12 +81,23 @@ def validate_invoice_output_path(path):
     """
     Validates the provided invoice output path.
 
+    Rejects any path that does not resolve to a directory inside the current
+    user's home directory.  This prevents invoices from being written to
+    system directories (/etc, /tmp, network shares, etc.) and blocks
+    path-traversal attempts before they reach the filesystem.
+
     Args:
         path (str): Path provided by the user.
 
     Returns:
         tuple: (valid_path: str, warning_message: Optional[str])
     """
-    if os.path.isdir(path):
-        return path, None
-    return DEFAULT_DOWNLOADS_PATH, "Resetting to DEFAULT PATH (invalid output path)"
+    try:
+        resolved = Path(path).resolve()
+        home = Path.home()
+        if resolved.is_dir() and resolved.is_relative_to(home):
+            return str(resolved), None
+    except (OSError, ValueError):
+        pass
+
+    return DEFAULT_DOWNLOADS_PATH, "Path must be a directory within your home folder."

@@ -8,6 +8,8 @@ Handles:
 - Submitting the day's sales.
 """
 
+import sqlite3
+
 from flask import Blueprint, redirect, render_template, request, url_for, flash
 from flask_login import login_required
 
@@ -185,7 +187,7 @@ def undo_scan():
         except ValueError as ve:
             msg_data["message"] = str(ve)
             msg_data["message_type"] = "error"
-        except Exception as e:  # pylint: disable=broad-exception-caught
+        except (sqlite3.Error, OSError) as e:
             msg_data["message"] = f"Unexpected error: {str(e)}"
             msg_data["message_type"] = "error"
 
