@@ -9,11 +9,10 @@ against the unpatched codebase are marked with the corresponding audit finding
 so they are easy to locate when fixing the vulnerabilities.
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from lottery_app.database.user_model import User
 
 
 # ---------------------------------------------------------------------------
@@ -24,6 +23,7 @@ def _make_fake_user(user_id, username, role):
     """Return a minimal user object understood by Flask-Login."""
 
     class FakeUser:  # pylint: disable=too-few-public-methods
+        """Minimal Flask-Login user stub."""
         is_authenticated = True
 
     FakeUser.id = user_id
@@ -91,7 +91,7 @@ class TestSignupPrivilegeEscalation:
 
         created_roles = []
 
-        def spy_create(username, password, role="standard"):
+        def spy_create(_username, _password, role="standard"):
             created_roles.append(role)
 
         monkeypatch.setattr("lottery_app.database.user_model.User.create", spy_create)
@@ -129,7 +129,7 @@ class TestSignupPrivilegeEscalation:
 
         created_roles = []
 
-        def spy_create(username, password, role="standard"):
+        def spy_create(_username, _password, role="standard"):
             created_roles.append(role)
 
         monkeypatch.setattr("lottery_app.database.user_model.User.create", spy_create)
@@ -325,7 +325,7 @@ class TestUserDeletionAuthorization:
 # ---------------------------------------------------------------------------
 
 
-class TestDefaultAdminRoleBug:
+class TestDefaultAdminRoleBug:  # pylint: disable=too-few-public-methods
     """
     HIGH-3: edit_single_report checks ``role != "admin"`` but the seeded
     account has role ``"default_admin"``, permanently locking it out.

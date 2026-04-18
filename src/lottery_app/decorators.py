@@ -52,7 +52,7 @@ def admin_required(f):
     def decorated(*args, **kwargs):
         # Lazy import avoids a circular dependency: user_model imports get_db_cursor
         # from this module, so a top-level import of User here would be circular.
-        from lottery_app.database.user_model import User  # noqa: PLC0415
+        from lottery_app.database.user_model import User  # pylint: disable=import-outside-toplevel
         user = User.get_by_id(current_user.id)
         if user is None or user.role not in ("admin", "default_admin"):
             flash("Unauthorized", "error")

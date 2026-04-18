@@ -7,8 +7,9 @@ Covers:
 - Route-level authentication (all protected routes block unauthenticated requests)
 """
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from lottery_app.utils import config as config_module
 

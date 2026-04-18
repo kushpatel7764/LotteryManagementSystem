@@ -55,7 +55,7 @@ def test_get_lottery_net_lookup_table_default_state(monkeypatch):
     """get_lottery_net_lookup_table defaults to massachusetts."""
     captured = {}
 
-    def fake_get(url, **kwargs):
+    def fake_get(url, **_kwargs):
         captured["url"] = url
         mock_resp = MagicMock()
         mock_resp.content = _make_html_response("123", "Lucky Test").encode()
@@ -70,7 +70,7 @@ def test_get_lottery_net_lookup_table_custom_state(monkeypatch):
     """get_lottery_net_lookup_table uses the provided state slug in the URL."""
     captured = {}
 
-    def fake_get(url, **kwargs):
+    def fake_get(url, **_kwargs):
         captured["url"] = url
         mock_resp = MagicMock()
         mock_resp.content = _make_html_response("456", "NY Winner").encode()
@@ -124,7 +124,7 @@ def test_get_lottery_net_lookup_table_raises_on_network_error(monkeypatch):
     "lottery_app.game_number_lookup_table.update_ticket_name_lookup.insert_ticket_name"
 )
 @patch("lottery_app.game_number_lookup_table.get_lottery_net_lookup_table")
-def test_insert_new_ticket_name_success(mock_fetch, mock_insert, mock_get_gm, temp_db_dir):
+def test_insert_new_ticket_name_success(mock_fetch, mock_insert, mock_get_gm, temp_db_dir):  # pylint: disable=unused-argument
     """New game numbers are inserted; already-known ones are skipped."""
     mock_fetch.return_value = pandas.DataFrame(
         [
@@ -144,7 +144,7 @@ def test_insert_new_ticket_name_success(mock_fetch, mock_insert, mock_get_gm, te
 
 @patch("lottery_app.game_number_lookup_table.database_queries.get_gm_from_lookup")
 @patch("lottery_app.game_number_lookup_table.get_lottery_net_lookup_table")
-def test_insert_new_ticket_name_no_duplicates(mock_fetch, mock_get_gm, temp_db_dir):
+def test_insert_new_ticket_name_no_duplicates(mock_fetch, mock_get_gm, temp_db_dir):  # pylint: disable=unused-argument
     """Game numbers already in the database are never re-inserted."""
     mock_fetch.return_value = pandas.DataFrame(
         [{"Game No.": "101", "Game Name": "Already There"}]
@@ -154,14 +154,14 @@ def test_insert_new_ticket_name_no_duplicates(mock_fetch, mock_get_gm, temp_db_d
     with patch(
         "lottery_app.game_number_lookup_table.update_ticket_name_lookup.insert_ticket_name"
     ) as mock_insert:
-        msg, status = lookup.insert_new_ticket_name_to_lookup_table("fake.db")
+        _msg, status = lookup.insert_new_ticket_name_to_lookup_table("fake.db")
 
     assert status == "success"
     mock_insert.assert_not_called()
 
 
 @patch("lottery_app.game_number_lookup_table.get_lottery_net_lookup_table")
-def test_insert_new_ticket_name_fetch_error(mock_fetch, temp_db_dir):
+def test_insert_new_ticket_name_fetch_error(mock_fetch, temp_db_dir):  # pylint: disable=unused-argument
     """A fetch error returns an error status and message."""
     mock_fetch.side_effect = requests.RequestException("boom")
 
@@ -173,7 +173,7 @@ def test_insert_new_ticket_name_fetch_error(mock_fetch, temp_db_dir):
 
 @patch("lottery_app.game_number_lookup_table.database_queries.get_gm_from_lookup")
 @patch("lottery_app.game_number_lookup_table.get_lottery_net_lookup_table")
-def test_insert_new_ticket_name_db_read_error(mock_fetch, mock_get_gm, temp_db_dir):
+def test_insert_new_ticket_name_db_read_error(mock_fetch, mock_get_gm, temp_db_dir):  # pylint: disable=unused-argument
     """A DB error from get_gm_from_lookup returns an error status."""
     mock_fetch.return_value = pandas.DataFrame(
         [{"Game No.": "101", "Game Name": "Test Game"}]
@@ -187,7 +187,7 @@ def test_insert_new_ticket_name_db_read_error(mock_fetch, mock_get_gm, temp_db_d
 
 
 @patch("lottery_app.game_number_lookup_table.get_lottery_net_lookup_table")
-def test_insert_new_ticket_name_uses_state_parameter(mock_fetch, temp_db_dir):
+def test_insert_new_ticket_name_uses_state_parameter(mock_fetch, temp_db_dir):  # pylint: disable=unused-argument
     """The state parameter is forwarded to get_lottery_net_lookup_table."""
     mock_fetch.side_effect = requests.RequestException("offline")
 

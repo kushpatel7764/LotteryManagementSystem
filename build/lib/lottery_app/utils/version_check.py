@@ -1,7 +1,9 @@
-import requests
+"""Version checking and auto-update utilities."""
+import os
 import subprocess
 import sys
-import os
+
+import requests
 from packaging import version
 from flask import flash
 from lottery_app.utils.config import __version__
@@ -32,8 +34,8 @@ def check_for_updates(app, package_name="lottery_app"):
             if success:
                 flash("Update complete! Restarting app...", "success")
                 restart_app(app)
-    except Exception as e:
-        app.logger.warning(f"Version check failed: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        app.logger.warning("Version check failed: %s", e)
 
 
 def auto_update(app, package_name):

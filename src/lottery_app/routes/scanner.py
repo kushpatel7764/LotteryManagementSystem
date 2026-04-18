@@ -8,14 +8,15 @@ This module provides:
 import logging
 import os
 import queue
-from flask import Blueprint, request, jsonify
 
-logger = logging.getLogger(__name__)
+from flask import Blueprint, request, jsonify
 from flask_login import login_required
 
 from lottery_app.extensions import csrf
 from lottery_app.utils.config import BARCODE_QUEUE
 from lottery_app.utils.config import load_config
+
+logger = logging.getLogger(__name__)
 
 _SCANNER_API_KEY = os.getenv("SCANNER_API_KEY")
 

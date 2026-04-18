@@ -1,5 +1,4 @@
 """Tests that all non-login routes are protected and require authentication."""
-import pytest
 
 
 def test_all_protected_routes_blocked_without_login(app, client):  # pylint: disable=redefined-outer-name

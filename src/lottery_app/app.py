@@ -34,7 +34,7 @@ def open_browser():
     webbrowser.open(f"http://127.0.0.1:{PORT}/login")
 
 
-def launch_app(app):
+def launch_app(flask_app):
     """Launch the Flask server and open the browser after a short delay."""
     threading.Timer(1.5, open_browser).start()
 
@@ -45,7 +45,7 @@ def launch_app(app):
     # the port is reachable from other hosts.
     debug = os.getenv("FLASK_DEBUG", "0") == "1"
 
-    app.run(host="0.0.0.0", port=PORT, debug=debug, use_reloader=False)
+    flask_app.run(host="0.0.0.0", port=PORT, debug=debug, use_reloader=False)
 
 
 if __name__ == "__main__":

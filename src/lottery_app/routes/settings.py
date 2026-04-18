@@ -73,7 +73,11 @@ def extract_setting_form_data(config):
     return {
         "ticket_order": request.form.get("ticket_order") or config["ticket_order"],
         "output_path": request.form.get("outputPath") or config["invoice_output_path"],
-        "should_poll": "true" if request.form.get("polling_state", "").strip().lower() == "true" else "false",
+        "should_poll": (
+            "true"
+            if request.form.get("polling_state", "").strip().lower() == "true"
+            else "false"
+        ),
     }
 
 

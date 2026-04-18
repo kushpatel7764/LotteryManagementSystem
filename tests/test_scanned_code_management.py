@@ -8,10 +8,9 @@ This module was previously completely untested.  It covers:
 - Edge cases: ticket 999 (sold-out sentinel), boundary book amounts, invalid combos
 """
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pandas as pd
-import pytest
 
 from lottery_app.scanned_code_information_management import ScannedCodeManagement
 
@@ -49,6 +48,8 @@ def _patched_scm(barcode: str, game_no: str = "356", price_str: str = "$5"):
 
 
 class TestValidateLengthAndDigits:
+    """Tests for barcode length and digit validation."""
+
     def test_valid_barcode_returns_true(self):
         """A well-formed barcode for a known game + price validates successfully."""
         scm, df = _patched_scm(VALID_BARCODE)
@@ -129,6 +130,8 @@ class TestValidateLengthAndDigits:
 
 
 class TestValidateGameAndPrice:
+    """Tests for game number and price validation."""
+
     def test_unknown_game_number_fails(self):
         """A game number not in the lookup table must fail validation."""
         scm, df = _patched_scm(VALID_BARCODE, game_no="999", price_str="$5")
@@ -355,6 +358,8 @@ class TestFieldExtraction:
 
 
 class TestExtractAllScannedCode:
+    """Tests for full barcode extraction round-trip."""
+
     def test_valid_barcode_returns_dict(self):
         """A valid barcode returns a dict with all five expected keys."""
         scm, df = _patched_scm(VALID_BARCODE)

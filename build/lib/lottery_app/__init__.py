@@ -5,13 +5,13 @@ This module initializes the Flask app
 and registers all the blueprints for different routes.
 """
 
-from flask import Flask
-
-from flask_login import LoginManager
-from dotenv import load_dotenv
-from cryptography.fernet import Fernet
-import os
 import atexit
+import os
+
+from cryptography.fernet import Fernet
+from dotenv import load_dotenv
+from flask import Flask
+from flask_login import LoginManager
 
 from lottery_app.database.user_model import User
 from lottery_app.utils.version_check import check_for_updates
@@ -29,6 +29,7 @@ from lottery_app.routes.security import security_bp
 
 
 def encrypt_db_at_exit():
+    """Encrypt the database file on application shutdown."""
     enc_path = db_path + ".enc"
     if os.path.exists(db_path):
         encrypt_file(db_path, enc_path)
@@ -37,6 +38,7 @@ def encrypt_db_at_exit():
 
 
 def create_app():
+    """Create and configure the Flask application."""
     my_instance_location = os.path.join(
         os.path.abspath(os.path.dirname(__file__)), "instance_folder"
     )
@@ -53,7 +55,7 @@ def create_app():
     if not fernet_key:
         fernet_key = Fernet.generate_key().decode()
         # Write it to .env for future use
-        with open(".env", "a") as f:
+        with open(".env", "a", encoding="utf-8") as f:
             f.write(f"\nFERNET_KEY={fernet_key}\n")
         app.logger.info("Generated new Fernet key and saved to .env")
 

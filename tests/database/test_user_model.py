@@ -74,7 +74,7 @@ def test_get_by_id_found(mock_cursor_ctx, fake_user_row):
 @patch("lottery_app.database.user_model.flash")
 @patch("lottery_app.database.user_model.generate_password_hash")
 @patch("lottery_app.database.user_model.get_db_cursor")
-def test_create_user(mock_cursor_ctx, mock_hash, mock_flash):
+def test_create_user(mock_cursor_ctx, mock_hash, mock_flash):  # pylint: disable=unused-argument
     """Test that User.create hashes the password and inserts a row."""
     mock_hash.return_value = "hashedpass"
 
@@ -105,9 +105,9 @@ def test_delete_user_success(mock_cursor_ctx, mock_flash):
 
 @patch("lottery_app.database.user_model.flash")
 @patch("lottery_app.database.user_model.get_db_cursor")
-def test_delete_user_exception(mock_cursor_ctx, mock_flash):
+def test_delete_user_exception(mock_cursor_ctx, mock_flash):  # pylint: disable=unused-argument
     """Test that User.delete flashes an error when a sqlite3.Error occurs."""
-    import sqlite3 as _sqlite3
+    import sqlite3 as _sqlite3  # pylint: disable=import-outside-toplevel
     mock_cursor_ctx.side_effect = _sqlite3.OperationalError("db error")
 
     User.delete("kush")
@@ -237,13 +237,13 @@ def test_delete_protected_admin(mock_cursor_ctx, mock_flash):  # NEW
 
 @patch("lottery_app.database.user_model.flash")
 @patch("lottery_app.database.user_model.get_db_cursor")
-def test_create_user_hashes_password(mock_cursor_ctx, mock_flash):  # NEW
+def test_create_user_hashes_password(mock_cursor_ctx, mock_flash):  # NEW  # pylint: disable=unused-argument
     """User.create must hash the password — the raw plaintext must never be stored."""
     captured_params = []
 
     cursor = MagicMock()
 
-    def capture_execute(query, params=None):
+    def capture_execute(_query, params=None):
         if params:
             captured_params.extend(params)
 
@@ -266,7 +266,7 @@ def test_update_password_hashes_new_password(mock_cursor_ctx):  # NEW
 
     cursor = MagicMock()
 
-    def capture_execute(query, params=None):
+    def capture_execute(_query, params=None):
         if params:
             captured_params.extend(params)
 
@@ -283,7 +283,7 @@ def test_update_password_hashes_new_password(mock_cursor_ctx):  # NEW
 
 def test_user_model_role_defaults_to_standard():  # NEW
     """User constructor defaults role to 'standard' when not specified."""
-    user = User(user_id=5, username="anon", password_hash="hash")
+    user = User(5, "anon", "hash")
     assert user.role == "standard"
 
 
@@ -296,7 +296,7 @@ def test_create_duplicate_username_flashes_integrity_error(
     Creating a user with an existing username raises IntegrityError.
     The route must flash an informative message without crashing.
     """
-    import sqlite3
+    import sqlite3  # pylint: disable=import-outside-toplevel
 
     cursor = MagicMock()
     cursor.execute.side_effect = sqlite3.IntegrityError("UNIQUE constraint failed")

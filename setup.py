@@ -1,3 +1,4 @@
+"""Package configuration for lottery_app."""
 from setuptools import setup, find_packages
 
 setup(

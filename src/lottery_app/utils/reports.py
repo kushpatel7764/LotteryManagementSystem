@@ -7,8 +7,6 @@ import logging
 import os
 import sqlite3
 import traceback
-
-logger = logging.getLogger(__name__)
 from datetime import datetime
 from pathlib import Path
 
@@ -20,6 +18,8 @@ from lottery_app.database import update_sale_log, update_sale_report
 from lottery_app.email_invoice import email_invoice
 from lottery_app.utils.config import db_path, load_config
 from lottery_app.utils.error_hanlder import check_error
+
+logger = logging.getLogger(__name__)
 
 
 def calculate_instant_tickets_sold(report_id):
@@ -279,7 +279,7 @@ def do_submit_procedure():
         file_name = f"Invoice#{next_report_id}-{now.strftime('%m-%d-%Y')}.pdf"
         try:
             email_invoice(filename=file_name)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.warning("Failed to email invoice: %s", e)
 
         return "SCANS SUBMITTED SUCCESSFULLY", "success"

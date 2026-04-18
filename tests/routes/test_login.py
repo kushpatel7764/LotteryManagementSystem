@@ -1,4 +1,5 @@
 """Tests for the login, logout, password change, and user deletion routes."""
+# pylint: disable=redefined-outer-name
 import sqlite3
 from unittest.mock import patch, MagicMock
 
@@ -289,15 +290,13 @@ def test_delete_user_success(client, monkeypatch):  # pylint: disable=redefined-
     assert response.status_code == 200
 
 
-def test_delete_user_flash_message(client, monkeypatch):  # NEW
+def test_delete_user_flash_message():  # NEW
     """User.delete flashes the correct success message format.
 
     NEW TEST: validates the flash message text that User.delete() actually
     produces (user_model.py line 117) against what the route emits.
     """
-    from unittest.mock import patch as _patch
-
-    with _patch("lottery_app.database.user_model.get_db_cursor") as mock_ctx:
+    with patch("lottery_app.database.user_model.get_db_cursor") as mock_ctx:
         cursor = MagicMock()
         cursor.fetchone.return_value = ("standard",)  # role is not default_admin
         mock_ctx.return_value.__enter__.return_value = cursor
@@ -408,6 +407,7 @@ def test_change_password_wrong_current_password(client, monkeypatch):  # NEW
     """A wrong current password must flash an error and not update the hash."""
 
     class FakeUser:  # pylint: disable=too-few-public-methods
+        """Minimal user for wrong-password testing."""
         id = 1
         is_authenticated = True
 

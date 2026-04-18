@@ -1,4 +1,6 @@
 """Tests for version_check utilities."""
+# pylint: disable=missing-function-docstring,missing-class-docstring
+# pylint: disable=redefined-outer-name,duplicate-code
 
 import sys
 from unittest.mock import MagicMock, patch
@@ -214,7 +216,10 @@ class TestStartVersionCheck:
                 t = original_thread(*args, **kwargs)
                 return t
 
-            with patch("lottery_app.utils.version_check.threading.Thread", side_effect=capture_thread):
+            with patch(
+                "lottery_app.utils.version_check.threading.Thread",
+                side_effect=capture_thread,
+            ):
                 start_version_check(app)
             t.join(timeout=2)
 
@@ -233,7 +238,10 @@ class TestStartVersionCheck:
                 t = original_thread(*args, **kwargs)
                 return t
 
-            with patch("lottery_app.utils.version_check.threading.Thread", side_effect=capture_thread):
+            with patch(
+                "lottery_app.utils.version_check.threading.Thread",
+                side_effect=capture_thread,
+            ):
                 start_version_check(app)
             t.join(timeout=2)
 
@@ -252,7 +260,10 @@ class TestStartVersionCheck:
                 t = original_thread(*args, **kwargs)
                 return t
 
-            with patch("lottery_app.utils.version_check.threading.Thread", side_effect=capture_thread):
+            with patch(
+                "lottery_app.utils.version_check.threading.Thread",
+                side_effect=capture_thread,
+            ):
                 start_version_check(app)
             t.join(timeout=2)
 

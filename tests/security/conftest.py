@@ -13,7 +13,6 @@ from unittest.mock import patch
 import pytest
 from cryptography.fernet import Fernet
 
-import lottery_app.utils.config
 from lottery_app import create_app
 from lottery_app.database import setup_database
 from lottery_app.database.user_model import User
@@ -63,7 +62,7 @@ def fernet_key_env():
 
 
 @pytest.fixture
-def app(fernet_key_env):  # pylint: disable=redefined-outer-name
+def app(fernet_key_env):  # pylint: disable=redefined-outer-name,unused-argument
     """
     Create a Flask test app backed by a temporary SQLite database.
 
@@ -73,7 +72,7 @@ def app(fernet_key_env):  # pylint: disable=redefined-outer-name
     db_fd, temp_db = tempfile.mkstemp()
 
     # Point the app at the temp database BEFORE create_app() runs
-    lottery_app.utils.config.db_path = temp_db
+    config_module.db_path = temp_db
 
     # Patch where the names are *used* (lottery_app.__init__ imports them
     # directly, so we patch the names in that module's namespace).

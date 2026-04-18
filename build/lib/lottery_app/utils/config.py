@@ -99,7 +99,7 @@ def update_business_info(name, value):
     updated = False
     config = load_config()
 
-    if config[name] != value and value != "":
+    if value not in (config[name], ""):
         updated = True
 
     config[name] = value

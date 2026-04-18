@@ -224,7 +224,7 @@ class TestBusinessProfileInputValidation:
             and call.kwargs.get("value") == payload
         ]
         assert not email_calls, (
-            f"XSS payload was stored in 'business_email' without sanitisation."
+            "XSS payload was stored in 'business_email' without sanitisation."
         )
 
     @pytest.mark.parametrize("payload", XSS_PAYLOADS)
@@ -256,7 +256,7 @@ class TestBusinessProfileInputValidation:
             }
             errors = validate_and_update_business_info(data)
         # No validation on business_name — currently accepted
-        assert errors == []
+        assert not errors
         mock_update.assert_any_call(
             name="business_name", value="<b>Bold Shop</b>"
         )
@@ -291,7 +291,7 @@ class TestScannerBarcodeInjection:
             "lottery_app.routes.scanner.load_config",
             lambda: {"should_poll": "true"},
         )
-        from lottery_app.utils import config as cfg
+        from lottery_app.utils import config as cfg  # pylint: disable=import-outside-toplevel
         cfg.BARCODE_STACK.clear()
 
         # Simulate a logged-in session (workaround while /receive lacks auth)
@@ -328,7 +328,7 @@ class TestScannerBarcodeInjection:
 # ---------------------------------------------------------------------------
 
 
-class TestUrlParameterInjection:
+class TestUrlParameterInjection:  # pylint: disable=too-few-public-methods
     """
     Several routes pass ``message`` and ``message_type`` through query
     parameters into flash().  The ``message_type`` value is appended to a

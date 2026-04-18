@@ -9,9 +9,10 @@ def check_error(
     result_or_callable, message_holder=None, fallback=None, flash_prefix=None
 ):
     """
-    Evaluates a callable or result and handles standard (msg, 'error', 'success', 'warning') patterns.
-    The message_holder is passed in then the message and message_type will be stored in it. Else if a flash_prefix is
-    passed then the message is will displayed through flask's flash function.
+    Evaluates a callable or result and handles standard
+    (msg, 'error', 'success', 'warning') patterns.
+    The message_holder is passed in then the message and message_type will be stored
+    in it. Else if a flash_prefix is passed the message is displayed via flash().
 
     Args:
         result_or_callable: A callable or pre-evaluated result.

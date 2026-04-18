@@ -1,4 +1,5 @@
 """Tests for the scanner blueprint: /receive and /check_barcode_stack."""
+# pylint: disable=redefined-outer-name
 import pytest
 from flask import Flask
 from flask_login import LoginManager, UserMixin
@@ -116,8 +117,7 @@ def test_receive_requires_login(client):  # pylint: disable=redefined-outer-name
     response = client.post("/receive", data={"barcode": "123"})
 
     if response.status_code == 200:
-        import pytest as _pytest
-        _pytest.xfail(
+        pytest.xfail(
             "CRIT-5: /receive is reachable without authentication (returns 200). "
             "Add @login_required to fix this vulnerability."
         )

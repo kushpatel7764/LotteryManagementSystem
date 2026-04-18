@@ -5,17 +5,19 @@ Pyinstaller Command:
 pyinstaller --onefile --noconsole  run.py
 """
 
-import sys  # pylint: disable=wrong-import-position
-from pathlib import Path  # pylint: disable=wrong-import-order
+import sys
+from pathlib import Path
 
 # Add project root to sys.path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from lottery_app import create_app
+
+from lottery_app import create_app  # pylint: disable=wrong-import-position
 
 app = create_app()
 
 
 def main():
+    """Run the Flask development server."""
     app.run(host="0.0.0.0", port=5000, debug=True)
 
 

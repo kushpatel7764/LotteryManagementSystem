@@ -12,8 +12,9 @@ import ssl
 from datetime import datetime
 from email.message import EmailMessage
 
-logger = logging.getLogger(__name__)
 from lottery_app.utils.config import load_config
+
+logger = logging.getLogger(__name__)
 
 
 def email_invoice(filename):
