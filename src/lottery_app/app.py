@@ -45,7 +45,7 @@ def launch_app(app):
     # the port is reachable from other hosts.
     debug = os.getenv("FLASK_DEBUG", "0") == "1"
 
-    app.run(host="127.0.0.1", port=PORT, debug=debug, use_reloader=False)
+    app.run(host="0.0.0.0", port=PORT, debug=debug, use_reloader=False)
 
 
 if __name__ == "__main__":

@@ -1,42 +1,44 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<title>{% block title %}{% endblock %}</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='Nav.css') }}">
-{% block extra_css %}{% endblock %}
-{% block extra_js %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='Nav.css') }}">
+  {% block extra_css %}{% endblock %}
+  {% block extra_js %}
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const msgs = document.querySelectorAll(".flash-message");
-        msgs.forEach((msg, index) => {
-            setTimeout(() => {
-                msg.style.transition = "opacity 1s ease-out"; // ensure transition is set
-                msg.style.opacity = "0";
-                setTimeout(() => {
-                    msg.remove();
-                }, 1000);
-            }, 4000 + index * 500);
-        });
+      document.querySelectorAll(".flash-message").forEach((msg, index) => {
+        setTimeout(() => {
+          msg.style.transition = "opacity 1s ease-out";
+          msg.style.opacity = "0";
+          setTimeout(() => msg.remove(), 1000);
+        }, 4000 + index * 500);
+      });
     });
   </script>
-{% endblock %}
+  {% endblock %}
 </head>
 <body>
-<div class="navbar">
+
+<nav class="navbar">
   <div id="header">
     <label>
-      {% block header %} Header {% endblock %}
+      {% block header %}Page{% endblock %}
       <span class="nav-indicator">▼</span>
     </label>
-
-    <!-- Logout button on the right -->
     <a href="/logout" class="logout-btn" title="Logout">
-      <i class="fas fa-sign-out-alt"></i><span class="logout-text"> logout</span>
+      <i class="fas fa-sign-out-alt"></i>
+      <span class="logout-text">Logout</span>
     </a>
   </div>
+
   <div class="nav-links">
     <div class="nav-links-pages">
       <a href="/edit_reports" class="{% if request.path == '/edit_reports' %}active{% endif %}">
@@ -46,18 +48,8 @@
         <i class="fas fa-book"></i><span class="nav-text"> Books Management</span>
       </a>
       <a href="/scan_tickets" class="{% if request.path == '/scan_tickets' %}active{% endif %}">
-        <i class="fas fa-qrcode"></i><span class="nav-text"> Scan Tickets</span>
+        <i class="fas fa-barcode"></i><span class="nav-text"> Scan Tickets</span>
       </a>
-    </div>
-    <div class="nav-messages">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-              <div class="flash-message {{ 'success' if 'success' in category else 'warning' if 'warning' in category else 'error' }}"
-              style="--index: {{ loop.index0 }};">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
     </div>
     <div class="nav-links-settings">
       <a href="/settings" class="{% if request.path == '/settings' %}active{% endif %}">
@@ -68,13 +60,20 @@
       </a>
     </div>
   </div>
-</div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash-message {{ 'success' if 'success' in category else 'warning' if 'warning' in category else 'error' }}"
+           style="--index: {{ loop.index0 }};">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
 <div class="content">
-{% block content %}
-  
-
-{% endblock %}
+  {% block content %}{% endblock %}
 </div>
+
 </body>
 </html>

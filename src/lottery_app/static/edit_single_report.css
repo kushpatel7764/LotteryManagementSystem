@@ -1,299 +1,194 @@
-:root {
-    --color-action-button: #1D4ED8; /* NEW: Darker Royal Blue for primary actions (Save) */
-    --color-action-hover: #1E40AF;  /* NEW: Slightly darker for hover */
-    --color-background: #fcfcfc;   /* Very Light Grey/Blue */
-    --color-input-selected: #90a9fc; /* Light Indigo for selected dropdown */
-    --color-nav-links-settings-buttons: #696d78; /* Bright Blue for Nav Links and Settings Buttons */
-    --color-nav-links-settings-buttons-hover: #383a40;
-    --color-text-dark: #1f2937;    /* Dark Text */
-    --color-success: #10b981;      /* Emerald Green */
-    --color-error: #ef4444;        /* Red */
-    --color-warning: #f59e0b;      /* Amber */
-    --color-border: #d1d5db; 
-    --color-grey-text: #6b7280;  /* Readonly/Footer text */
-    --border-radius-reg: 2px;
-    --box-shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
+/* ── Page header with back button ── */
+.report-page-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-input[type="text"] {
-    padding: 10px;
-    width: 300px;
-    font-size: 16px;
-    border: 1px solid rgb(204, 204, 204);
-    border-radius: 6px;
+.btn-back {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s, color 0.15s;
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: var(--color-action-button);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transform: scale(1);
-    transition: background-color 0.2s ease, transform 0.1s ease;
+.btn-back:hover {
+  background: var(--gray-200);
+  color: var(--gray-900);
 }
 
-button:hover {
-    background-color: var(--color-action-hover);
-    transform: scale(1.1);
-    transition: background-color 0.2s ease, transform 0.1s ease;
+/* ── Table section ── */
+.table-section {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 24px;
 }
 
-.back-btn {
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 14px;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--gray-200);
 }
 
-.back-btn svg {
-    width: 18px;
-    height: 18px;
+.mono { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.8125rem; color: var(--gray-500); }
+.na-text { color: var(--gray-400); font-size: 0.8125rem; }
+
+/* Edit button */
+.col-edit { width: 52px; text-align: center; padding: 8px; }
+th.col-edit { background: var(--gray-50); }
+
+.edit_button {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--blue-light);
+  color: var(--blue);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s;
 }
 
-.back-btn{
-    margin-right: auto;
+.edit_button:hover { background: var(--blue); }
+
+.edit_button img {
+  width: 16px;
+  height: 16px;
+  filter: invert(30%) sepia(100%) saturate(1500%) hue-rotate(210deg);
 }
 
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 30px;
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0);
-    /*box-shadow: 0 4px 10px rgba(0,0,0,0.05);*/
+/* Inline number inputs created by JS */
+.open-input {
+  width: 70px !important;
+  padding: 5px 8px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-xs);
+  text-align: center;
+  outline: none;
+  background: white;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-th{
-    background-color: #eef2ff; /* soft indigo */
-    color: #374151;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 13px;
-    padding: 12px 10px;
+.open-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(29,78,216,0.1);
 }
 
-th td:not(.edit_button_row), td:not(.edit_button_row) {
-    text-align: center;
-    padding: 12px;
-    border: 1px solid #ddd;
+/* ── Totals section ── */
+.totals-section {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 28px;
 }
 
-/*Delete and Deactivate option CSS*/
-tr .x_button_container{
-    box-shadow: none;
-    position: relative;
-    padding: 5px;
-    background-color: rgba(249, 250, 251, 0);
-    border-color: rgba(249, 250, 251, 0);
-    width: 0;
-    height: 0;
-    overflow: visible; /* allow contents to escape bounds */
+.totals-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--gray-200);
 }
 
-th {
-    background-color: rgb(230, 230, 230);
-}
-
-tr.row td:not(.edit_button_row){
-    background-color: rgb(243, 244, 246); 
-    font-weight: bold;
-}
-
-tr.row:hover td:not(.edit_button_row){
-  background-color: #f1f5ff;
-  transition: background-color 0.2s ease;
-}
-
-tr.row.scanned td:not(.edit_button_row) {
-    background-color: #10b953a7;
-}
-
-/* Ensure the Book Sold Out button aligns vertically with table text */
-td form {
-    display: flex;
-    justify-content: center;
-    align-items: center; /* Centers the button vertically */
-    margin: 0;
-    padding: 0;
-}
-
-
-/* --- H2 Styling for Underline Effect --- */
-h2 {
-    font-size: 1.5rem;
-    color: var(--color-text-dark);
-    margin: 25px 0 15px 0;
-    /* This line creates the underline */
-    border-bottom: 2px solid #6b728029; /* Use primary color for emphasis */
-    padding-bottom: 8px; /* Space between text and the line */
-}
-
-/*Edit Button*/
-.edit_button{
-    padding: 10px;
-    margin-left: 10px;
-}
-
-.edit_button img{
-    width: 30px;
-    height: 30px;
-    filter: invert(1);
-}
-
-th {
-    background-color: rgb(230, 230, 230);
-}
-
-tr.row {
-    background-color: rgba(243, 244, 246, 0); 
-    font-weight: bold;
-}
-
-
-/* Styles for the active input in the table */
-td .open-input {
-    width: 60px !important;
-    padding: 5px;
-    font-size: 0.9rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-reg);
-    text-align: center;
-}
-
-td .open-input:focus {
-    border-color: var(--color-action-button);
-    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
-    outline: none;
-}
-
-.modal {
-    display: none; /* Show on load */
-    position: fixed;
-    z-index: 999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5); /* Transparent dark background */
-}
-
-input[type="text"] {
-    padding: 10px;
-    width: 300px;
-    font-size: 16px;
-    border: 1px solid rgb(204, 204, 204);
-    border-radius: var(--border-radius-reg);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-input[type="text"]:focus {
-    border-color: var(--color-action-button); /* Highlight border on focus */
-    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2); /* Soft blue focus ring */
-    outline: none; /* Remove default focus outline */
-}
-
-/* --- Report Totals Form Layout --- */
 .daily-totals-form {
-    background: white;
-    padding: 30px; /* Increased padding */
-    border-radius: var(--border-radius-reg);
-    box-shadow: var(--box-shadow-light);
-    /* CHANGE: Set to a two-column grid for cleaner visual flow. 
-      The last two fields (Total Due and Cash On Hand) will align nicely. 
-    */
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 25px 50px; /* Increased gap */
-    margin-bottom: 30px;
+  padding: 20px 20px 0;
+}
+
+.totals-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 20px;
+  margin-bottom: 20px;
 }
 
 .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px; /* Slightly increased gap between label and input */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .form-group label {
-    font-weight: 600;
-    color: var(--color-text-dark);
-    font-size: 0.95rem;
-    margin-bottom: 0; /* Clear margin from original code */
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-/* --- Currency Input Styling --- */
-.currency-input-wrapper {
-    position: relative;
-    display: block; /* Make it block-level to fill grid column */
+.totals-actions {
+  display: flex;
+  gap: 10px;
+  padding: 16px 0 12px;
+  border-top: 1px solid var(--gray-100);
+  flex-wrap: wrap;
 }
 
-.currency-symbol {
-    position: absolute;
-    left: 10px; /* Position inside the input field */
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.9rem; /* Match input text size */
-    color: var(--color-grey-text);
-    pointer-events: none; /* Allows clicks/focus to pass through */
-    font-weight: 500;
+.btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
 }
 
-.daily-totals-form input[type="number"], 
-.daily-totals-form input[readonly] {
-    /* Use padding to make space for the currency symbol */
-    padding: 10px 12px 10px 28px; 
-    width: 100%; /* Must be 100% to fill the grid column */
-    box-sizing: border-box; /* Include padding/border in width */
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-reg);
-    font-size: 1rem;
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+.btn-save:hover { background: var(--blue-hover); }
+
+.btn-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
 }
 
-.daily-totals-form input[type="number"]:focus {
-    border-color: var(--color-action-button);
-    box-shadow: 0 0 0 3px rgba(29,78,216,0.15);
-    outline: none;
+.btn-download:hover { background: var(--gray-200); }
+
+.form-note {
+  font-size: 0.8rem;
+  color: var(--gray-400);
+  padding-bottom: 20px;
+  margin: 0;
 }
 
-.form-group input[readonly] {
-    background-color: #f3f4f6; /* Lighter background for non-editable fields */
-    color: var(--color-grey-text);
+@media (max-width: 700px) {
+  .totals-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* --- Action & Footer Sections --- */
-.form-actions {
-    grid-column: 1 / -1; /* Span the full width */
-    margin-top: 15px;
-    display: flex;
-    justify-content: flex-start;
-    gap: 15px; /* Spacing between Save and Download buttons */
-}
-
-.form-footer {
-    grid-column: 1 / -1;
-    text-align: center;
-    font-size: 0.85rem;
-    color: var(--color-grey-text);
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #f3f4f6; /* Subtle top border */
-}
-
-/* Style for Download button if it's secondary */
-.form-actions button[onclick^="downloadInvoice"] {
-    background-color: #6b7280;
-}
-.form-actions button[onclick^="downloadInvoice"]:hover {
-    background-color: #4b5563;
+@media (max-width: 480px) {
+  .totals-grid { grid-template-columns: 1fr; }
+  .report-page-header { align-items: flex-start; }
 }

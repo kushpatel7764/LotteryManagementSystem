@@ -1,166 +1,169 @@
 {% extends "navButton.html" %}
 {% block title %}Settings{% endblock %}
-
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
 {% endblock %}
 
 {% block extra_js %}
 {{ super() }}
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // Access elements
-        const btn = document.getElementById("togglePollingBtn");
-        const form = document.getElementById("pollingForm");
-        const input = document.getElementById("pollingStateInput");
-        // Set initial label on button
-        let pollingEnabled = input.value === 'true';
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn   = document.getElementById("togglePollingBtn");
+    const form  = document.getElementById("pollingForm");
+    const input = document.getElementById("pollingStateInput");
+    let pollingEnabled = input.value === 'true';
 
-        // Function to update the button's appearance (text and color)
-        const updateButtonUI = () => {
-            btn.textContent = pollingEnabled ? "Disable Polling" : "Enable Polling";
-            btn.classList.remove('enable-btn-style', 'disable-btn-style');
-            if (pollingEnabled) {
-                btn.classList.add('disable-btn-style');
-            } else {
-                btn.classList.add('enable-btn-style');
-            }
-        };
+    const updateButtonUI = () => {
+      btn.textContent = pollingEnabled ? "Disable Polling" : "Enable Polling";
+      btn.classList.remove('btn-enable', 'btn-disable');
+      btn.classList.add(pollingEnabled ? 'btn-disable' : 'btn-enable');
+    };
 
-        // Set initial UI
-        updateButtonUI();
+    updateButtonUI();
 
-        // Handle button click
-        btn.addEventListener("click", (e) => {
-            pollingEnabled = !pollingEnabled; // Toggle state
-            // Update hidden input and button label
-            input.value = pollingEnabled ? 'true' : 'false';
-            // Update UI immediately 
-            updateButtonUI();
-            form.submit(); // will only submit input value.
-        });
-
-        // Toggle password visibility buttons
-        document.querySelectorAll(".toggle-password").forEach(button => {
-            button.addEventListener("click", (e) => {
-                e.preventDefault(); // avoid form submission
-                const targetId = button.getAttribute("data-target");
-                const input = document.getElementById(targetId);
-                const icon = button.querySelector("i");
-
-                if (!input) return; // safety check
-
-                // Toggle the specific input’s type
-                if (input.type === "password") {
-                    input.type = "text";
-                    icon.classList.replace("fa-eye", "fa-eye-slash");
-                } else {
-                    input.type = "password";
-                    icon.classList.replace("fa-eye-slash", "fa-eye");
-                }
-            });
-        });
+    btn.addEventListener("click", () => {
+      pollingEnabled = !pollingEnabled;
+      input.value = pollingEnabled ? 'true' : 'false';
+      updateButtonUI();
+      form.submit();
     });
-</script>
-<script>
-    function ChangeOrder(event){
-        event.preventDefault();
 
-        const input = document.getElementById("ticket_order_input");
-        const button = document.getElementById("ticket_order_btn");
-
-        if (input.value == "ascending"){
-            input.value = "descending";
-            button.innerHTML = "Descending";
+    document.querySelectorAll(".toggle-password").forEach(button => {
+      button.addEventListener("click", (e) => {
+        e.preventDefault();
+        const targetId = button.getAttribute("data-target");
+        const input = document.getElementById(targetId);
+        const icon  = button.querySelector("i");
+        if (!input) return;
+        if (input.type === "password") {
+          input.type = "text";
+          icon.classList.replace("fa-eye", "fa-eye-slash");
         } else {
-            input.value = "ascending";
-            button.innerHTML = "Ascending";
+          input.type = "password";
+          icon.classList.replace("fa-eye-slash", "fa-eye");
         }
-
-        document.getElementById("orderForm").submit();
-    }
+      });
+    });
+  });
 </script>
 {% endblock %}
-{% block header %} System Settings {% endblock %}  
 
-{% block content%}
-    <div class="settings_container">
-        <!-- 1. Ticket Order Setting -->
-        <div class="setting-card">
-            <h2>Ticket Scan Order</h2>
-            <p>Define the default order for scanning book tickets (e.g., first ticket is 000, next is 001).</p>
-            <form method="post" action="/settings" id="orderForm" class="setting-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="setting_type" value="ticket_order">
-                <label for="ticket_order_select">Order:</label>
-                <select name="ticket_order" id="ticket_order_select" onchange="this.form.submit();">
-                    <option value="ascending" {% if counting_order == 'ascending' %}selected{% endif %}>Ascending (000, 001, ...)</option>
-                    <option value="descending" {% if counting_order == 'descending' %}selected{% endif %}>Descending (999, 998, ...)</option>
-                </select>
-                <!-- Submission is handled by the onchange event above -->
-            </form>
-        </div>
+{% block header %}Settings{% endblock %}
 
-        <!-- 2. Invoice Output Path Setting -->
-        <div class="setting-card">
-            <h2>Invoice Output Path</h2>
-            <p>Set the default folder location for generated PDF reports and invoices.</p>
-            <form method="post" action="/settings" id="invoice_output_path"  class="setting-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="setting_type" value="output_path">
-                <label for="invoice_output_path_input">File Path:</label>
-                <input type="text" id="invoice_output_path_input" name="outputPath" placeholder="e.g., C:\Users\You\Documents\OutputFolder" value="{{ invoice_output_path if invoice_output_path else '' }}">
-                <button type="submit">Save Path</button>
-            </form>
-        </div>
-        <!-- 3. Barcode Polling Setting -->
-        <div class="setting-card">
-            <h2>Barcode Scanner Polling</h2>
-            <p>Control whether the system actively checks for input from a connected barcode scanner.</p>
-            <form method="post" action="/settings" id="pollingForm" class="setting-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="setting_type" value="polling_state">
-                <input type="hidden" name="polling_state" id="pollingStateInput" value="{{ 'true' if should_poll == 'true' else 'false' }}">
-                <button type="submit" name="togglePollingBtn" id="togglePollingBtn" class="toggle-button">
-                    <!-- Text is set dynamically by JavaScript -->
-                </button>
-            </form>
-        </div>
-        <!-- 4. Change Password Setting -->
-        <div class="setting-card">
-            <h2>Change Password</h2>
-            <p>Update your account password to keep your account secure.</p>
-            <form method="post" action="/change_password" class="setting-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="input-group">
-                    <label for="current_password">Current Password:</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="current_password" name="current_password" required>
-                        <button type="button" class="toggle-password" data-target="current_password">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="new_password">New Password:</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="new_password" name="new_password" required minlength="6">
-                        <button type="button" class="toggle-password" data-target="new_password">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="confirm_password">Confirm New Password:</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="confirm_password" name="confirm_password" required minlength="6">
-                        <button type="button" class="toggle-password" data-target="confirm_password">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <button type="submit" class="save-btn">Change Password</button>
-            </form>
-        </div>
+{% block content %}
+
+<div class="page-header">
+  <h2>System Settings</h2>
+  <p class="page-subtitle">Configure application behaviour and security</p>
+</div>
+
+<div class="settings-list">
+
+  <!-- 1. Ticket Scan Order -->
+  <div class="setting-card">
+    <div class="setting-card-info">
+      <div class="setting-icon"><i class="fas fa-sort-amount-up"></i></div>
+      <div>
+        <h3>Ticket Scan Order</h3>
+        <p>Define whether ticket numbers count up (ascending) or down (descending).</p>
+      </div>
     </div>
+    <form method="post" action="/settings" class="setting-control">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="setting_type" value="ticket_order">
+      <select name="ticket_order" id="ticket_order_select" onchange="this.form.submit();">
+        <option value="ascending"  {% if counting_order == 'ascending'  %}selected{% endif %}>Ascending (000, 001…)</option>
+        <option value="descending" {% if counting_order == 'descending' %}selected{% endif %}>Descending (999, 998…)</option>
+      </select>
+    </form>
+  </div>
+
+  <!-- 2. Invoice Output Path -->
+  <div class="setting-card">
+    <div class="setting-card-info">
+      <div class="setting-icon"><i class="fas fa-folder-open"></i></div>
+      <div>
+        <h3>Invoice Output Path</h3>
+        <p>Set the folder where generated PDF invoices are saved.</p>
+      </div>
+    </div>
+    <form method="post" action="/settings" class="setting-control setting-control--row">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="setting_type" value="output_path">
+      <input type="text" name="outputPath"
+        placeholder="e.g. C:\Users\You\Documents\Reports"
+        value="{{ invoice_output_path if invoice_output_path else '' }}">
+      <button type="submit" class="btn-setting-save">Save</button>
+    </form>
+  </div>
+
+  <!-- 3. Barcode Scanner Polling -->
+  <div class="setting-card">
+    <div class="setting-card-info">
+      <div class="setting-icon"><i class="fas fa-barcode"></i></div>
+      <div>
+        <h3>Barcode Scanner Polling</h3>
+        <p>Control whether the system actively listens for a connected barcode scanner.</p>
+      </div>
+    </div>
+    <div class="setting-control">
+      <form method="post" action="/settings" id="pollingForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="setting_type" value="polling_state">
+        <input type="hidden" name="polling_state" id="pollingStateInput"
+          value="{{ 'true' if should_poll == 'true' else 'false' }}">
+        <button type="button" id="togglePollingBtn" class="btn-toggle">
+          <!-- Text set by JS -->
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Change Password -->
+  <div class="setting-card setting-card--column">
+    <div class="setting-card-info">
+      <div class="setting-icon"><i class="fas fa-key"></i></div>
+      <div>
+        <h3>Change Password</h3>
+        <p>Update your account password to keep your account secure.</p>
+      </div>
+    </div>
+    <form method="post" action="/change_password" class="password-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="pw-field">
+        <label for="current_password">Current Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="current_password" name="current_password" required>
+          <button type="button" class="toggle-password" data-target="current_password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="pw-field">
+        <label for="new_password">New Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="new_password" name="new_password" required minlength="6">
+          <button type="button" class="toggle-password" data-target="new_password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="pw-field">
+        <label for="confirm_password">Confirm Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="confirm_password" name="confirm_password" required minlength="6">
+          <button type="button" class="toggle-password" data-target="confirm_password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-change-pw">Update Password</button>
+    </form>
+  </div>
+
+</div>
 {% endblock %}

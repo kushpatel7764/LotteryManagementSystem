@@ -1,138 +1,213 @@
-:root {
-    --color-primary: #2563eb;       /* Indigo/Blue theme */
-    --color-primary-hover: #1e40af;
-    --color-background: #f5f7ff;
-    --color-input-border: #ccc;
-    --color-text-dark: #333;
-    --color-shadow: rgba(0, 0, 0, 0.08);
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* Center everything on the page */
-.login-container {
-    height: 75vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--color-background);
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f0f2f5;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* The form card */
+/* ── Flash messages ── */
+.flash-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 320px;
+  pointer-events: none;
+}
+
+.flash-message {
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: auto;
+}
+
+.flash-message.success { background: #10b981; }
+.flash-message.error   { background: #ef4444; }
+.flash-message.warning { background: #f59e0b; }
+
+/* ── Page layout ── */
+.login-page {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+}
+
+/* ── Card ── */
+.login-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 44px 40px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Brand ── */
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  background: #1D4ED8;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  letter-spacing: -0.01em;
+}
+
+/* ── Header ── */
+.login-header {
+  margin-bottom: 28px;
+}
+
+.login-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+.login-header p {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* ── Form ── */
 .login-form {
-    background-color: #fff;
-    padding: 40px 50px;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px var(--color-shadow);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-/* Headings */
-.login-form h2 {
-    margin-bottom: 5px;
-    color: var(--color-text-dark);
-    font-size: 1.8em;
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.subtitle {
-    color: #666;
-    font-size: 0.95em;
-    margin-bottom: 25px;
+.field label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #374151;
 }
 
-/* Input groups */
-.input-group {
-    text-align: left;
-    margin-bottom: 18px;
+.field input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  color: #111827;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.input-group label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: var(--color-text-dark);
+.field input:focus {
+  border-color: #1D4ED8;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
 }
 
-.input-group input {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 1em;
-    border: 1px solid var(--color-input-border);
-    border-radius: 8px;
-    background-color: #fafafa;
-    outline: none;
-    transition: border-color 0.2s, background-color 0.2s;
+.field input::placeholder {
+  color: #9ca3af;
+  font-size: 0.875rem;
 }
 
-.input-group input:focus {
-    border-color: var(--color-primary);
-    background-color: #fff;
-}
-
-/* Login button */
-.login-btn {
-    width: 100%;
-    background-color: var(--color-primary);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 0;
-    font-size: 1em;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.login-btn:hover {
-    background-color: var(--color-primary-hover);
-    transform: scale(1.02);
-}
-
-/* Sign-up link */
-.signup-text {
-    margin-top: 18px;
-    font-size: 0.95em;
-    color: #555;
-}
-
-.signup-text a {
-    color: var(--color-primary);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.signup-text a:hover {
-    text-decoration: underline;
-}
-
+/* ── Password wrapper ── */
 .password-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .password-wrapper input {
-    width: 100%;
-    padding-right: 40px; /* Space for the eye button */
+  padding-right: 42px;
 }
 
 .toggle-password {
-    display: flex;
-    flex-direction: row-reverse;
-    position: absolute;
-    right: 10px;
-    background: none;
-    border: none;
-    color: #6b7280;
-    cursor: pointer;
-    font-size: 1em;
-    width: fit-content;
-    padding: unset;
-    transition: color 0.2s ease;
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1;
+  width: auto;
+  height: auto;
+  transition: color 0.15s ease;
 }
 
 .toggle-password:hover {
-    background-color: unset;
-    color: var(--color-action-button);
+  background: none;
+  color: #4b5563;
+  transform: none;
 }
 
+/* ── Submit button ── */
+.btn-login {
+  width: 100%;
+  padding: 11px;
+  background: #1D4ED8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-login:hover {
+  background: #1e40af;
+  transform: translateY(-1px);
+}
+
+.btn-login:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 36px 28px;
+  }
+}

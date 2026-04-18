@@ -1,272 +1,276 @@
 {% extends "navButton.html" %}
 {% block title %}Books Management{% endblock %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='book_managment.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='book_managment.css') }}">
 {% endblock %}
-   
+
 {% block extra_js %}
 {{ super() }}
-    <!-- Socket.IO client library -->
-    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
-    <script>
-        let pollingInterval = null;
-        let isProcessing = false;
+  <!-- Socket.IO client library -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+  <script>
+    let pollingInterval = null;
+    let isProcessing = false;
 
-        async function processBarcode() {
-            if (isProcessing) return; // Skip if still processing
-            isProcessing = true;
-            try {
-                const response = await fetch('/check_barcode_stack');
-                // Check for successful response
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log("Data from server:", data);
-                    // Check for barcode presence
-                    if (data.barcode) {
-                        console.log("RECEIVED BARCODE");
-                        const activeElement = document.activeElement;
-
-                        // Only insert if the focused element is an input field.
-                        if (activeElement && (activeElement.tagName === "INPUT")) {
-
-                            // Set barcode value
-                            activeElement.value = data.barcode;
-
-                            // Simulate input event so browser recognizes value change
-                            activeElement.dispatchEvent(new Event("input", { bubbles: true }));
-                            
-                            // Store the ID of the last-focused input
-                            sessionStorage.setItem("lastFocusedInput", activeElement.id);
-
-                            const form = activeElement.form;
-                            if (form) {
-                                form.requestSubmit(); // Modern way (better than form.submit())
-                            }
-                        } else {
-                            console.warn("No input field is focused; barcode not inserted.");
-                        }
-                    } else {
-                        return null;
-                    }
-                } else {
-                    return null;
-                }
-            } catch (error) {
-                return null;
-            } finally {
-                isProcessing = false;
+    async function processBarcode() {
+      if (isProcessing) return;
+      isProcessing = true;
+      try {
+        const response = await fetch('/check_barcode_stack');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.barcode) {
+            // Use the focused input if available, otherwise default to add_book_code
+            const activeElement = document.activeElement;
+            const target = (activeElement && activeElement.tagName === "INPUT")
+              ? activeElement
+              : document.getElementById("add_book_code");
+            if (target) {
+              target.value = data.barcode;
+              target.dispatchEvent(new Event("input", { bubbles: true }));
+              sessionStorage.setItem("lastFocusedInput", target.id);
+              const form = target.form;
+              if (form) form.requestSubmit();
             }
+          }
         }
+      } catch (error) {
+        // silent fail
+      } finally {
+        isProcessing = false;
+      }
+    }
 
-        document.addEventListener("DOMContentLoaded", () => {
-        let pollingEnabled = {{ 'true' if should_poll == "true" else 'false' }} === true;
-
-        if (pollingEnabled) {
-            pollingInterval = setInterval(processBarcode, 500);
-            console.log("Polling started based on settings");
-        } else {
-            console.log("Polling is disabled in settings");
-        }
+    document.addEventListener("DOMContentLoaded", () => {
+      let pollingEnabled = {{ 'true' if should_poll == "true" else 'false' }} === true;
+      if (pollingEnabled) {
+        pollingInterval = setInterval(processBarcode, 500);
+      }
     });
-    </script>
-    <script>
-            function checkLengthAndSubmitAddBook() {
-                const func_route = "/books_managment"
-                const input = document.getElementById('add_book_code');
+  </script>
 
-                const isValid = /^\d{29}$/.test(input.value);
+  <script>
+    function checkLengthAndSubmitAddBook() {
+      const input = document.getElementById('add_book_code');
+      if (/^\d{29}$/.test(input.value)) {
+        const form = document.getElementById('AddBookForm');
+        form.action = "/books_managment";
+        form.submit();
+      }
+    }
 
-                if (isValid) { // add more security to ensure that book being added is a real ticket book. 
-                    const form = document.getElementById('AddBookForm');
-                    form.action = func_route;
-                    form.submit();
-                }
-            }
-            function checkLengthAndSubmitActivateBook() {
-                const func_route = "/activate_book"
-                const input = document.getElementById('activate_book_code');
+    function checkLengthAndSubmitActivateBook() {
+      const input = document.getElementById('activate_book_code');
+      if (/^\d{29}$/.test(input.value)) {
+        const form = document.getElementById('ActivateBookForm');
+        form.action = "/activate_book";
+        form.submit();
+      }
+    }
 
-                const isValid = /^\d{29}$/.test(input.value);
+    function toggleDropdown(event) {
+      event.stopPropagation();
+      closeAllDropdowns();
+      const container = event.currentTarget.closest(".dropdown-container");
+      container.classList.toggle("show");
+      if (container.classList.contains("show")) {
+        const btn = event.currentTarget;
+        const rect = btn.getBoundingClientRect();
+        const menu = container.querySelector(".dropdown-content");
+        menu.style.top = (rect.bottom + 6) + "px";
+        menu.style.right = (document.documentElement.clientWidth - rect.right) + "px";
+      }
+    }
 
-                if (isValid) { // add more security to ensure that book being added is a real ticket book. 
-                    const form = document.getElementById('ActivateBookForm');
-                    form.action = func_route;
-                    form.submit();
-                }
-            }
-            //DropDown Functions
-            function toggleDropdown(event) {
-            event.stopPropagation(); // Stop the click from closing immediately
-            closeAllDropdowns();     // Close others
-            const dropdown = event.currentTarget.closest(".dropdown-container");
-            dropdown.classList.toggle("show");
-            }
+    function closeAllDropdowns() {
+      document.querySelectorAll(".dropdown-container").forEach(el => el.classList.remove("show"));
+    }
 
-            function closeAllDropdowns() {
-            document.querySelectorAll(".dropdown-container").forEach(el => {
-                el.classList.remove("show");
-            });
-            }
+    document.addEventListener("click", () => closeAllDropdowns());
 
-            // Close dropdown if clicked anywhere else
-            document.addEventListener("click", () => {
-            closeAllDropdowns();
-            });
+    function handleDeactivate(bookID) {
+      fetch('/deactivate_book', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ bookID })
+      })
+      .then(r => r.json())
+      .then(data => { if (data.redirect_url) window.location.href = data.redirect_url; });
+    }
 
-            // Your actual button functions
-            function handleDeactivate(bookID) {
-                fetch('/deactivate_book', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ bookID: bookID })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.redirect_url) {
-                            window.location.href = data.redirect_url;  // Manual redirect
-                    }
-                });
-            }
+    function handleDelete(bookID) {
+      if (confirm(`Are you sure you want to delete book ${bookID}?`)) {
+        fetch('/delete_book', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ bookID })
+        })
+        .then(r => r.json())
+        .then(data => { if (data.redirect_url) window.location.href = data.redirect_url; });
+      }
+    }
 
-            function handleDelete(bookID) {
-                if (confirm(`Are you sure you want to delete book ${bookID}?`)) {
-                    fetch('/delete_book', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: JSON.stringify({ bookID: bookID })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.redirect_url) {
-                            window.location.href = data.redirect_url;  // Manual redirect
-                        }
-                    });
-                }
-            }
-            function showInfoImage() {
-                const modal = document.getElementById('infoModal');
-                modal.style.display = 'flex';
-                requestAnimationFrame(() => modal.classList.add('show')); // ensures transition triggers
-            }
+    function showInfoImage() {
+      const modal = document.getElementById('infoModal');
+      modal.style.display = 'flex';
+      requestAnimationFrame(() => modal.classList.add('show'));
+    }
 
-            function hideInfoImage() {
-                const modal = document.getElementById('infoModal');
-                modal.classList.remove('show');
-                modal.addEventListener('transitionend', () => {
-                    if (!modal.classList.contains('show')) modal.style.display = 'none';
-                }, { once: true });
-            }
+    function hideInfoImage() {
+      const modal = document.getElementById('infoModal');
+      modal.classList.remove('show');
+      modal.addEventListener('transitionend', () => {
+        if (!modal.classList.contains('show')) modal.style.display = 'none';
+      }, { once: true });
+    }
 
-            window.addEventListener("DOMContentLoaded", function () {
-                const lastFocusedID = sessionStorage.getItem("lastFocusedInput");
+    window.addEventListener("DOMContentLoaded", () => {
+      const lastFocusedID = sessionStorage.getItem("lastFocusedInput");
+      if (lastFocusedID) {
+        const input = document.getElementById(lastFocusedID);
+        if (input) input.focus();
+      }
+    });
 
-                if (lastFocusedID) {
-                    const input = document.getElementById(lastFocusedID);
-                    if (input) {
-                        input.focus();
-                    }
-                }
-            });
-
-            window.onload = function() {
-            {% if add_book_message %}
-                const scanInput = document.querySelector('[name="add_book_code"]');
-                if (scanInput) scanInput.value = "";
-            {% endif %}
-            {% if activate_book_message %}
-                const scanInput = document.querySelector('[name="activate_book_code"]');
-                if (scanInput) scanInput.value = "";
-            {% endif %}
-            }
-
-        
-    </script>
-
+    window.onload = function () {
+      {% if add_book_message %}
+        const addInput = document.querySelector('[name="add_book_code"]');
+        if (addInput) addInput.value = "";
+      {% endif %}
+      {% if activate_book_message %}
+        const activateInput = document.querySelector('[name="activate_book_code"]');
+        if (activateInput) activateInput.value = "";
+      {% endif %}
+    };
+  </script>
 {% endblock %}
-{% block header %} Books {% endblock %}  
+
+{% block header %}Books{% endblock %}
+
 {% block content %}
-    <form method="POST" id="AddBookForm" class="scan-box">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label for="add_book_code"><strong>Add Book:</strong></label>
-        <div class="input-group-scan"> <input type="text"
-                name="add_book_code"
-                id="add_book_code"
-                placeholder="Scan book or ticket to add to the system"
-                required
-                oninput="checkLengthAndSubmitAddBook()">
-            <button type="button" onclick="showInfoImage()" title="Show barcode scan info" id="scanInfoButton"> i </button>
-        </div> <button type="submit" style="display:none;">Submit</button>
-    </form>
 
-    <form method="POST" id="ActivateBookForm" class="scan-box">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label for="activate_book_code"><strong>Activate Book:</strong></label>
-        <div class="input-group-scan"> <input type="text"
-                name="activate_book_code"
-                id="activate_book_code"
-                placeholder="Scan book or ticket to activate it"
-                required
-                oninput="checkLengthAndSubmitActivateBook()">
-            <button type="button" onclick="showInfoImage()" title="Show barcode scan info" id="scanInfoButton"> i </button>
-        </div> <button type="submit" style="display:none;">Submit</button>
-    </form>
+<div class="page-header">
+  <h2>Books Management</h2>
+  <p class="page-subtitle">Add and activate lottery ticket books</p>
+</div>
 
-    <h2>Books</h2>
-    <table>
-        <thead>
-            <tr class="header">
-                <th>Game Name</th>  
-                <th>Book ID</th>
-                <th>Game Number</th>
-                <th>Ticket Price</th>
-                <th>Ticket Amount</th>
-                <th>Sold</th>
-                <th class="th_OptionsButton"></th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for book in books %}
-            <tr class="row">
-                <td>{{ book['TicketName'] }}</td>
-                <td>{{ book['BookID'] }}</td>
-                <td>{{ book['GameNumber'] }}</td>
-                <td>${{ book['TicketPrice'] }}</td>
-                <td>{{ book['BookAmount'] }}</td>
-                <td>{{ book['Is_Sold'] }}</td>
-                <td class="options_Button {% if book['BookID'] in activated_ids %}activated{% endif %}">
-                    <div class="dropdown-container">
-                        <button class="dropbtn" onclick="toggleDropdown(event)">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                                <circle cx="5" cy="12" r="1.5"/>
-                                <circle cx="12" cy="12" r="1.5"/>
-                                <circle cx="19" cy="12" r="1.5"/>
-                            </svg>
-                        </button>
-                        <div class="dropdown-content">
-                            {% if book['BookID'] in activated_ids %}
-                                <button onclick="handleDeactivate('{{ book['BookID'] }}')">Deactivate</button> <!-- Should only show up with the given book is already activated-->
-                            {% endif %}
-                            <button onclick="handleDelete('{{ book['BookID'] }}')">Delete</button>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <!-- Modal for Image -->
-    <div id="infoModal">
-        <div style="position: relative; background: white; padding: 10px; border-radius: 8px;">
-            <img src="{{ url_for('static', filename='BookManagementInfoImg.JPG') }}" 
-                alt="Info Image" 
-                style="max-width: 90vw; max-height: 80vh; display: block; margin: auto;">
-            <button onclick="hideInfoImage()" id="InfoModalCloseBtn" onmouseover="this.style.backgroundColor='#f2f2f2'" onmouseout="this.style.backgroundColor='#ff3d3d'">×</button>
-        </div>
+<div class="scan-grid">
+
+  <form method="POST" id="AddBookForm" class="scan-card">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="scan-card-label">Add Book</div>
+    <div class="scan-input-row">
+      <input
+        type="text"
+        name="add_book_code"
+        id="add_book_code"
+        placeholder="Scan barcode to add book"
+        required
+        oninput="checkLengthAndSubmitAddBook()">
+      <button type="button" class="info-btn" onclick="showInfoImage()" title="View barcode info">
+        <i class="fas fa-info"></i>
+      </button>
     </div>
+    <button type="submit" style="display:none;">Submit</button>
+  </form>
+
+  <form method="POST" id="ActivateBookForm" class="scan-card">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="scan-card-label">Activate Book</div>
+    <div class="scan-input-row">
+      <input
+        type="text"
+        name="activate_book_code"
+        id="activate_book_code"
+        placeholder="Scan barcode to activate book"
+        required
+        oninput="checkLengthAndSubmitActivateBook()">
+      <button type="button" class="info-btn" onclick="showInfoImage()" title="View barcode info">
+        <i class="fas fa-info"></i>
+      </button>
+    </div>
+    <button type="submit" style="display:none;">Submit</button>
+  </form>
+
+</div>
+
+<div class="table-section">
+  <div class="table-header">
+    <h3>Books</h3>
+    <span class="book-count">{{ books | length }} book{{ 's' if books | length != 1 else '' }}</span>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Game Name</th>
+          <th>Book ID</th>
+          <th>Game No.</th>
+          <th>Ticket Price</th>
+          <th>Tickets</th>
+          <th>Sold</th>
+          <th class="col-options"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for book in books %}
+        <tr class="{% if book['BookID'] in activated_ids %}row-activated{% endif %}">
+          <td>{{ book['TicketName'] }}</td>
+          <td class="mono">{{ book['BookID'] }}</td>
+          <td>{{ book['GameNumber'] }}</td>
+          <td>${{ book['TicketPrice'] }}</td>
+          <td>{{ book['BookAmount'] }}</td>
+          <td>{{ book['Is_Sold'] }}</td>
+          <td class="col-options">
+            <div class="dropdown-container">
+              <button class="dropbtn {% if book['BookID'] in activated_ids %}dropbtn-active{% endif %}" onclick="toggleDropdown(event)" title="Options">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <circle cx="5" cy="12" r="1.5"/>
+                  <circle cx="12" cy="12" r="1.5"/>
+                  <circle cx="19" cy="12" r="1.5"/>
+                </svg>
+              </button>
+              <div class="dropdown-content">
+                {% if book['BookID'] in activated_ids %}
+                  <button onclick="handleDeactivate('{{ book['BookID'] }}')">
+                    <i class="fas fa-pause-circle"></i> Deactivate
+                  </button>
+                {% endif %}
+                <button class="btn-delete" onclick="handleDelete('{{ book['BookID'] }}')">
+                  <i class="fas fa-trash-alt"></i> Delete
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not books %}
+        <tr>
+          <td colspan="7" class="empty-state">No books added yet. Scan a barcode above to get started.</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Info Modal -->
+<div id="infoModal">
+  <div class="modal-inner">
+    <button onclick="hideInfoImage()" class="modal-close" title="Close">
+      <i class="fas fa-times"></i>
+    </button>
+    <img
+      src="{{ url_for('static', filename='BookManagementInfoImg.JPG') }}"
+      alt="Barcode scan instructions">
+  </div>
+</div>
+
 {% endblock %}

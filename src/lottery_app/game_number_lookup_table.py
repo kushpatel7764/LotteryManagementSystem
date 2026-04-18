@@ -20,7 +20,7 @@ from lottery_app.database import database_queries, update_ticket_name_lookup
 from lottery_app.utils.config import db_dir
 
 _LOTTERY_NET_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; LotteryApp/1.0)"}
-_REQUIRED_COLUMNS = {"Game No.", "Game Name"}
+_REQUIRED_COLUMNS = {"Game No.", "Game Name", "Price"}
 
 
 def get_lottery_net_lookup_table(state: str = "massachusetts") -> DataFrame:
@@ -73,7 +73,7 @@ def get_lottery_net_lookup_table(state: str = "massachusetts") -> DataFrame:
         rows.append(parsed_row)
 
     df = pd.DataFrame(rows, columns=all_headers)
-    return df[["Game No.", "Game Name"]]
+    return df[["Game No.", "Game Name", "Price"]]
 
 
 def insert_new_ticket_name_to_lookup_table(

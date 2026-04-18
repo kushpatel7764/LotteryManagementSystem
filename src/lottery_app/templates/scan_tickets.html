@@ -1,307 +1,318 @@
 {% extends "navButton.html" %}
-{% block title %}Scan Tickets Page{% endblock %}
+{% block title %}Scan Tickets{% endblock %}
 {% block extra_css %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='scan_tickets.css') }}">
 {% endblock %}
 
 {% block extra_js %}
 {{ super() }}
-    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
-    <script>
-        let pollingInterval = null;
-        let isProcessing = false;
-        async function processBarcode() {
-            if (isProcessing ) return; // Skip if still processing
-            isProcessing = true;
-            try {
-                const response = await fetch('/check_barcode_stack');
-                // Check for successful response
-                if (response.ok) {
-                    const data = await response.json();
-                    // Check for barcode presence
-                    if (data.barcode) {
-                        const activeElement = document.activeElement;
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+  <script>
+    let pollingInterval = null;
+    let isProcessing = false;
 
-                        // Only insert if the focused element is an input field.
-                        if (activeElement && (activeElement.tagName === "INPUT")) {
-
-                            // Set barcode value
-                            activeElement.value = data.barcode;
-
-                            // Simulate input event so browser recognizes value change
-                            activeElement.dispatchEvent(new Event("input", { bubbles: true }));
-                            
-                            // Store the ID of the last-focused input
-                            sessionStorage.setItem("lastFocusedInput", activeElement.id);
-
-                            const form = activeElement.form;
-                            if (form) {
-                                form.requestSubmit(); // Modern way (better than form.submit())
-                            }
-                        } else {
-                            console.warn("No input field is focused; barcode not inserted.");
-                        }
-                    } else {
-                        return null;
-                    }
-                } else {
-                    return null;
-                }
-            } catch (error) {
-                return null;
-            } finally {
-                isProcessing = false;
+    async function processBarcode() {
+      if (isProcessing) return;
+      isProcessing = true;
+      try {
+        const response = await fetch('/check_barcode_stack');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.barcode) {
+            const activeElement = document.activeElement;
+            if (activeElement && activeElement.tagName === "INPUT") {
+              activeElement.value = data.barcode;
+              activeElement.dispatchEvent(new Event("input", { bubbles: true }));
+              sessionStorage.setItem("lastFocusedInput", activeElement.id);
+              const form = activeElement.form;
+              if (form) form.requestSubmit();
             }
+          }
         }
+      } catch (error) {
+        // silent fail
+      } finally {
+        isProcessing = false;
+      }
+    }
 
-        document.addEventListener("DOMContentLoaded", () => {
-        // Check localStorage polling preference
-        let pollingEnabled = {{ 'true' if should_poll == "true" else 'false' }} === true;
-
-        if (pollingEnabled) {
-            pollingInterval = setInterval(processBarcode, 500);
-            console.log("Polling started based on settings");
-        } else {
-            console.log("Polling is disabled in settings");
-        }
+    document.addEventListener("DOMContentLoaded", () => {
+      let pollingEnabled = {{ 'true' if should_poll == "true" else 'false' }} === true;
+      if (pollingEnabled) {
+        pollingInterval = setInterval(processBarcode, 500);
+      }
     });
-    </script>
-    <script>
-        function checkLengthAndSubmit() {
-            const func_route = "/scan_tickets"
-            const input = document.getElementById('scanned_code');
-            
-            const isValid = /^\d{29}$/.test(input.value);
+  </script>
 
-            if (isValid) {
-                const form = document.getElementById('scanForm');
-                form.action = func_route;
-                form.submit();
-            }
-        }
-        // Wait until the entire page content is loaded
-        document.addEventListener("DOMContentLoaded", function () {
-            function calculateCashDue() {
-                const instantSold = parseFloat(document.getElementById("instant_sold").value) || 0;
-                const instantCashed = parseFloat(document.getElementById("instant_cashed").value) || 0;
-                const onlineCashed = parseFloat(document.getElementById("online_cashed").value) || 0;
-                const onlineSold = parseFloat(document.getElementById("online_sold").value) || 0;
+  <script>
+    function checkLengthAndSubmit() {
+      const input = document.getElementById('scanned_code');
+      if (/^\d{29}$/.test(input.value)) {
+        const form = document.getElementById('scanForm');
+        form.action = "/scan_tickets";
+        form.submit();
+      }
+    }
 
-                const totalDue = (instantSold + onlineSold) - (instantCashed + onlineCashed);
+    document.addEventListener("DOMContentLoaded", function () {
+      function calculateCashDue() {
+        const instantSold  = parseFloat(document.getElementById("instant_sold").value)  || 0;
+        const instantCashed = parseFloat(document.getElementById("instant_cashed").value) || 0;
+        const onlineCashed  = parseFloat(document.getElementById("online_cashed").value)  || 0;
+        const onlineSold    = parseFloat(document.getElementById("online_sold").value)    || 0;
+        document.getElementById("total_due").value = ((instantSold + onlineSold) - (instantCashed + onlineCashed)).toFixed(2);
+      }
+      document.getElementById("online_sold").addEventListener("input", calculateCashDue);
+      document.getElementById("instant_cashed").addEventListener("input", calculateCashDue);
+      document.getElementById("online_cashed").addEventListener("input", calculateCashDue);
+    });
 
-                document.getElementById("total_due").value = totalDue.toFixed(2);
-            }
-            document.getElementById("online_sold").addEventListener("input", calculateCashDue);
-            document.getElementById("instant_cashed").addEventListener("input", calculateCashDue);
-            document.getElementById("online_cashed").addEventListener("input", calculateCashDue);
-        });
+    function closeModal() {
+      document.getElementById("popupModal").classList.remove("is-open");
+    }
 
-        function closeModal() {
-            document.getElementById("popupModal").style.display = "none";
-        }
-        function canSubmit(e) {
-            event.preventDefault();
-            document.getElementById("popupModal").style.display = "block";
-        }
-        function submitFormTo(actionUrl) {
-            const form = document.querySelector('.daily-totals-form');
-            // Check if all required fields are valid
-            if (form.checkValidity()) {
-                form.action = actionUrl;
-                closeModal();
-                form.submit();
-            } else {
-                // Trigger browser's built-in validation UI
-                form.reportValidity();
-            }
-        }
-        function showInfoImage() {
-                const modal = document.getElementById('infoModal');
-                modal.style.display = 'flex';
-                requestAnimationFrame(() => modal.classList.add('show')); // ensures transition triggers
-            }
+    function canSubmit(e) {
+      e.preventDefault();
+      document.getElementById("popupModal").classList.add("is-open");
+    }
 
-        function hideInfoImage() {
-            const modal = document.getElementById('infoModal');
-            modal.classList.remove('show');
-            modal.addEventListener('transitionend', () => {
-                if (!modal.classList.contains('show')) modal.style.display = 'none';
-            }, { once: true });
-        }
-        window.onload = function() {
-        {% if message %}
-            const scanInput = document.querySelector('[name="scanned_code"]');
-            if (scanInput) scanInput.value = "";
-        {% endif %}
-        }
-    </script>
+    function submitFormTo(actionUrl) {
+      const form = document.querySelector('.daily-totals-form');
+      if (form.checkValidity()) {
+        form.action = actionUrl;
+        closeModal();
+        form.submit();
+      } else {
+        form.reportValidity();
+      }
+    }
+
+    function showInfoImage() {
+      const modal = document.getElementById('infoModal');
+      modal.style.display = 'flex';
+      requestAnimationFrame(() => modal.classList.add('show'));
+    }
+
+    function hideInfoImage() {
+      const modal = document.getElementById('infoModal');
+      modal.classList.remove('show');
+      modal.addEventListener('transitionend', () => {
+        if (!modal.classList.contains('show')) modal.style.display = 'none';
+      }, { once: true });
+    }
+
+    window.onload = function () {
+      {% if message %}
+        const scanInput = document.querySelector('[name="scanned_code"]');
+        if (scanInput) scanInput.value = "";
+      {% endif %}
+    };
+  </script>
 {% endblock %}
-{% block header %} Daily Scans {% endblock %}  
+
+{% block header %}Daily Scans{% endblock %}
+
 {% block content %}
-    <section class="scan-section">
-        
-        <!-- Popup Message -->
-        <div id="popupModal" class="modal" class="modal" aria-hidden="true" style="display:none">
-            <div class="modal-content">
-                <button class="modal-close-btn" onclick="closeModal()">×</button>
-                <p>Did you make sure your newly activated books are also activated in this system?</p>
-                <button class="modal-option-btn" onclick="submitFormTo('/submit')" type="submit">YES</button>
-                <button class="modal-option-btn" onclick="closeModal()">NO</button>
-            </div>
+
+<div class="page-header">
+  <h2>Scan Tickets</h2>
+  <p class="page-subtitle">Scan a ticket barcode to record it against an active book</p>
+</div>
+
+<!-- Scan input card -->
+<form method="POST" id="scanForm" class="scan-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="scan-card-label">Scan Ticket</div>
+  <div class="scan-input-row">
+    <input
+      type="text"
+      name="scanned_code"
+      id="scanned_code"
+      placeholder="Scan ticket barcode…"
+      autofocus
+      required
+      oninput="checkLengthAndSubmit()">
+    <button type="button" class="info-btn" onclick="showInfoImage()" title="View barcode info">
+      <i class="fas fa-info"></i>
+    </button>
+  </div>
+  <button type="submit" style="display:none;">Submit</button>
+</form>
+
+<!-- Activated books table -->
+<div class="table-section">
+  <div class="table-header">
+    <h3 class="section-title">Activated Books</h3>
+    <span class="book-count">{{ activated_book_count }} active</span>
+  </div>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Game Name</th>
+          <th>Game #</th>
+          <th>Book ID</th>
+          <th>Price</th>
+          <th>Open</th>
+          <th>Close</th>
+          <th>Sold</th>
+          <th class="col-action"></th>
+        </tr>
+      </thead>
+      <tbody id="scannedTicketsTable">
+        {% if activated_books %}
+          {% for book in activated_books %}
+          <tr class="{% if book['countingTicketNumber'] is not none %}row-scanned{% endif %}">
+            <td>{{ book["TicketName"] }}</td>
+            <td>{{ book['GameNumber'] }}</td>
+            <td class="mono">{{ book['ActiveBookID'] }}</td>
+            <td>${{ book['ticketPrice'] }}</td>
+            <td>{{ book['isAtTicketNumber'] }}</td>
+            <td>
+              {% if book['countingTicketNumber'] is not none %}
+                {{ book['countingTicketNumber'] }}
+              {% else %}
+                <form method="POST" action="/book_sold_out" class="inline-form">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
+                  <button type="submit" class="soldout-btn" title="Mark book as sold out">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                    <span class="soldout-text">Book Sold Out</span>
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+            <td>
+              {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
+                {% if counting_order == "descending" %}
+                  {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
+                {% else %}
+                  {{ (book['countingTicketNumber'] - book['isAtTicketNumber']) }}
+                {% endif %}
+              {% else %}
+                <span class="na-text">N/A</span>
+              {% endif %}
+            </td>
+            <td class="col-action">
+              {% if book['countingTicketNumber'] is not none %}
+                <form method="POST" action="/undo_scan" class="inline-form">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
+                  <button type="submit" class="undo-btn" title="Undo scan">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" class="empty-state">No activated books. Go to Books Management to activate a book.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Report totals form -->
+<div class="totals-section">
+  <div class="totals-header">
+    <h3 class="section-title">Report Totals</h3>
+  </div>
+  <form method="POST" action="/submit" class="daily-totals-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="totals-grid">
+      <div class="form-group">
+        <label for="instant_sold">Instant Sold</label>
+        <div class="currency-wrapper">
+          <span class="currency-symbol">$</span>
+          <input name="instant_sold" id="instant_sold"
+            type="number" inputmode="decimal" min="0" step="0.01"
+            value="{{ instant_tickets_sold_total }}" readonly>
         </div>
+      </div>
 
-        <form method="POST" id="scanForm" class="scan-box">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <label for="scanned_code"><strong>Scan Ticket: </strong></label><br>
-            <div class="input-group-scan">
-                <input type="text"
-                    name="scanned_code"
-                    id="scanned_code"
-                    placeholder="Scan ticket..."
-                    autofocus
-                    required
-                    oninput="checkLengthAndSubmit()">
-                <button type="button" onclick="showInfoImage()" title="Scan the ticket barcode here" id="scanInfoButton">i</button>
-            </div>
-            <!-- Submit button is hidden since auto-submit is now enabled -->
-            <button type="submit" style="display:none;">Submit</button>
-        </form>
+      <div class="form-group">
+        <label for="online_sold">Online Sold</label>
+        <div class="currency-wrapper">
+          <span class="currency-symbol">$</span>
+          <input type="number" name="online_sold" id="online_sold"
+            inputmode="decimal" min="0" step="0.01" required>
+        </div>
+      </div>
 
-        <h2>Activated Books: {{activated_book_count}}</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>GAME NAME</th>
-                    <th>GAME #</th>
-                    <th>BOOK ID</th>
-                    <th>PRICE</th>
-                    <th>OPEN</th>
-                    <th>CLOSE</th>
-                    <th>SOLD</th>
-                    <th class="x_button_container"></th>
-                </tr>
-            </thead>
-            <tbody id="scannedTicketsTable">
-            {% if  activated_books %}
-                {% for book in activated_books %}
-                    <tr class="row {% if book['countingTicketNumber'] is not none %}scanned{% endif %}">
-                        <td>{{ book["TicketName"] }}
-                        <td>{{ book['GameNumber'] }}</td>
-                        <td>{{ book['ActiveBookID'] }}</td>
-                        <td>${{ book['ticketPrice'] }}</td>
-                        <td>{{ book['isAtTicketNumber'] }}</td>
-                        <td>
-                            {% if book['countingTicketNumber'] is not none %}
-                                {{ book['countingTicketNumber'] }}
-                            {% else %}
-                            <!-- if no input for close column then show a button sold out button -->
-                                <form method="POST" action="/book_sold_out">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
-                                    <button type="submit" id="SoldOutButton" class="soldout-btn"><i class="fa-solid fa-book-bookmark"></i><span class="soldout-text">Book Sold Out</span></button>
-                                </form>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
-                                {% if counting_order == "descending"%}
-                                    {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
-                                {% else %}
-                                    {{ ( book['countingTicketNumber'] - book['isAtTicketNumber'] ) }}
-                                {% endif %}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-                        <td class="x_button_container">
-                            {% if book['countingTicketNumber'] is not none %}
-                                <form method="POST" action="/undo_scan">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
-                                    <button type="Submit" class="icon-btn close-btn"><i class="fa-solid fa-xmark"></i></button>
-                                </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            {% endif %}
-            </tbody>
-        </table>
-    </section>
+      <div class="form-group">
+        <label for="instant_cashed">Instant Cashed</label>
+        <div class="currency-wrapper">
+          <span class="currency-symbol">$</span>
+          <input type="number" name="instant_cashed" id="instant_cashed"
+            inputmode="decimal" min="0" step="0.01" required>
+        </div>
+      </div>
 
-    <section class="totals-section">
-        <h2>Report Totals</h2>
-        <form method="POST" action="/submit" class="daily-totals-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="form-input-grid">
-                <div class="form-group">
-                    <label for="instant_sold">Instant Tickets Sold</label>
-                    <div style="position: relative; display: inline-block;">
-                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                        <input name="instant_sold" id="instant_sold" 
-                            type="number" inputmode="decimal" min="0" step="0.01" 
-                            value="{{instant_tickets_sold_total}}" readonly
-                            style="padding-left: 20px;">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="online_sold">Online Tickets Sold</label>
-                    <div style="position: relative; display: inline-block;">
-                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                        <input type="number" name="online_sold" id="online_sold" 
-                            inputmode="decimal" min="0" step="0.01" required
-                            style="padding-left: 20px;">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="instant_cashed">Instant Tickets Cashed</label>
-                    <div style="position: relative; display: inline-block;">
-                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                        <input type="number" name="instant_cashed" id="instant_cashed"
-                            inputmode="decimal" min="0" step="0.01" required
-                            style="padding-left: 20px;">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="online_cashed">Online Tickets Cashed</label>
-                    <div style="position: relative; display: inline-block;">
-                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                        <input type="number" name="online_cashed" id="online_cashed"
-                            inputmode="decimal" min="0" step="0.01" required
-                            style="padding-left: 20px;">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="cash_on_hand">Cash On Hand</label>
-                    <div style="position: relative; display: inline-block;">
-                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                        <input type="number" name="cash_on_hand" id="cash_on_hand"
-                            inputmode="decimal" min="0" step="0.01" required
-                            style="padding-left: 20px;">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="total_due">Total Due</label>
-                    <div style="position: relative; display: inline-block;">
-                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.85em; color: #555;">$</span>
-                        <input name="total_due" id="total_due"
-                            type="number" inputmode="decimal" min="0" step="0.01" readonly
-                            style="padding-left: 20px;">
-                    </div>
-                </div>
-            </div>
+      <div class="form-group">
+        <label for="online_cashed">Online Cashed</label>
+        <div class="currency-wrapper">
+          <span class="currency-symbol">$</span>
+          <input type="number" name="online_cashed" id="online_cashed"
+            inputmode="decimal" min="0" step="0.01" required>
+        </div>
+      </div>
 
-            <button type="button" onclick="canSubmit(event)">Submit</button>
-            <!-- Modal for Image -->
-            <div id="infoModal">
-                <div style="position: relative; background: white; padding: 10px; border-radius: 8px;">
-                    <img src="{{ url_for('static', filename='BarcodeImg.JPG') }}" 
-                        alt="Info Image" 
-                        style="max-width: 90vw; max-height: 80vh; display: block; margin: auto;">
-                    <button onclick="hideInfoImage()" id="InfoModalCloseBtn" onmouseover="this.style.backgroundColor='#f2f2f2'" onmouseout="this.style.backgroundColor='#ff3d3d'">×</button>
-                </div>
-            </div>
-        </form>
-    </section>
+      <div class="form-group">
+        <label for="cash_on_hand">Cash on Hand</label>
+        <div class="currency-wrapper">
+          <span class="currency-symbol">$</span>
+          <input type="number" name="cash_on_hand" id="cash_on_hand"
+            inputmode="decimal" min="0" step="0.01" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="total_due">Total Due</label>
+        <div class="currency-wrapper">
+          <span class="currency-symbol">$</span>
+          <input name="total_due" id="total_due"
+            type="number" inputmode="decimal" min="0" step="0.01" readonly>
+        </div>
+      </div>
+    </div>
+
+    <div class="totals-footer">
+      <button type="button" class="btn-submit" onclick="canSubmit(event)">
+        <i class="fas fa-check"></i> Submit Report
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Confirmation popup modal -->
+<div id="popupModal" class="confirm-modal" aria-hidden="true">
+  <div class="confirm-modal-box">
+    <button class="confirm-close" onclick="closeModal()" title="Close">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="confirm-icon"><i class="fas fa-exclamation-circle"></i></div>
+    <p>Did you make sure your newly activated books are also activated in this system?</p>
+    <div class="confirm-actions">
+      <button class="btn-confirm-yes" onclick="submitFormTo('/submit')">Yes, Submit</button>
+      <button class="btn-confirm-no" onclick="closeModal()">No, Go Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- Barcode info modal -->
+<div id="infoModal">
+  <div class="modal-inner">
+    <button onclick="hideInfoImage()" class="modal-close" title="Close">
+      <i class="fas fa-times"></i>
+    </button>
+    <img src="{{ url_for('static', filename='BarcodeImg.JPG') }}" alt="Barcode scan instructions">
+  </div>
+</div>
+
 {% endblock %}

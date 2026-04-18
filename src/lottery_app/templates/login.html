@@ -1,62 +1,109 @@
-{% extends "navButton.html" %}
-{% block title %}Login{% endblock %}
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
+<body>
 
-{% block extra_js %}
-{{ super() }}
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // Toggle password visibility buttons
-        document.querySelectorAll(".toggle-password").forEach(button => {
-            button.addEventListener("click", (e) => {
-                e.preventDefault(); // avoid form submission
-                const targetId = button.getAttribute("data-target");
-                const input = document.getElementById(targetId);
-                const icon = button.querySelector("i");
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash-message {{ 'success' if 'success' in category else 'warning' if 'warning' in category else 'error' }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
 
-                if (!input) return; // safety check
+  <div class="login-page">
+    <div class="login-card">
 
-                // Toggle the specific input’s type
-                if (input.type === "password") {
-                    input.type = "text";
-                    icon.classList.replace("fa-eye", "fa-eye-slash");
-                } else {
-                    input.type = "password";
-                    icon.classList.replace("fa-eye-slash", "fa-eye");
-                }
-            });
-        });
-    });
-</script>
-{% endblock %}
+      <div class="login-brand">
+        <div class="brand-icon">
+          <i class="fas fa-ticket-alt"></i>
+        </div>
+        <span class="brand-name">Lottery Manager</span>
+      </div>
 
-{% block header %} Login {% endblock %}  
-{% block content %}
-<div class="login-container">
+      <div class="login-header">
+        <h1>Welcome back</h1>
+        <p>Sign in to your account to continue</p>
+      </div>
 
-    <form method="POST" action="{{ url_for('security.login') }}" class="login-form">
+      <form method="POST" action="{{ url_for('security.login') }}" class="login-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <h2>Welcome Back</h2>
-        <p class="subtitle">Sign in to continue</p>
 
-        <div class="input-group">
-            <label for="username">Username</label>
-            <input type="text" name="username" id="username" placeholder="Enter your username" required>
+        <div class="field">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            name="username"
+            id="username"
+            placeholder="Enter your username"
+            required
+            autocomplete="username">
         </div>
 
-        <div class="input-group">
-            <label for="password">Password</label>
-            <div class="password-wrapper">
-                <input type="password" name="password" id="password" placeholder="Enter your password" required>
-                <button type="button" class="toggle-password" data-target="password">
-                    <i class="fas fa-eye"></i>
-                </button>
-            </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrapper">
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="Enter your password"
+              required
+              autocomplete="current-password">
+            <button type="button" class="toggle-password" data-target="password" tabindex="-1">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
         </div>
 
-        <button type="submit" class="login-btn">Login</button>
-    </form>
-</div>
-{% endblock %}
+        <button type="submit" class="btn-login">Sign in</button>
+      </form>
+
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Auto-dismiss flash messages
+      document.querySelectorAll(".flash-message").forEach((msg, index) => {
+        setTimeout(() => {
+          msg.style.opacity = "0";
+          msg.style.transform = "translateY(-8px)";
+          setTimeout(() => msg.remove(), 400);
+        }, 4000 + index * 500);
+      });
+
+      // Password visibility toggle
+      document.querySelectorAll(".toggle-password").forEach(button => {
+        button.addEventListener("click", (e) => {
+          e.preventDefault();
+          const input = document.getElementById(button.getAttribute("data-target"));
+          const icon = button.querySelector("i");
+          if (!input) return;
+          if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
+          } else {
+            input.type = "password";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

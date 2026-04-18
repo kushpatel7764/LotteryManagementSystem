@@ -1,361 +1,405 @@
 :root {
-    --color-action-button: #1D4ED8; /* NEW: Darker Royal Blue for primary actions (Save) */
-    --color-action-hover: #1E40AF;  /* NEW: Slightly darker for hover */
-    --color-background: #fcfcfc;   /* Very Light Grey/Blue */
-    --color-input-selected: #90a9fc; /* Light Indigo for selected dropdown */
-    --color-nav-links-settings-buttons: #696d78; /* Bright Blue for Nav Links and Settings Buttons */
-    --color-nav-links-settings-buttons-hover: #383a40;
-    --color-text-dark: #1f2937;    /* Dark Text */
-    --color-success: #10b981;      /* Emerald Green */
-    --color-error: #ef4444;        /* Red */
-    --color-warning: #f59e0b;      /* Amber */
-    --border-radius-reg: 2px;
+  --blue:         #1D4ED8;
+  --blue-hover:   #1e40af;
+  --blue-light:   #eff6ff;
+  --green:        #10b981;
+  --green-hover:  #059669;
+  --green-light:  #ecfdf5;
+  --red:          #ef4444;
+  --red-hover:    #dc2626;
+  --gray-50:      #f9fafb;
+  --gray-100:     #f3f4f6;
+  --gray-200:     #e5e7eb;
+  --gray-300:     #d1d5db;
+  --gray-500:     #6b7280;
+  --gray-700:     #374151;
+  --gray-900:     #111827;
+  --radius:       8px;
+  --radius-sm:    6px;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:    0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* Headings & Totals Sections */
-h2 {
-    margin-top: 40px;
-    color: #1e293b;
-    font-size: 1.25rem;
-    font-weight: 700;
-    border-bottom: 2px solid #e5e7eb;
-    padding-bottom: 8px;
+/* ── Page header ── */
+.page-header {
+  margin-bottom: 28px;
 }
 
-#scanInfoButton{
-    position: relative;
-    /* Increase size for better touch/click target and visual weight */
-    width: 38px; 
-    height: 38px; 
-    border-radius: var(--border-radius-reg); /* Match or complement the input field radius */
-    border: none;
-    background-color: #60a5fa; /* A lighter, more accessible blue */
-    color: white;
-    font-size: 16px; /* Larger font for the 'i' */
-    font-weight: bold;
-    /* Use flex to perfectly center the 'i' */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    cursor: pointer;
-    /* Ensure it doesn't shrink in the flex container */
-    flex-shrink: 0; 
-    transition: background-color 0.2s ease;
+.page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  letter-spacing: -0.03em;
+  margin: 0 0 4px;
+  border: none;
+  padding: 0;
 }
 
-#scanInfoButton:hover {
-    background-color: var(--color-action-button); /* Use the darker primary color on hover */
-    transform: scale(1.05);
+.page-subtitle {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin: 0;
 }
 
-#infoModalContent {
-    background: white;
-    border-radius: var(--border-radius-reg);
-    padding: 24px 30px;
-    max-width: 500px;
-    width: 90%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    position: relative;
-    animation: modalPop 0.3s ease;
+/* ── Scan grid ── */
+.scan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 36px;
+  max-width: 720px;
 }
 
-@keyframes modalPop {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+/* ── Scan card ── */
+.scan-card {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
 }
 
-#infoModal{
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(6px);
-    background-color: rgba(0,0,0,0.1);
-
-    opacity: 0;
-    transform: scale(0.95);
-    pointer-events: none;
-    transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-/* Add a visible state */
-#infoModal.show {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
-}
-
-#infoModal img {
-    max-width: 100%;
-    max-height: 80vh;
-    border-radius: var(--border-radius-reg);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-}
-
-#InfoModalCloseBtn{
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #ff4d4d;
-    color: white;
-    border: none;
-    border-radius: 5%;
-    width: 28px;
-    height: 28px;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, transform 0.15s ease;
-}
-
-#InfoModalCloseBtn:hover {
-    background-color: #ff0000;
-    transform: scale(1.1);
-}
-
-h1 {
-    color: #333;
-    font-size: 28px;
-}
-
-.scan-box {
-    /* Use a slightly cleaner background from the dark text color for better contrast */
-    background-color: #f5f7fa; 
-    border: 1px solid #e0e7ff; /* A lighter blue/indigo border */
-    border-radius: var(--border-radius-reg); /* Slightly larger radius for a modern feel */
-    padding: 20px 25px; /* Increased padding */
-    margin-bottom: 30px; /* Increased margin for separation */
-    /* A more subtle shadow gives a professional 'lifted' look */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1); 
-    max-width: 450px;
-}
-
-.scan-box label {
+.scan-card-label {
+  font-size: 0.8125rem;
   font-weight: 600;
-  font-size: 1.1rem;
-  color: var(--color-text-dark);
-  margin-bottom: 12px;
-  display: block;
+  color: var(--gray-700);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
 }
 
-.scan-box input[type="text"] {
-  width: 100%;
-  max-width: 400px;
+.scan-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-input[type="text"] {
-    padding: 10px;
-    width: 300px;
-    font-size: 16px;
-    border: 1px solid rgb(204, 204, 204);
-    border-radius: var(--border-radius-reg);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+.scan-input-row input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--gray-900);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+  width: auto;
 }
 
-input[type="text"]:focus {
-    border-color: var(--color-action-button); /* Highlight border on focus */
-    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2); /* Soft blue focus ring */
-    outline: none; /* Remove default focus outline */
+.scan-input-row input[type="text"]:focus {
+  border-color: var(--blue);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
 }
 
-/* Add this to your book_managment.css */
-.input-group-scan {
-    display: flex; /* Enable flex layout for alignment */
-    align-items: center; /* Vertically align items in the middle */
-    gap: 10px; /* Space between input and button */
-    max-width: 500px; /* Define a consistent max width for the group */
-}
-/* Ensure the input takes up the available space within the group */
-.input-group-scan input[type="text"] {
-    flex-grow: 1; /* Allows the input to fill the remaining space */
-    margin: 0; /* Remove default margin */
+.scan-input-row input[type="text"]::placeholder {
+  color: #9ca3af;
+  font-size: 0.85rem;
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: var(--color-action-button);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius-reg);
-    cursor: pointer;
+/* ── Info button ── */
+.info-btn {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: var(--blue-light);
+  color: var(--blue);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background-color 0.15s, color 0.15s;
 }
 
+.info-btn:hover {
+  background: var(--blue);
+  color: #ffffff;
+  transform: none;
+}
 
-button:hover {
-    background-color: var(--color-action-hover);
+/* ── Table section ── */
+.table-section {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.table-header h3 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.book-count {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  background: var(--gray-100);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+/* ── Table ── */
+.table-wrapper {
+  overflow-x: auto;
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 30px;
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0);
-    /*box-shadow: 0 4px 10px rgba(0,0,0,0.05);*/
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
 }
 
-th{
-    background-color: #eef2ff; /* soft indigo */
-    color: #374151;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 13px;
-    padding: 12px 10px;
+thead tr {
+  background: var(--gray-50);
 }
 
-th, td {
-    text-align: center;
-    padding: 12px;
-    border: 1px solid #ddd;
+th {
+  padding: 11px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  border-bottom: 1px solid var(--gray-200);
+  background: var(--gray-50);
 }
 
-/*Delete and Deactivate option CSS*/
-tr .options_Button{
-    box-shadow: none;
-    position: relative;
-    padding: 5px;
-    background-color: rgba(249, 250, 251, 0);
-    border-color: rgba(249, 250, 251, 0);
-    width: 0;
-    height: 0;
-    overflow: visible; /* allow contents to escape bounds */
+td {
+  padding: 13px 16px;
+  color: var(--gray-700);
+  border-bottom: 1px solid var(--gray-100);
+  text-align: center;
+  background: #ffffff;
 }
 
-tr .th_OptionsButton{
-    box-shadow: none;
-    border-color: rgba(249, 250, 251, 0);
-    background-color: rgba(249, 250, 251, 0);
+tbody tr:last-child td {
+  border-bottom: none;
 }
 
-
-td.options_Button.activated .dropbtn {
-    background-color: #10b95f; /* green */
-    color: white;
+tbody tr:hover td {
+  background: #fafbff;
+  transition: background-color 0.15s ease;
 }
 
-td.options_Button.activated .dropdown-content{
-    background-color: #10b95f;
-    box-shadow: 0px 8px 16px #10b953;
-    color: white;
+/* Activated row subtle highlight */
+tbody tr.row-activated td {
+  background: var(--green-light);
 }
-td.options_Button.activated .dropdown-content button:hover{
-    background-color: #48de81;
+
+tbody tr.row-activated:hover td {
+  background: #d1fae5;
 }
+
+.mono {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 40px 16px;
+  font-size: 0.875rem;
+}
+
+/* ── Options column ── */
+.col-options {
+  width: 52px;
+  padding: 8px;
+  text-align: center;
+  position: relative;
+  overflow: visible;
+}
+
+th.col-options {
+  background: var(--gray-50);
+}
+
+/* ── Dropdown ── */
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
 .dropbtn {
-  background-color: var(--color-action-button);
-  border: none;
-  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-100);
+  color: var(--gray-500);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  padding: 6px 12px;
-  border-radius: var(--border-radius-reg);
-  transform: scale(1);
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.15s, color 0.15s;
+  font-size: 0;
 }
 
 .dropbtn:hover {
-  transform: scale(1.1);
-  transition: transform 0.2s ease;
+  background: var(--gray-200);
+  color: var(--gray-700);
+  transform: none;
+}
+
+.dropbtn-active {
+  background: var(--green-light);
+  color: var(--green);
+  border-color: #a7f3d0;
+}
+
+.dropbtn-active:hover {
+  background: var(--green);
+  color: #ffffff;
 }
 
 .dropdown-content {
   display: none;
-  position: absolute;
-  right: 0;
-  background-color: var(--color-action-button);
-  min-width: 130px;
-  box-shadow: 0px 8px 16px var(--color-input-selected);
-  z-index: 1;
-  border-radius: var(--border-radius-reg);
-  padding: 5px 0px 5px 0px;
-  box-sizing: border-box;
-  overflow: hidden; 
-}
-
-.dropdown-content button {
-    padding: none;
-    background: none;
-    border: none;
-    text-align: center;
-    cursor: pointer;
-    font-family: inherit;
-    transform: scale(1);
-    transition: background-color 0.2s ease;
-    outline: none; 
-}
-
-.dropdown-content button:hover {
-transform: scale(1.1);
-  background-color: var(--color-action-hover);
+  position: fixed;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  z-index: 9999;
+  min-width: 150px;
+  overflow: hidden;
+  padding: 4px;
 }
 
 .dropdown-container.show .dropdown-content {
   display: block;
 }
 
-
-th {
-    background-color: rgb(230, 230, 230);
+.dropdown-content button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 0.8375rem;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--gray-700);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.12s;
 }
 
-tr.row td:not(.options_Button){
-    background-color: rgb(243, 244, 246); 
-    font-weight: bold;
+.dropdown-content button i {
+  font-size: 0.75rem;
+  color: var(--gray-500);
 }
 
-tr.row:hover td:not(.options_Button) {
-  background-color: #f1f5ff;
-  transition: background-color 0.2s ease;
+.dropdown-content button:hover {
+  background: var(--gray-100);
+  color: var(--gray-900);
+  transform: none;
 }
 
-.modal {
-    display: none; /* Show on load */
-    position: fixed;
-    z-index: 999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5); /* Transparent dark background */
+.dropdown-content button.btn-delete {
+  color: var(--red);
 }
 
-/* Modal content box */
-.modal-content {
-    background-color: white;
-    margin: 15% auto;
-    padding: 20px;
-    border-radius: border;
-    width: 300px;
-    text-align: center;
+.dropdown-content button.btn-delete i {
+  color: var(--red);
 }
 
-.modal button {
-    margin-top: 15px;
-    padding: 8px 16px;
-    margin-right: 15px;
+.dropdown-content button.btn-delete:hover {
+  background: #fef2f2;
+  color: var(--red-hover);
 }
 
+/* ── Info Modal ── */
+#infoModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
 
+#infoModal.show {
+  opacity: 1;
+}
+
+.modal-inner {
+  position: relative;
+  background: #ffffff;
+  border-radius: var(--radius);
+  padding: 12px;
+  max-width: min(90vw, 560px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: modalSlideIn 0.2s ease;
+}
+
+@keyframes modalSlideIn {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-inner img {
+  display: block;
+  max-width: 100%;
+  max-height: 78vh;
+  border-radius: var(--radius-sm);
+}
+
+.modal-close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: var(--gray-900);
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close:hover {
+  background: var(--red);
+  transform: none;
+}
+
+/* ── Barcode highlight (scanner feedback) ── */
 .barcode-highlight {
-    border: 2px solid limegreen;
-    box-shadow: 0 0 5px limegreen;
+  border: 2px solid #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
 }
-

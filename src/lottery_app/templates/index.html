@@ -1,27 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Lottery Ticket App - Home</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lottery Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 </head>
 <body>
-    <div class="home-container">
-        <h1>Lottery Management System</h1>
-        <div class="card">
-            <div class="nav-buttons">
-                <a href="{{ url_for('tickets.scan_tickets') }}" class="button">Scan Tickets</a>
-                <a href="{{ url_for('books.books_managment') }}" class="button">Books Management</a>
-                <a href="{{ url_for('reports.edit_reports') }}" class="button">Edit Reports</a>
-            </div>
-            <div class="user_edit_buttons">
-                <a href="{{ url_for('settings.settings') }}" class="button" id="settings_btn">Settings</a>
-                <a href="{{ url_for('business_profile.business_profile') }}" class="button" id="business_profile_btn">Business Profile</a>
-            </div>
-        </div>
+  <div class="home-page">
+
+    <div class="home-card">
+      <div class="home-brand">
+        <div class="brand-icon"><i class="fas fa-ticket-alt"></i></div>
+        <span class="brand-name">Lottery Manager</span>
+      </div>
+
+      <div class="nav-group">
+        <p class="group-label">Main</p>
+        <a href="{{ url_for('tickets.scan_tickets') }}" class="nav-item">
+          <span class="nav-item-icon"><i class="fas fa-barcode"></i></span>
+          <span class="nav-item-text">Scan Tickets</span>
+          <i class="fas fa-chevron-right nav-item-arrow"></i>
+        </a>
+        <a href="{{ url_for('books.books_managment') }}" class="nav-item">
+          <span class="nav-item-icon"><i class="fas fa-book"></i></span>
+          <span class="nav-item-text">Books Management</span>
+          <i class="fas fa-chevron-right nav-item-arrow"></i>
+        </a>
+        <a href="{{ url_for('reports.edit_reports') }}" class="nav-item">
+          <span class="nav-item-icon"><i class="fas fa-edit"></i></span>
+          <span class="nav-item-text">Edit Reports</span>
+          <i class="fas fa-chevron-right nav-item-arrow"></i>
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <p class="group-label">Administration</p>
+        <a href="{{ url_for('settings.settings') }}" class="nav-item">
+          <span class="nav-item-icon nav-item-icon--gray"><i class="fas fa-cog"></i></span>
+          <span class="nav-item-text">Settings</span>
+          <i class="fas fa-chevron-right nav-item-arrow"></i>
+        </a>
+        <a href="{{ url_for('business_profile.business_profile') }}" class="nav-item">
+          <span class="nav-item-icon nav-item-icon--gray"><i class="fas fa-briefcase"></i></span>
+          <span class="nav-item-text">Business Profile</span>
+          <i class="fas fa-chevron-right nav-item-arrow"></i>
+        </a>
+      </div>
     </div>
+
+  </div>
 </body>
 </html>

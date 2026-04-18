@@ -1,368 +1,259 @@
-:root {
-    /* ... (Existing color variables) ... */
-    --color-action-button: #1D4ED8; /* Darker Royal Blue for primary actions (Save) */
-    --color-action-hover: #1E40AF;  /* Slightly darker for hover */
-    --color-background: #f5f7fa;   /* Very Light Grey/Blue */
-    --color-nav-links-settings-buttons: #696d78;
-    --color-nav-links-settings-buttons-hover: #383a40;
-    --color-text-dark: #1f2937;
-    --color-success: #10b981;
-    --color-error: #ef4444;
-    --color-warning: #f59e0b;
-    --border-radius-reg: 2px; /* Slightly increased for softer look */
+/* ── Two-column grid ── */
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  max-width: 900px;
+  align-items: start;
 }
 
-/* Common card style */
-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-sizing: border-box;
-    padding: 20px;
+/* ── Card ── */
+.profile-card {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
-/* Card container */
-section > form, .users-list-container, .add-user-container {
-    background: white;
-    border-radius: var(--border-radius-reg);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    padding: 40px;
-    width: 100%;
-    max-width: 700px;
-    box-sizing: border-box;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+.profile-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gray-200);
 }
 
-/* Hover effect for cards (optional) */
-section > form:hover, .users-list-container:hover, .add-user-container:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 14px 28px rgba(0,0,0,0.12);
+.card-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--blue-light);
+  color: var(--blue);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  flex-shrink: 0;
 }
 
-/* Password show icon */
-
-.password-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
+.profile-card-header h3 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
 }
 
-.password-wrapper input {
-    width: 100%;
-    padding-right: 40px; /* Space for the eye button */
+/* ── General info form ── */
+.info-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.password-wrapper .toggle-password{
-    background-color: unset;
-    width: unset;
-    padding: unset;
-    color: unset;
-    margin: unset;
-    padding-top: 6px;
-}
-.password-wrapper .toggle-password:hover{
-    background-color: unset;
-}
-.toggle-password {
-    display: flex;
-    flex-direction: row-reverse;
-    position: absolute;
-    right: 10px;
-    background: none;
-    border: none;
-    color: #6b7280;
-    cursor: pointer;
-    font-size: 1em;
-    width: fit-content;
-    padding: unset;
-    transition: color 0.2s ease;
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.toggle-password:hover {
-    background-color: unset;
-    color: var(--color-action-button);
+.form-field label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-/* Buttons */
-.users-list-container .btn-action { 
-    cursor:pointer; 
-    font-weight:600; 
-    flex-shrink: 0;
-    display: block;
-    padding: 10px 16px;
-    margin: 20px auto 0 auto;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: var(--border-radius-reg);
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    max-width: 250px;
-}
-.btn-action { 
-    cursor:pointer; 
-    font-weight:600; 
-    flex-shrink: 0;
-    display: block;
-    padding: 10px 16px;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: var(--border-radius-reg);
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    max-width: 250px;
+.btn-save-profile {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background-color 0.15s;
 }
 
-.btn-role { background: var(--color-action-button);border:1px solid rgba(29,78,216,0.08); }
-.btn-delete { 
-    background-color:#d42020;
-    transform: scale(1);
-    color:white;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-.btn-delete:hover { 
-    background-color: #b51212;
-    transform: scale(1.1);
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-.self-badge { padding:6px 10px;border-radius:var(--border-radius-reg);background:#eef2ff;color:#1D4ED8;font-weight:600;}
+.btn-save-profile:hover { background: var(--blue-hover); }
 
-/* --- General Information Form --- */
-#general-info form h2 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 30px;
-    color: #1f2937;
-    text-align: center;
+/* ── User list ── */
+.user-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
 }
 
-#general-info label {
-    display: block;
-    margin-bottom: 20px;
-    font-weight: 600;
-    color: #374151;
-    font-size: 1rem;
+.user-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--gray-100);
+  transition: background-color 0.12s;
 }
 
-#general-info input {
-    width: 100%;
-    padding: 12px 15px;
-    margin-top: 8px;
-    border-radius: var(--border-radius-reg);
-    border: 1px solid #ccc;
-    outline: none;
-    font-size: 1rem;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+.user-item:last-child { border-bottom: none; }
+.user-item:hover { background: var(--gray-50); }
+
+.user-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-#general-info input:focus {
-    border-color: #1D4ED8;
-    box-shadow: 0 0 0 3px rgba(29,78,216,0.15);
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--blue-light);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
-#general-info button {
-    display: block;
-    margin: 20px auto 0 auto;
-    padding: 12px 25px;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: var(--border-radius-reg);
-    background-color: #1D4ED8;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    max-width: 250px;
-    transform: scale(1);
-    transition: background-color 0.3s ease, transform 0.3s ease;
+.user-info { display: flex; flex-direction: column; gap: 1px; }
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-900);
 }
 
-#general-info button:hover {
-    background-color: #1E40AF;
-    transform: scale(1.1);
-    transition: background-color 0.3s ease, transform 0.3s ease;
+.user-role {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  text-transform: capitalize;
 }
 
-/* User list items */
-/* --- Users List Scroll --- */
-.users-list-container {
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: var(--border-radius-reg);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    padding: 20px 24px;
-    width: 100%;
-    max-width: 700px;
-    box-sizing: border-box;
-    gap: 12px;
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* Header stays fixed */
-.users-list-container h3 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 30px;
-    color: #1f2937;
-    text-align: center;
+.inline-form { margin: 0; padding: 0; }
+
+.btn-delete-user {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fee2e2;
+  color: var(--red);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
 }
 
-/* Scrollable user list */
-.user-list-modern {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    max-height: 350px; /* scrollable area height */
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.btn-delete-user:hover { background: var(--red); color: white; }
+
+.you-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--blue);
+  background: var(--blue-light);
+  padding: 3px 10px;
+  border-radius: 999px;
 }
 
-.user-item { background:white; padding:12px 18px; margin-bottom:12px; border-radius:var(--border-radius-reg); display:flex; justify-content:space-between; align-items:center; }
-.user-item:hover{
-    background:#dee9f373;
-}
-.user-left { display:flex; align-items:center; gap:12px; }
-.user-avatar { width:44px;height:44px;border-radius: var(--border-radius-reg);display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eef2ff,#e0e7ff); color:#1f2937;font-weight:700; }
-.user-info { display:flex; flex-direction:column; }
-.user-name { font-weight:700;color:#1f2937;font-size:1rem; }
-.user-role { font-size:0.85rem; opacity:0.8; margin-top:2px; text-transform:capitalize; }
-.user-actions { display:flex; gap:10px; align-items:center; }
-.self-badge {
-    padding: 6px 10px;
-    border-radius: var(--border-radius-reg);
-    background: #eef2ff;
-    color: #1D4ED8;
-    font-weight: 600;
-}
-
-
-/* --- Add User Form --- */
-/* Keep add user button fixed at the bottom of the card */
-#showAddUserBtn {
-    margin-top: 10px;
-    flex-shrink: 0;
-    background-color: #1D4ED8;
-    padding: 12px 25px;
-    transform: scale(1);
-    transition: background-color 0.3s ease, transform 0.3s ease;
+/* Add user button */
+.btn-add-user {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: calc(100% - 40px);
+  margin: 16px 20px;
+  padding: 9px 16px;
+  background: var(--gray-50);
+  color: var(--gray-700);
+  border: 1px dashed var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  justify-content: center;
 }
 
-#showAddUserBtn:hover {
-    background-color: var(--color-action-hover);
-    transform: scale(1.1);
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-/* Make sure Add User form matches the card height */
-.add-user-container {
-    max-height: 500px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-.add-user-container h2 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-    text-align: center;
-    color: #1f2937;
+.btn-add-user:hover {
+  background: var(--blue-light);
+  border-color: var(--blue);
+  color: var(--blue);
 }
 
-.add-user-container label {
-    display: block;
-    font-weight: 600;
-    color: #374151;
+/* ── Add user form ── */
+.add-user-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.add-user-container .form-group{
-    margin-bottom: 20px;
+.add-user-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
 }
 
-.add-user-container .form-action{
-    display: flex;
-    justify-content: center;   /* ✅ Centers both buttons horizontally */
-    gap: 16px;                 /* ✅ Adds breathing space between them */
-    width: 100%;
-    margin-top: 10px;
+.btn-back-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
 }
 
-button i {
-  margin-right: 8px;
+.btn-back-list:hover { background: var(--gray-200); }
+
+.btn-create-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
 }
 
+.btn-create-user:hover { background: var(--blue-hover); }
 
-.add-user-container input, .add-user-container select {
-    width: 100%;
-    padding: 12px 15px;
-    margin-top: 6px;
-    border-radius: var(--border-radius-reg);
-    border: 1px solid #ccc;
-    font-size: 1rem;
-    outline: none;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.add-user-container input:focus, .add-user-container select:focus {
-    border-color: #1D4ED8;
-    box-shadow: 0 0 0 3px rgba(29,78,216,0.15);
-}
-
-.add-user-container button {
-    margin-top: 15px;
-    padding: 12px 25px;
-    background-color: var(--color-action-button);
-    color: white;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: var(--border-radius-reg);
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    max-width: 250px;
-    transform: scale(1);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.add-user-container #backToListBtn {
-    margin-top: 15px;
-    padding: 12px 25px;
-    background-color: rgba(221, 221, 225, 0.787);
-    color: white;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: var(--border-radius-reg);
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    max-width: 250px;
-    transform: scale(1);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.add-user-container button:hover {
-    transform: scale(1.1);
-    background-color: var(--color-action-hover);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.add-user-container #backToListBtn:hover {
-    background-color: rgba(188, 188, 192, 0.787);
-    transform: scale(1.1);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-@media (max-width:640px){
-    section > form, .users-list-container, .add-user-container {
-        padding: 25px;
-    }
-    .user-item{ flex-direction:column; align-items:flex-start; gap:8px; }
-    .user-actions{width:100%; justify-content:flex-end;}
+@media (max-width: 480px) {
+  .profile-grid { grid-template-columns: 1fr; }
+  .add-user-actions { flex-direction: column; }
+  .btn-back-list, .btn-create-user { width: 100%; justify-content: center; }
 }

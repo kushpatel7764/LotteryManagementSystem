@@ -7,6 +7,7 @@ and registers all the blueprints for different routes.
 
 import logging
 import os
+import sys
 import atexit
 
 logger = logging.getLogger(__name__)
@@ -54,8 +55,12 @@ def create_app():
     app = Flask(__name__, instance_path=my_instance_location)
 
     enc_path = db_path + ".enc"
-    # Load .env file from project root
-    load_dotenv()
+    # Load .env — next to the executable when bundled, next to src/ in dev
+    if getattr(sys, 'frozen', False):
+        _dotenv_path = os.path.join(os.path.dirname(sys.executable), '.env')
+    else:
+        _dotenv_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '.env')
+    load_dotenv(_dotenv_path)
 
     secret = os.getenv("FLASK_SECRET_KEY")
     if not secret:
