@@ -7,6 +7,7 @@ that use a temporary in-memory database).
 """
 
 import os
+import queue as _queue_mod
 import tempfile
 from unittest.mock import patch
 
@@ -105,9 +106,18 @@ def client(app):  # pylint: disable=redefined-outer-name
     return app.test_client()
 
 
+def _drain_barcode_queue():
+    """Drain all items from BARCODE_QUEUE."""
+    while not config_module.BARCODE_QUEUE.empty():
+        try:
+            config_module.BARCODE_QUEUE.get_nowait()
+        except _queue_mod.Empty:
+            break
+
+
 @pytest.fixture(autouse=True)
-def clear_barcode_stack():
-    """Ensure BARCODE_STACK is clean before and after each test."""
-    config_module.BARCODE_STACK.clear()
+def clear_barcode_queue():
+    """Ensure BARCODE_QUEUE is empty before and after each test."""
+    _drain_barcode_queue()
     yield
-    config_module.BARCODE_STACK.clear()
+    _drain_barcode_queue()

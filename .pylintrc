@@ -1,3 +1,10 @@
 [MAIN]
 # lottery_app lives under src/ — install with `pip install -e .` so all tools can find it
 ignore-paths = ^build/
+
+[MESSAGES CONTROL]
+# R0401: Flask blueprint imports in __init__.py create intentional cycles
+# R0801: Test fixtures legitimately share similar boilerplate across conftest files
+disable = cyclic-import,
+          R0401,
+          duplicate-code

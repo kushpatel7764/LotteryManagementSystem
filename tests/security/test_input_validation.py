@@ -287,16 +287,29 @@ class TestScannerBarcodeInjection:
 
     def _authenticated_post(self, client, monkeypatch, barcode):
         """Post a barcode as a logged-in user (simulated via session)."""
+        import queue as _queue_mod  # pylint: disable=import-outside-toplevel
+        from lottery_app.utils import config as cfg  # pylint: disable=import-outside-toplevel
+
         monkeypatch.setattr(
             "lottery_app.routes.scanner.load_config",
             lambda: {"should_poll": "true"},
         )
-        from lottery_app.utils import config as cfg  # pylint: disable=import-outside-toplevel
-        cfg.BARCODE_STACK.clear()
+
+        while not cfg.BARCODE_QUEUE.empty():
+            try:
+                cfg.BARCODE_QUEUE.get_nowait()
+            except _queue_mod.Empty:
+                break
 
         # Simulate a logged-in session (workaround while /receive lacks auth)
         resp = client.post("/receive", data={"barcode": barcode})
-        cfg.BARCODE_STACK.clear()
+
+        while not cfg.BARCODE_QUEUE.empty():
+            try:
+                cfg.BARCODE_QUEUE.get_nowait()
+            except _queue_mod.Empty:
+                break
+
         return resp
 
     def test_null_barcode_does_not_crash(self, client, monkeypatch):

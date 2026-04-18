@@ -303,7 +303,7 @@ def test_delete_user_flash_message():  # NEW
 
         flash_calls = []
 
-        with _patch(
+        with patch(
             "lottery_app.database.user_model.flash",
             side_effect=lambda msg, cat: flash_calls.append((msg, cat)),
         ):

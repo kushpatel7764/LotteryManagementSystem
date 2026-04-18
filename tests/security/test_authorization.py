@@ -7,11 +7,32 @@ Covers:
 - Route-level authentication (all protected routes block unauthenticated requests)
 """
 
+import queue as _queue_mod
 from unittest.mock import MagicMock
 
 import pytest
 
 from lottery_app.utils import config as config_module
+
+
+def _drain_barcode_queue():
+    """Drain all items from BARCODE_QUEUE."""
+    while not config_module.BARCODE_QUEUE.empty():
+        try:
+            config_module.BARCODE_QUEUE.get_nowait()
+        except _queue_mod.Empty:
+            break
+
+
+def _queue_contains(value):
+    """Drain BARCODE_QUEUE and return (found, remaining_items)."""
+    items = []
+    while not config_module.BARCODE_QUEUE.empty():
+        try:
+            items.append(config_module.BARCODE_QUEUE.get_nowait())
+        except _queue_mod.Empty:
+            break
+    return value in items
 
 
 # ---------------------------------------------------------------------------
@@ -33,7 +54,7 @@ class TestReceiveEndpointAuth:
         This test documents the vulnerability.  It passes against the current
         (insecure) code and should FAIL once @login_required is added.
         """
-        config_module.BARCODE_STACK.clear()
+        _drain_barcode_queue()
         monkeypatch.setattr(
             "lottery_app.routes.scanner.load_config",
             lambda: {"should_poll": "true"},
@@ -44,7 +65,7 @@ class TestReceiveEndpointAuth:
         # Secure behaviour: 302 redirect to /login or 401
         if resp.status_code == 200:
             # Vulnerability is active
-            assert "INJECTED_BARCODE" in config_module.BARCODE_STACK, (
+            assert _queue_contains("INJECTED_BARCODE"), (
                 "CRIT-5 ACTIVE: unauthenticated POST to /receive was accepted. "
                 "Add @login_required or API key authentication to this route."
             )
@@ -52,16 +73,16 @@ class TestReceiveEndpointAuth:
             # Vulnerability has been fixed
             assert resp.status_code in (302, 401)
 
-        config_module.BARCODE_STACK.clear()
+        _drain_barcode_queue()
 
     def test_receive_barcode_injection_does_not_reach_stack_when_fixed(
         self, client, monkeypatch
     ):
         """
         [CRIT-5] Once /receive is secured, an unauthenticated request must
-        NOT add anything to BARCODE_STACK.
+        NOT add anything to BARCODE_QUEUE.
         """
-        config_module.BARCODE_STACK.clear()
+        _drain_barcode_queue()
         monkeypatch.setattr(
             "lottery_app.routes.scanner.load_config",
             lambda: {"should_poll": "true"},
@@ -69,14 +90,14 @@ class TestReceiveEndpointAuth:
 
         client.post("/receive", data={"barcode": "SHOULD_NOT_APPEAR"})
 
-        # After patching, stack should remain empty for unauthenticated requests
+        # After patching, queue should remain empty for unauthenticated requests
         # This assertion documents the expected post-fix state.
-        if "SHOULD_NOT_APPEAR" in config_module.BARCODE_STACK:
+        if _queue_contains("SHOULD_NOT_APPEAR"):
             pytest.xfail(
                 "CRIT-5: unauthenticated barcode injection still active — "
                 "fix by adding @login_required to /receive."
             )
-        config_module.BARCODE_STACK.clear()
+        _drain_barcode_queue()
 
 
 # ---------------------------------------------------------------------------
@@ -262,13 +283,13 @@ class TestUnauthenticatedAccess:
         verifies its authentication state and xfails if the vulnerability
         is still present.
         """
-        config_module.BARCODE_STACK.clear()
+        _drain_barcode_queue()
         monkeypatch.setattr(
             "lottery_app.routes.scanner.load_config",
             lambda: {"should_poll": "true"},
         )
         resp = client.post("/receive", data={"barcode": "test"})
-        config_module.BARCODE_STACK.clear()
+        _drain_barcode_queue()
 
         if resp.status_code == 200:
             pytest.xfail(
