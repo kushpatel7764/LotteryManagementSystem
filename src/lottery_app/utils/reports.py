@@ -289,6 +289,8 @@ def do_submit_procedure():
         return f"Database error during submission: {str(e)}", "error"
     except ValueError as ve:
         return str(ve), "error"
+    except FileNotFoundError as e:
+        return f"Invoice not found: {str(e)}", "error"
     except (TypeError, OSError) as e:
         traceback.print_exc()
         return f"Unexpected error: {str(e)}", "error"

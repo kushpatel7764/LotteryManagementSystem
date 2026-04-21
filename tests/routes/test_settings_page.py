@@ -55,10 +55,13 @@ def test_extract_setting_form_data_fallbacks(app):
 # -------------------------------------------------------------------------
 # validate_invoice_output_path tests
 # -------------------------------------------------------------------------
-def test_validate_invoice_output_path_valid(tmp_path):
-    """If the directory exists, return it with no warning."""
+def test_validate_invoice_output_path_valid(tmp_path, monkeypatch):
+    """If the directory exists inside the (mocked) home, return it with no warning."""
+    from pathlib import Path  # pylint: disable=import-outside-toplevel
     real_dir = tmp_path / "out"
     real_dir.mkdir()
+
+    monkeypatch.setattr("lottery_app.routes.settings.Path.home", staticmethod(lambda: tmp_path))
 
     valid_path, warning = validate_invoice_output_path(str(real_dir))
     assert valid_path == str(real_dir)
@@ -71,7 +74,7 @@ def test_validate_invoice_output_path_invalid_returns_default():
     valid_path, warning = validate_invoice_output_path("/not/a/real/dir")
 
     assert valid_path == "/fallback/downloads"
-    assert "invalid output path" in warning.lower()
+    assert "within your home" in warning.lower()
 
 
 # -------------------------------------------------------------------------

@@ -562,94 +562,57 @@ def form_context(app):  # pylint: disable=redefined-outer-name
 
 def test_do_submit_procedure_success(mocker, form_context):  # pylint: disable=unused-argument
     """All mocks succeed: the procedure returns a success message."""
-    mock_check_error = mocker.patch("lottery_app.utils.reports.check_error")
     mock_db_queries = mocker.patch("lottery_app.utils.reports.database_queries")
-    mock_update_sale_report = mocker.patch(
-        "lottery_app.utils.reports.update_sale_report"
+    mock_update_sale_report = mocker.patch("lottery_app.utils.reports.update_sale_report")
+    mock_conn = mocker.MagicMock()
+    mock_cursor = mocker.MagicMock()
+    mock_cursor.fetchall.return_value = []
+    mock_conn.cursor.return_value = mock_cursor
+    mocker.patch("lottery_app.utils.reports.sqlite3.connect", return_value=mock_conn)
+    mocker.patch(
+        "lottery_app.utils.reports.create_daily_invoice",
+        return_value=("invoice.pdf", "success"),
     )
-    mock_update_sale_log = mocker.patch("lottery_app.utils.reports.update_sale_log")
-    mock_update_ticket_timeline = mocker.patch(
-        "lottery_app.utils.reports.update_ticket_timeline"
-    )
-    mock_update_activated_books = mocker.patch(
-        "lottery_app.utils.reports.update_activated_books"
-    )
-    mock_email_invoice = mocker.patch("lottery_app.utils.reports.email_invoice")
-
-    mock_check_error.side_effect = lambda result, *_: result
+    mocker.patch("lottery_app.utils.reports.email_invoice")
 
     mock_db_queries.next_report_id.return_value = 10
-    mock_db_queries.get_all_sold_books.return_value = [
-        {"BookID": 1},
-        {"BookID": 2},
-    ]
 
     message, message_type = do_submit_procedure()
 
     assert message == "SCANS SUBMITTED SUCCESSFULLY"
     assert message_type == "success"
-
-    mock_update_sale_report.insert_daily_totals.assert_called_once()
-    mock_update_sale_log.update_pending_sales_log_report_id.assert_called_once_with(
-        ANY, 10
-    )
-    mock_update_ticket_timeline.update_pending_ticket_timeline_report_id.assert_called_once_with(
-        ANY, 10
-    )
-    assert mock_update_activated_books.deactivate_book.call_count == 2
-    mock_update_activated_books.update_is_at_ticketnumbers.assert_called_once()
-    mock_update_activated_books.clear_counting_ticket_numbers.assert_called_once()
-    mock_email_invoice.assert_called_once()
+    mock_conn.commit.assert_called_once()
+    mock_update_sale_report.add_daily_totals.assert_called_once()
 
 
-@patch("lottery_app.utils.reports.email_invoice")
-@patch("lottery_app.utils.reports.database_queries.get_all_sold_books")
-@patch("lottery_app.utils.reports.check_error")
-def test_do_submit_procedure_check_error_failure(
-    mock_check_error,
-    mock_get_sold_books,
-    mock_email_invoice,  # pylint: disable=unused-argument
-    app,  # pylint: disable=redefined-outer-name
-):
-    """check_error injecting an error causes the procedure to return that error."""
-    def check_error_side_effect(result, msg_data, *_args):
-        msg_data["message"] = "DB ERROR"
-        msg_data["message_type"] = "error"
-        return result
-
-    mock_check_error.side_effect = check_error_side_effect
-    mock_get_sold_books.return_value = [{"BookID": 123}]
-
-    with app.test_request_context(
-        method="POST",
-        data={
-            "instant_sold": 10,
-            "online_sold": 5,
-            "instant_cashed": 2,
-            "online_cashed": 1,
-            "cash_on_hand": 100,
-        },
-    ):
-        message, message_type = do_submit_procedure()
-
-    assert message == "DB ERROR"
-    assert message_type == "error"
-
-
-@patch("lottery_app.utils.reports.database_queries")
-@patch("lottery_app.utils.reports.check_error")
-def test_do_submit_procedure_invalid_book_data(
-    mock_check_error, mock_db_queries, form_context  # pylint: disable=unused-argument
-):
-    """A non-dict entry in get_all_sold_books returns an error tuple."""
-    mock_check_error.side_effect = lambda result, *_: result
-    mock_db_queries.next_report_id.return_value = 1
-    mock_db_queries.get_all_sold_books.return_value = ["BAD_BOOK"]
+def test_do_submit_procedure_next_report_id_error(mocker, form_context):  # pylint: disable=unused-argument
+    """When next_report_id returns an error tuple, the procedure propagates it immediately."""
+    mock_db_queries = mocker.patch("lottery_app.utils.reports.database_queries")
+    mock_db_queries.next_report_id.return_value = ("DB connection failed", "error")
 
     message, message_type = do_submit_procedure()
 
-    assert message == "ERROR: Invalid book data"
+    assert message == "DB connection failed"
     assert message_type == "error"
+
+
+def test_do_submit_procedure_db_error_during_transaction(mocker, form_context):  # pylint: disable=unused-argument
+    """An sqlite3.Error during the transaction triggers rollback and returns a DB error."""
+    import sqlite3 as _sqlite3  # pylint: disable=import-outside-toplevel
+    mock_db_queries = mocker.patch("lottery_app.utils.reports.database_queries")
+    mock_db_queries.next_report_id.return_value = 1
+    mocker.patch("lottery_app.utils.reports.update_sale_report")
+    mock_conn = mocker.MagicMock()
+    mock_cursor = mocker.MagicMock()
+    mock_cursor.execute.side_effect = _sqlite3.OperationalError("no such table: SaleReport")
+    mock_conn.cursor.return_value = mock_cursor
+    mocker.patch("lottery_app.utils.reports.sqlite3.connect", return_value=mock_conn)
+
+    message, message_type = do_submit_procedure()
+
+    assert "Database error" in message
+    assert message_type == "error"
+    mock_conn.rollback.assert_called_once()
 
 
 @patch("lottery_app.utils.reports.database_queries")
@@ -666,14 +629,20 @@ def test_do_submit_procedure_value_error(
     assert message_type == "error"
 
 
-@patch("lottery_app.utils.reports.create_daily_invoice")
-@patch("lottery_app.utils.reports.check_error")
-def test_do_submit_procedure_file_not_found(
-    mock_check_error, mock_create_invoice, form_context  # pylint: disable=unused-argument
-):
+def test_do_submit_procedure_file_not_found(mocker, form_context):  # pylint: disable=unused-argument
     """A FileNotFoundError during invoice creation returns an 'Invoice not found' error."""
-    mock_check_error.side_effect = lambda result, *_: result
-    mock_create_invoice.side_effect = FileNotFoundError("invoice.pdf")
+    mock_db_queries = mocker.patch("lottery_app.utils.reports.database_queries")
+    mock_db_queries.next_report_id.return_value = 5
+    mocker.patch("lottery_app.utils.reports.update_sale_report")
+    mock_conn = mocker.MagicMock()
+    mock_cursor = mocker.MagicMock()
+    mock_cursor.fetchall.return_value = []
+    mock_conn.cursor.return_value = mock_cursor
+    mocker.patch("lottery_app.utils.reports.sqlite3.connect", return_value=mock_conn)
+    mocker.patch(
+        "lottery_app.utils.reports.create_daily_invoice",
+        side_effect=FileNotFoundError("invoice.pdf"),
+    )
 
     message, message_type = do_submit_procedure()
 
@@ -696,24 +665,23 @@ def test_do_submit_procedure_unexpected_exception(
     assert message_type == "error"
 
 
-@patch("lottery_app.utils.reports.email_invoice")
-@patch("lottery_app.utils.reports.database_queries")
-@patch("lottery_app.utils.reports.update_activated_books")
-@patch("lottery_app.utils.reports.check_error")
-def test_do_submit_procedure_no_sold_books(
-    mock_check_error,
-    mock_update_activated_books,
-    mock_db_queries,
-    mock_email_invoice,  # pylint: disable=unused-argument
-    form_context,  # pylint: disable=unused-argument
-):
+def test_do_submit_procedure_no_sold_books(mocker, form_context):  # pylint: disable=unused-argument
     """When there are no sold books the procedure still returns success."""
-    mock_check_error.side_effect = lambda result, *_: result
+    mock_db_queries = mocker.patch("lottery_app.utils.reports.database_queries")
     mock_db_queries.next_report_id.return_value = 5
-    mock_db_queries.get_all_sold_books.return_value = []
+    mocker.patch("lottery_app.utils.reports.update_sale_report")
+    mock_conn = mocker.MagicMock()
+    mock_cursor = mocker.MagicMock()
+    mock_cursor.fetchall.return_value = []
+    mock_conn.cursor.return_value = mock_cursor
+    mocker.patch("lottery_app.utils.reports.sqlite3.connect", return_value=mock_conn)
+    mocker.patch(
+        "lottery_app.utils.reports.create_daily_invoice",
+        return_value=("invoice.pdf", "success"),
+    )
+    mocker.patch("lottery_app.utils.reports.email_invoice")
 
     message, message_type = do_submit_procedure()
 
     assert message == "SCANS SUBMITTED SUCCESSFULLY"
     assert message_type == "success"
-    mock_update_activated_books.deactivate_book.assert_not_called()

@@ -35,14 +35,14 @@ def _make_html_response(game_no, game_name, state_class=""):
         <tr>
             <th>Game No.</th>
             <th>Game Name</th>
-            <th>Top Prize</th>
+            <th>Price</th>
             <th>Prizes Remaining</th>
             <th>Odds of Winning</th>
         </tr>
         <tr>
             <td>{game_no}</td>
             <td>{game_name}</td>
-            <td>$1,000</td>
+            <td>$1</td>
             <td>10</td>
             <td>1 in 4</td>
         </tr>
@@ -90,7 +90,7 @@ def test_get_lottery_net_lookup_table_returns_correct_columns(monkeypatch):
     df = lookup.get_lottery_net_lookup_table()
 
     assert isinstance(df, pandas.DataFrame)
-    assert list(df.columns) == ["Game No.", "Game Name"]
+    assert list(df.columns) == ["Game No.", "Game Name", "Price"]
     assert df.iloc[0]["Game No."] == "123"
     assert df.iloc[0]["Game Name"] == "Lucky Test"
 

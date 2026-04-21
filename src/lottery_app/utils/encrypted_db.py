@@ -55,7 +55,7 @@ def encrypt_file(input_path, output_path=None):
         return
 
     if os.path.getsize(input_path) == 0:
-        logger.debug("DB is empty. Skipping encryption.")
+        print("DB is empty. Skipping encryption.")
         return
 
     cipher = get_cipher()
@@ -120,7 +120,7 @@ def decrypt_file(input_path, output_path=None):
 
     # Safety: empty .enc file → skip (likely corruption or first run)
     if len(encrypted_bytes) == 0:
-        logger.warning("Encrypted file is empty — skipping decryption.")
+        print("Encrypted file is empty — skipping decryption.")
         return
 
     decrypted = cipher.decrypt(encrypted_bytes)

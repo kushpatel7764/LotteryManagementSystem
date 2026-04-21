@@ -5,10 +5,13 @@ Defines the User class used for authentication and user management,
 backed by a SQLite database via Flask-Login.
 """
 
+import logging
 import sqlite3
 
-from flask import current_app, flash
+from flask import flash
 from flask_login import UserMixin
+
+logger = logging.getLogger(__name__)
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from lottery_app.decorators import get_db_cursor
@@ -92,7 +95,7 @@ class User(UserMixin):
                 "error",
             )
         except sqlite3.Error as e:
-            current_app.logger.error("DB error creating user %r: %s", username, e)
+            logger.error("DB error creating user %r: %s", username, e)
             flash("An error occurred. Please try again.", "error")
 
     @staticmethod
@@ -117,10 +120,10 @@ class User(UserMixin):
                     )
                     flash(f"User '{username}' was deleted successfully.", "success")
         except sqlite3.IntegrityError as e:
-            current_app.logger.error("DB integrity error deleting user %r: %s", username, e)
+            logger.error("DB integrity error deleting user %r: %s", username, e)
             flash("An error occurred. Please try again.", "error")
         except sqlite3.Error as e:
-            current_app.logger.error("DB error deleting user %r: %s", username, e)
+            logger.error("DB error deleting user %r: %s", username, e)
             flash("An error occurred. Please try again.", "error")
 
     @staticmethod

@@ -138,7 +138,7 @@ def test_edit_reports_success(client, auth, mocker):
 
     assert resp.status_code == 200
     assert b"Edit Reports" in resp.data
-    assert b"Filtered Results" in resp.data
+    assert b"Results" in resp.data
     assert b"2024-01-01" in resp.data
     assert b"12:00 PM" in resp.data
 

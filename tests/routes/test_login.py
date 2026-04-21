@@ -274,6 +274,7 @@ def test_delete_user_success(client, monkeypatch):  # pylint: disable=redefined-
 
     mock_user_instance = MagicMock()
     mock_user_instance.username = "admin"
+    mock_user_instance.role = "admin"
     monkeypatch.setattr(
         "lottery_app.database.user_model.User.get_by_id",
         lambda user_id: mock_user_instance,
@@ -327,6 +328,7 @@ def test_delete_user_protect_self(client, monkeypatch):  # pylint: disable=redef
 
     mock_user_instance = MagicMock()
     mock_user_instance.username = "selfuser"
+    mock_user_instance.role = "admin"
     monkeypatch.setattr(
         "lottery_app.database.user_model.User.get_by_id",
         lambda user_id: mock_user_instance,
