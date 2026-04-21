@@ -3,7 +3,7 @@
 add_sales_log, and do_submit_procedure in lottery_app.utils.reports."""
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from flask import Flask

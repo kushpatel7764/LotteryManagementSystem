@@ -271,18 +271,19 @@ def do_submit_procedure():
         # Invoice generation reads committed data so it must happen after commit.
         invoice_result = create_daily_invoice(next_report_id)
         if isinstance(invoice_result, tuple) and invoice_result[1] == "error":
-            return invoice_result[0], invoice_result[1]
+            message, status = invoice_result[0], invoice_result[1]
+        else:
+            # Email is best-effort: a network failure must not surface as a failed
+            # submission when all the database work already committed successfully.
+            now = datetime.now()
+            file_name = f"Invoice#{next_report_id}-{now.strftime('%m-%d-%Y')}.pdf"
+            try:
+                email_invoice(filename=file_name)
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                logger.warning("Failed to email invoice: %s", e)
+            message, status = "SCANS SUBMITTED SUCCESSFULLY", "success"
 
-        # Email is best-effort: a network failure must not surface as a failed
-        # submission when all the database work already committed successfully.
-        now = datetime.now()
-        file_name = f"Invoice#{next_report_id}-{now.strftime('%m-%d-%Y')}.pdf"
-        try:
-            email_invoice(filename=file_name)
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.warning("Failed to email invoice: %s", e)
-
-        return "SCANS SUBMITTED SUCCESSFULLY", "success"
+        return message, status
 
     except sqlite3.Error as e:
         traceback.print_exc()

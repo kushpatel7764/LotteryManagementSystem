@@ -10,12 +10,12 @@ import sqlite3
 
 from flask import flash
 from flask_login import UserMixin
-
-logger = logging.getLogger(__name__)
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from lottery_app.decorators import get_db_cursor
 from lottery_app.utils.config import db_path
+
+logger = logging.getLogger(__name__)
 
 DATABASE = db_path
 
