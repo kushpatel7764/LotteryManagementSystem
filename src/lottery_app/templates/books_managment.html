@@ -203,7 +203,14 @@
 <div class="table-section">
   <div class="table-header">
     <h3>Books</h3>
+    <div class="table-search-wrapper">
+      <i class="fas fa-search table-search-icon"></i>
+      <input type="text" class="table-search" id="booksSearch"
+             placeholder="Search name, game #, book ID…"
+             oninput="filterTable('booksSearch', 'booksTableBody')">
+    </div>
     <span class="book-count">{{ books | length }} book{{ 's' if books | length != 1 else '' }}</span>
+    <span class="book-count">${{ "%.2f"|format(total_worth) }}</span>
   </div>
 
   <div class="table-wrapper">
@@ -219,9 +226,9 @@
           <th class="col-options"></th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="booksTableBody">
         {% for book in books %}
-        <tr class="{% if book['BookID'] in activated_ids %}row-activated{% endif %}">
+        <tr class="data-row {% if book['BookID'] in activated_ids %}row-activated{% endif %}">
           <td>{{ book['TicketName'] }}</td>
           <td class="mono">{{ book['BookID'] }}</td>
           <td>{{ book['GameNumber'] }}</td>
@@ -256,6 +263,9 @@
           <td colspan="7" class="empty-state">No books added yet. Scan a barcode above to get started.</td>
         </tr>
         {% endif %}
+        <tr class="no-results-row" style="display:none;">
+          <td colspan="7" class="empty-state">No books match your search.</td>
+        </tr>
       </tbody>
     </table>
   </div>

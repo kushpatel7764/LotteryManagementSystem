@@ -83,11 +83,18 @@ def books_managment():
 
     should_poll = load_config().get("should_poll", False)
 
+    total_worth = sum(
+        (book.get("TicketPrice", 0) or 0) * (book.get("BookAmount", 0) or 0)
+        for book in books
+        if isinstance(book, dict)
+    )
+
     return render_template(
         "books_managment.html",
         books=books,
         activated_ids=activated_ids,
         should_poll=should_poll,
+        total_worth=total_worth,
     )
 
 

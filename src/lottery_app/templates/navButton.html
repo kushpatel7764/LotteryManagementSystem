@@ -13,6 +13,24 @@
   {% block extra_css %}{% endblock %}
   {% block extra_js %}
   <script>
+    function filterTable(inputId, tbodyId) {
+      const query = document.getElementById(inputId).value.toLowerCase().trim();
+      const tbody = document.getElementById(tbodyId);
+      const dataRows = tbody.querySelectorAll('tr.data-row');
+      const noResults = tbody.querySelector('.no-results-row');
+      let visibleCount = 0;
+      dataRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const text = [0, 1, 2].map(i => cells[i] ? cells[i].textContent.toLowerCase() : '').join(' ');
+        const matches = !query || text.includes(query);
+        row.style.display = matches ? '' : 'none';
+        if (matches) visibleCount++;
+      });
+      if (noResults) {
+        noResults.style.display = (visibleCount === 0 && dataRows.length > 0) ? '' : 'none';
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".flash-message").forEach((msg, index) => {
         setTimeout(() => {

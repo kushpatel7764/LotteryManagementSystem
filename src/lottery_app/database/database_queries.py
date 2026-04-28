@@ -314,8 +314,8 @@ def get_scan_ticket_page_table(db):
         with get_db_cursor(db) as cursor:
             cursor.execute("""
                 SELECT TicketNameLookup.TicketName, ActivatedBooks.ActiveBookID, Books.TicketPrice,
-                Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber, 
-                ActivatedBooks.countingTicketNumber
+                Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber,
+                ActivatedBooks.countingTicketNumber, Books.BookAmount
                 FROM ActivatedBooks
                 Join Books ON ActiveBookID = BookID
                 Left Join TicketNameLookup ON Books.GameNumber = TicketNameLookup.GameNumber
@@ -331,6 +331,7 @@ def get_scan_ticket_page_table(db):
                     "Is_Sold": row[4],
                     "isAtTicketNumber": row[5],
                     "countingTicketNumber": row[6],
+                    "BookAmount": row[7],
                 }
                 for row in rows
             ]

@@ -23,7 +23,7 @@ sql_file_path = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "../database/Lottery_DB_Schema.sql")
 )
 
-__version__ = "0.1.0"
+__version__ = "0.0.0"
 
 DEFAULT_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
 CONFIG_PATH = os.path.join(

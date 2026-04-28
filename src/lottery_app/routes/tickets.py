@@ -126,12 +126,22 @@ def scan_tickets():
 
 def _render_scan_tickets():
     """Helper to render the scan tickets page."""
+    activated_books = check_error(
+        database_queries.get_scan_ticket_page_table(db=db_path),
+        flash_prefix="tickets",
+    )
+    if not isinstance(activated_books, list):
+        activated_books = []
+
+    total_worth = sum(
+        (b.get("ticketPrice", 0) or 0) * (b.get("BookAmount", 0) or 0)
+        for b in activated_books
+        if isinstance(b, dict)
+    )
+
     return render_template(
         "scan_tickets.html",
-        activated_books=check_error(
-            database_queries.get_scan_ticket_page_table(db=db_path),
-            flash_prefix="tickets",
-        ),
+        activated_books=activated_books,
         instant_tickets_sold_total=check_error(
             calculate_instant_tickets_sold(report_id="Pending"),
             flash_prefix="tickets",
@@ -143,6 +153,7 @@ def _render_scan_tickets():
             fallback=0,
         ),
         should_poll=load_config().get("should_poll", False),
+        total_worth=total_worth,
     )
 
 

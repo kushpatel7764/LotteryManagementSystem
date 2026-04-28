@@ -126,6 +126,12 @@
 <div class="table-section">
   <div class="table-header">
     <h3 class="section-title">Sale Entries</h3>
+    <div class="table-search-wrapper">
+      <i class="fas fa-search table-search-icon"></i>
+      <input type="text" class="table-search" id="reportSearch"
+             placeholder="Search name, game #, book ID…"
+             oninput="filterTable('reportSearch', 'reportTableBody')">
+    </div>
   </div>
   <div class="table-wrapper">
     <table>
@@ -140,9 +146,9 @@
           <th class="col-edit"></th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="reportTableBody">
         {% for log in sales_logs %}
-        <tr class="row">
+        <tr class="data-row row">
           <td>{{ log["Game Name"] }}</td>
           <td>{{ log["Game #"] }}</td>
           <td class="mono BookID">{{ log["ActiveBookID"] }}</td>
@@ -170,6 +176,9 @@
           <td colspan="7" class="empty-state">No sales logs found for this report.</td>
         </tr>
         {% endfor %}
+        <tr class="no-results-row" style="display:none;">
+          <td colspan="7" class="empty-state">No entries match your search.</td>
+        </tr>
       </tbody>
     </table>
   </div>

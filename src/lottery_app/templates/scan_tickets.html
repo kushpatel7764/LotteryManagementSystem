@@ -144,7 +144,14 @@
 <div class="table-section">
   <div class="table-header">
     <h3 class="section-title">Activated Books</h3>
+    <div class="table-search-wrapper">
+      <i class="fas fa-search table-search-icon"></i>
+      <input type="text" class="table-search" id="scanSearch"
+             placeholder="Search name, game #, book ID…"
+             oninput="filterTable('scanSearch', 'scannedTicketsTable')">
+    </div>
     <span class="book-count">{{ activated_book_count }} active</span>
+    <span class="book-count">${{ "%.2f"|format(total_worth) }}</span>
   </div>
   <div class="table-wrapper">
     <table>
@@ -163,7 +170,7 @@
       <tbody id="scannedTicketsTable">
         {% if activated_books %}
           {% for book in activated_books %}
-          <tr class="{% if book['countingTicketNumber'] is not none %}row-scanned{% endif %}">
+          <tr class="data-row {% if book['countingTicketNumber'] is not none %}row-scanned{% endif %}">
             <td>{{ book["TicketName"] }}</td>
             <td>{{ book['GameNumber'] }}</td>
             <td class="mono">{{ book['ActiveBookID'] }}</td>
@@ -212,6 +219,9 @@
             <td colspan="8" class="empty-state">No activated books. Go to Books Management to activate a book.</td>
           </tr>
         {% endif %}
+        <tr class="no-results-row" style="display:none;">
+          <td colspan="8" class="empty-state">No books match your search.</td>
+        </tr>
       </tbody>
     </table>
   </div>

@@ -1,6 +1,6 @@
 # Lottery Management System
 
-A Flask web application for lottery retailers to manage instant ticket inventory, track real-time sales via barcode scanning, generate daily financial reports, and produce PDF invoices — all backed by an encrypted SQLite database.
+A Flask application for lottery retailers to manage instant ticket inventory, track sales via barcode scanning, generate daily financial reports, and produce PDF invoices — all backed by an encrypted SQLite database.
 
 ---
 
@@ -27,7 +27,7 @@ A Flask web application for lottery retailers to manage instant ticket inventory
 
 The Lottery Management System is a web-based point-of-sale and reporting tool built for lottery retailers. It allows store operators to:
 
-- **Scan physical lottery ticket barcodes** to record each sale in real time
+- **Scan physical lottery ticket barcodes** to record each sale 
 - **Track multiple active ticket books** simultaneously with per-book open/close ticket numbers
 - **Submit a daily sales report** that atomically finalises all pending scans into a numbered report
 - **Generate and email PDF invoices** summarising each day's financial activity
@@ -35,7 +35,7 @@ The Lottery Management System is a web-based point-of-sale and reporting tool bu
 
 ### Problem It Solves
 
-Lottery retailers must track the sale of individual instant tickets across many different games and ticket books. Manual spreadsheets are error-prone, time-consuming, and offer no audit trail. This system replaces that workflow with a structured, database-backed application that:
+Lottery retailers must track the sale of individual instant tickets across many different games and books. Manual spreadsheets are error-prone, time-consuming, and offer no audit trail. This system replaces that workflow with a structured, database-backed application that:
 
 - Eliminates manual entry errors by reading barcodes directly
 - Maintains a complete, immutable history of every scan and every report

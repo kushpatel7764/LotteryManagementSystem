@@ -519,6 +519,46 @@ input[readonly] {
 }
 .btn-success:hover { background: var(--green); color: white; }
 
+/* ── Table search ── */
+.table-search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 240px;
+  margin: 0 12px;
+}
+
+.table-search-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-400);
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+
+.table-search {
+  width: 100%;
+  padding: 6px 10px 6px 30px !important;
+  font-size: 0.8125rem;
+  color: var(--gray-900);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.table-search:focus {
+  border-color: var(--blue);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+}
+
+.table-search::placeholder {
+  color: var(--gray-400);
+}
+
 @media (max-width: 480px) {
   .content { padding: 20px 16px; }
   .navbar { padding: 0 16px; }
