@@ -21,7 +21,8 @@ build/
 MANIFEST
 
 # ── PyInstaller ─────────────────────────────────────────────────────────────────
-*.spec
+# lottery_app.spec is tracked — only ignore spec files generated in subdirectories
+build/**/*.spec
 
 # ── Database files ──────────────────────────────────────────────────────────────
 *.db
