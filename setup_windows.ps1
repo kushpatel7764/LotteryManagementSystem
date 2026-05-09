@@ -159,7 +159,10 @@ GMAIL_APP_PASSWORD=$GMAIL_APP_PASSWORD
 "@
 
 # Write without BOM so python-dotenv can read it cleanly
-[System.IO.File]::WriteAllText("$PROJECT_DIR\src\.env", $envContent, [System.Text.Encoding]::UTF8)
+# Note: [System.Text.Encoding]::UTF8 in .NET Framework emits a BOM, which breaks
+# python-dotenv's key parsing. New-Object UTF8Encoding($false) disables the BOM.
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText("$PROJECT_DIR\src\.env", $envContent, $utf8NoBom)
 
 Ok "src\.env written."
 
@@ -181,7 +184,7 @@ New-Item -ItemType Directory -Path "dist\lottery_app" -Force | Out-Null
 [System.IO.File]::WriteAllText(
     "$PROJECT_DIR\dist\lottery_app\.env",
     $envContent,
-    [System.Text.Encoding]::UTF8
+    $utf8NoBom
 )
 
 Ok "dist\lottery_app\.env written."
