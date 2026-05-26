@@ -147,11 +147,7 @@ def _render_scan_tickets():
             flash_prefix="tickets",
         ),
         counting_order=load_config()["ticket_order"],
-        activated_book_count=check_error(
-            database_queries.count_activated_books(db_path),
-            flash_prefix="tickets",
-            fallback=0,
-        ),
+        activated_book_count=len(activated_books),
         should_poll=load_config().get("should_poll", False),
         total_worth=total_worth,
     )

@@ -86,7 +86,7 @@ def books_managment():
     total_worth = sum(
         (book.get("TicketPrice", 0) or 0) * (book.get("BookAmount", 0) or 0)
         for book in books
-        if isinstance(book, dict)
+        if isinstance(book, dict) and not book.get("Is_Sold")
     )
 
     return render_template(
