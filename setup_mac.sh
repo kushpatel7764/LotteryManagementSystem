@@ -10,10 +10,10 @@
 #   1. Checks / installs Python 3.11+ and pip (via Homebrew if needed)
 #   2. Creates a virtual environment and installs all dependencies
 #   3. Prompts for your Gmail address and App Password
-#   4. Auto-generates FERNET_KEY, FLASK_SECRET_KEY, and SCANNER_API_KEY
+#   4. Auto-generates FERNET_KEY and FLASK_SECRET_KEY
 #   5. Builds the standalone executable with PyInstaller
 #   6. Writes .env to dist/lottery_app/
-#   7. Prints this machine's IP address and the SCANNER_API_KEY
+#   7. Prints next steps — including how to start the Bluetooth scanner bridge
 # =============================================================================
 
 set -euo pipefail
@@ -188,10 +188,15 @@ echo ""
 echo -e "  ${BOLD}App URL (accessible from other devices on the same network):${NC}"
 echo -e "    ${CYAN}http://${LOCAL_IP}:7777${NC}"
 echo ""
-echo -e "  ${BOLD}Scanner API Key${NC}  (set this in your scanner device's header):"
-echo -e "    ${CYAN}${SCANNER_API_KEY}${NC}"
-echo ""
 echo -e "  ${BOLD}First login credentials:${NC}"
 echo -e "    Username: ${CYAN}admin${NC}    Password: ${CYAN}admin${NC}"
 echo -e "  ${YELLOW}  ⚠  Change the default password immediately after first login!${NC}"
+echo ""
+echo -e "  ${BOLD}Bluetooth Scanner Bridge:${NC}"
+echo -e "    Run this in a second terminal window alongside the app:"
+echo -e "    ${CYAN}python bluetooth_bridge.py${NC}"
+echo -e "    It auto-discovers your iPhone — no IP or API key needed."
+echo ""
+echo -e "  ${BOLD}macOS Accessibility permission${NC}  (one-time, needed for keyboard injection):"
+echo -e "    ${CYAN}System Settings → Privacy & Security → Accessibility → add Terminal${NC}"
 echo ""

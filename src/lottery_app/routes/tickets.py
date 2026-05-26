@@ -148,7 +148,6 @@ def _render_scan_tickets():
         ),
         counting_order=load_config()["ticket_order"],
         activated_book_count=len(activated_books),
-        should_poll=load_config().get("should_poll", False),
         total_worth=total_worth,
     )
 

@@ -6,49 +6,6 @@
 
 {% block extra_js %}
 {{ super() }}
-  <!-- Socket.IO client library -->
-  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
-  <script>
-    let pollingInterval = null;
-    let isProcessing = false;
-
-    async function processBarcode() {
-      if (isProcessing) return;
-      isProcessing = true;
-      try {
-        const response = await fetch('/check_barcode_stack');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.barcode) {
-            // Use the focused input if available, otherwise default to add_book_code
-            const activeElement = document.activeElement;
-            const target = (activeElement && activeElement.tagName === "INPUT")
-              ? activeElement
-              : document.getElementById("add_book_code");
-            if (target) {
-              target.value = data.barcode;
-              target.dispatchEvent(new Event("input", { bubbles: true }));
-              sessionStorage.setItem("lastFocusedInput", target.id);
-              const form = target.form;
-              if (form) form.requestSubmit();
-            }
-          }
-        }
-      } catch (error) {
-        // silent fail
-      } finally {
-        isProcessing = false;
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      let pollingEnabled = {{ 'true' if should_poll == "true" else 'false' }} === true;
-      if (pollingEnabled) {
-        pollingInterval = setInterval(processBarcode, 500);
-      }
-    });
-  </script>
-
   <script>
     function checkLengthAndSubmitAddBook() {
       const input = document.getElementById('add_book_code');

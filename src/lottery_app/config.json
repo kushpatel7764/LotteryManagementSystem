@@ -1,6 +1,5 @@
 {
     "ticket_order": "ascending",
-    "should_poll": "false",
     "invoice_output_path": "",
     "timezone": "America/New_York",
     "business_name": "",

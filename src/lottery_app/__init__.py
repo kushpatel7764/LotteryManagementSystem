@@ -24,7 +24,6 @@ from lottery_app.routes.business_profile import business_profile_bp
 from lottery_app.routes.reports import report_bp
 from lottery_app.routes.settings import settings_bp
 from lottery_app.routes.tickets import tickets_bp
-from lottery_app.routes.scanner import scanner_bp
 from lottery_app.routes.security import security_bp
 from lottery_app.utils.version_check import notify_if_update_available, start_version_check
 from lottery_app.utils.encrypted_db import decrypt_file, encrypt_file
@@ -135,7 +134,6 @@ def create_app():
     app.register_blueprint(books_bp)
     app.register_blueprint(settings_bp)
     app.register_blueprint(business_profile_bp)
-    app.register_blueprint(scanner_bp)
 
     # Register the encrypt function to be called at exit
     atexit.register(encrypt_db_at_exit)

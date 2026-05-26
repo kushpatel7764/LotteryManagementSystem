@@ -1,14 +1,10 @@
 """
 Settings routes for Lottery Management System.
-
-This module provides:
-- A route to manage system settings (ticket order and invoice output path).
-- Helpers to extract form data and validate user-provided settings.
 """
 
 from pathlib import Path
 
-from flask import Blueprint, render_template, request, flash
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_login import login_required
 
 from lottery_app.utils.config import (
@@ -16,8 +12,8 @@ from lottery_app.utils.config import (
     load_config,
     update_invoice_output_path,
     update_ticket_order,
-    update_should_poll,
 )
+from lottery_app.utils.bluetooth_bridge import bluetooth_bridge
 
 settings_bp = Blueprint("settings", __name__)
 
@@ -25,76 +21,52 @@ settings_bp = Blueprint("settings", __name__)
 @settings_bp.route("/settings", methods=["GET", "POST"])
 @login_required
 def settings():
-    """
-    Render and manage the settings page.
-
-    Allows users to:
-    - Update the ticket counting order.
-    - Change the invoice output path (validated before saving).
-    """
     if request.method == "POST":
         config = load_config()
-
-        # Process form input with fallback to config
         form_data = extract_setting_form_data(config)
-
-        # Update ticket order
         update_ticket_order(form_data["ticket_order"])
-
-        # Validate and update invoice output path
-        valid_output, warning_message = validate_invoice_output_path(
-            form_data["output_path"]
-        )
+        valid_output, warning_message = validate_invoice_output_path(form_data["output_path"])
         if warning_message:
             flash(warning_message, "settings_warning")
         update_invoice_output_path(valid_output)
-        update_should_poll(form_data["should_poll"])
 
-    # Load current config for rendering
     config = load_config()
     return render_template(
         "settings.html",
         counting_order=config["ticket_order"],
         invoice_output_path=config["invoice_output_path"],
-        should_poll=config["should_poll"],
+        bt_running=bluetooth_bridge.is_running,
     )
 
 
+@settings_bp.route("/bluetooth", methods=["POST"])
+@login_required
+def toggle_bluetooth():
+    action = request.form.get("action")
+    if action == "start":
+        bluetooth_bridge.start()
+    elif action == "stop":
+        bluetooth_bridge.stop()
+    return redirect(url_for("settings.settings"))
+
+
+@settings_bp.route("/bluetooth/status", methods=["GET"])
+@login_required
+def bluetooth_status():
+    return jsonify({"status": bluetooth_bridge.status})
+
+
 def extract_setting_form_data(config):
-    """
-    Extracts ticket order and invoice output path from the settings form.
-
-    Args:
-        config (dict): Existing configuration used as fallback.
-
-    Returns:
-        dict: Dictionary containing "ticket_order" and "output_path".
-    """
     return {
         "ticket_order": request.form.get("ticket_order") or config["ticket_order"],
-        "output_path": request.form.get("outputPath") or config["invoice_output_path"],
-        "should_poll": (
-            "true"
-            if request.form.get("polling_state", "").strip().lower() == "true"
-            else "false"
-        ),
+        "output_path":  request.form.get("outputPath")   or config["invoice_output_path"],
     }
 
 
 def validate_invoice_output_path(path):
     """
-    Validates the provided invoice output path.
-
     Rejects any path that does not resolve to a directory inside the current
-    user's home directory.  This prevents invoices from being written to
-    system directories (/etc, /tmp, network shares, etc.) and blocks
-    path-traversal attempts before they reach the filesystem.
-
-    Args:
-        path (str): Path provided by the user.
-
-    Returns:
-        tuple: (valid_path: str, warning_message: Optional[str])
+    user's home directory to block path-traversal attempts.
     """
     try:
         resolved = Path(path).resolve()
@@ -103,5 +75,4 @@ def validate_invoice_output_path(path):
             return str(resolved), None
     except (OSError, ValueError):
         pass
-
     return DEFAULT_DOWNLOADS_PATH, "Path must be a directory within your home folder."

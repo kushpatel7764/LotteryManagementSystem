@@ -18,3 +18,5 @@ ruff==0.15.10
 simplejson==3.20.2
 urllib3==2.6.3
 WebOb==1.8.9
+bleak>=0.22.0
+pynput>=1.7.6

@@ -8,10 +8,10 @@
 #   1. Checks / installs Python 3.11+ and pip (via winget if needed)
 #   2. Creates a virtual environment and installs all dependencies
 #   3. Prompts for your Gmail address and App Password
-#   4. Auto-generates FERNET_KEY, FLASK_SECRET_KEY, and SCANNER_API_KEY
+#   4. Auto-generates FERNET_KEY and FLASK_SECRET_KEY
 #   5. Builds the standalone executable with PyInstaller
 #   6. Writes .env to dist\lottery_app\
-#   7. Prints this machine's IP address and the SCANNER_API_KEY
+#   7. Prints next steps — including how to start the Bluetooth scanner bridge
 # =============================================================================
 
 # Allow script to run even if execution policy is restricted
@@ -224,10 +224,14 @@ Write-Host ""
 Write-Host "  App URL (accessible from other devices on the same network):" -ForegroundColor White
 Write-Host "    http://${LOCAL_IP}:7777" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  Scanner API Key  (set this in your scanner device's header):" -ForegroundColor White
-Write-Host "    $SCANNER_API_KEY" -ForegroundColor Cyan
-Write-Host ""
 Write-Host "  First login credentials:" -ForegroundColor White
 Write-Host "    Username: admin    Password: admin" -ForegroundColor Cyan
 Write-Host "  ⚠  Change the default password immediately after first login!" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  Bluetooth Scanner Bridge:" -ForegroundColor White
+Write-Host "    Run this in a second terminal window alongside the app:" -ForegroundColor White
+Write-Host "    python bluetooth_bridge.py" -ForegroundColor Cyan
+Write-Host "    It auto-discovers your iPhone — no IP or API key needed." -ForegroundColor White
+Write-Host ""
+Write-Host "  No extra permissions needed on Windows — the bridge works out of the box." -ForegroundColor White
 Write-Host ""

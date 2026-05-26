@@ -5,7 +5,6 @@ download locations, and application configuration settings.
 
 import json
 import os
-import queue
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from flask import flash
@@ -23,14 +22,12 @@ sql_file_path = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "../database/Lottery_DB_Schema.sql")
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 DEFAULT_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
 CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.json"
 )
-BARCODE_QUEUE: queue.Queue = queue.Queue()
-
 
 def load_config():
     """
@@ -123,18 +120,3 @@ def get_timezone() -> str:
         return _DEFAULT_TIMEZONE
 
 
-def update_should_poll(set_val):
-    """
-    Persists the barcode-scanner polling toggle.
-
-    Args:
-        set_val (str): Any string — canonicalized to "true" or "false" before
-            writing so the config file always contains a known value.
-    """
-    if not isinstance(set_val, str):
-        raise TypeError("should_poll value must be a string")
-    canonical = "true" if set_val.strip().lower() == "true" else "false"
-    config = load_config()
-    config["should_poll"] = canonical
-    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-        json.dump(config, f, indent=4)

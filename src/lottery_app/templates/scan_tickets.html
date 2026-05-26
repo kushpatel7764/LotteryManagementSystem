@@ -7,44 +7,6 @@
 
 {% block extra_js %}
 {{ super() }}
-  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
-  <script>
-    let pollingInterval = null;
-    let isProcessing = false;
-
-    async function processBarcode() {
-      if (isProcessing) return;
-      isProcessing = true;
-      try {
-        const response = await fetch('/check_barcode_stack');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.barcode) {
-            const activeElement = document.activeElement;
-            if (activeElement && activeElement.tagName === "INPUT") {
-              activeElement.value = data.barcode;
-              activeElement.dispatchEvent(new Event("input", { bubbles: true }));
-              sessionStorage.setItem("lastFocusedInput", activeElement.id);
-              const form = activeElement.form;
-              if (form) form.requestSubmit();
-            }
-          }
-        }
-      } catch (error) {
-        // silent fail
-      } finally {
-        isProcessing = false;
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      let pollingEnabled = {{ 'true' if should_poll == "true" else 'false' }} === true;
-      if (pollingEnabled) {
-        pollingInterval = setInterval(processBarcode, 500);
-      }
-    });
-  </script>
-
   <script>
     function checkLengthAndSubmit() {
       const input = document.getElementById('scanned_code');

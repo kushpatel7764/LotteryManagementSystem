@@ -8,31 +8,53 @@
 {{ super() }}
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const btn   = document.getElementById("togglePollingBtn");
-    const form  = document.getElementById("pollingForm");
-    const input = document.getElementById("pollingStateInput");
-    let pollingEnabled = input.value === 'true';
 
-    const updateButtonUI = () => {
-      btn.textContent = pollingEnabled ? "Disable Polling" : "Enable Polling";
-      btn.classList.remove('btn-enable', 'btn-disable');
-      btn.classList.add(pollingEnabled ? 'btn-disable' : 'btn-enable');
+    // ── Bluetooth status ──────────────────────────────────────────────────────
+    const statusCfg = {
+      off:       { label: "Off",         cls: "bt-off"       },
+      scanning:  { label: "Scanning…",   cls: "bt-scanning"  },
+      connected: { label: "Connected",   cls: "bt-connected" },
     };
 
-    updateButtonUI();
+    function updateBtUI(status) {
+      const badge  = document.getElementById("btStatusBadge");
+      const btn    = document.getElementById("btToggleBtn");
+      const action = document.getElementById("btAction");
+      const cfg    = statusCfg[status] || statusCfg.off;
 
-    btn.addEventListener("click", () => {
-      pollingEnabled = !pollingEnabled;
-      input.value = pollingEnabled ? 'true' : 'false';
-      updateButtonUI();
-      form.submit();
+      badge.textContent = cfg.label;
+      badge.className   = "bt-badge " + cfg.cls;
+
+      if (status === "off") {
+        btn.textContent = "Enable";
+        btn.classList.replace("btn-disable", "btn-enable");
+        action.value = "start";
+      } else {
+        btn.textContent = "Disable";
+        btn.classList.replace("btn-enable", "btn-disable");
+        action.value = "stop";
+      }
+    }
+
+    async function pollBtStatus() {
+      try {
+        const r = await fetch("/bluetooth/status");
+        if (r.ok) updateBtUI((await r.json()).status);
+      } catch {}
+    }
+
+    updateBtUI({{ 'true' if bt_running else 'false' }} ? "scanning" : "off");
+    setInterval(pollBtStatus, 2000);
+
+    document.getElementById("btToggleBtn").addEventListener("click", () => {
+      document.getElementById("btForm").submit();
     });
 
+    // ── Password visibility toggles ───────────────────────────────────────────
     document.querySelectorAll(".toggle-password").forEach(button => {
       button.addEventListener("click", (e) => {
         e.preventDefault();
-        const targetId = button.getAttribute("data-target");
-        const input = document.getElementById(targetId);
+        const input = document.getElementById(button.getAttribute("data-target"));
         const icon  = button.querySelector("i");
         if (!input) return;
         if (input.type === "password") {
@@ -44,6 +66,7 @@
         }
       });
     });
+
   });
 </script>
 {% endblock %}
@@ -97,24 +120,21 @@
     </form>
   </div>
 
-  <!-- 3. Barcode Scanner Polling -->
+  <!-- 3. Bluetooth Scanner -->
   <div class="setting-card">
     <div class="setting-card-info">
-      <div class="setting-icon"><i class="fas fa-barcode"></i></div>
+      <div class="setting-icon"><i class="fas fa-bluetooth-b"></i></div>
       <div>
-        <h3>Barcode Scanner Polling</h3>
-        <p>Control whether the system actively listens for a connected barcode scanner.</p>
+        <h3>Bluetooth Scanner</h3>
+        <p>Connect to the iPhone scanner app over Bluetooth. Keep the Scan Tickets page open and focused while scanning.</p>
       </div>
     </div>
     <div class="setting-control">
-      <form method="post" action="/settings" id="pollingForm">
+      <span id="btStatusBadge" class="bt-badge bt-off">Off</span>
+      <form method="post" action="/bluetooth" id="btForm">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="setting_type" value="polling_state">
-        <input type="hidden" name="polling_state" id="pollingStateInput"
-          value="{{ 'true' if should_poll == 'true' else 'false' }}">
-        <button type="button" id="togglePollingBtn" class="btn-toggle">
-          <!-- Text set by JS -->
-        </button>
+        <input type="hidden" name="action" id="btAction" value="start">
+        <button type="button" id="btToggleBtn" class="btn-toggle btn-enable">Enable</button>
       </form>
     </div>
   </div>

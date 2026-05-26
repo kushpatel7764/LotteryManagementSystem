@@ -15,7 +15,7 @@ from lottery_app.decorators import admin_required
 from lottery_app.database import database_queries
 from lottery_app.database import update_books, update_activated_books
 from lottery_app.utils.books import activate_book_procedure, add_book_procedure
-from lottery_app.utils.config import db_path, load_config
+from lottery_app.utils.config import db_path
 from lottery_app.utils.error_hanlder import check_error
 
 logger = logging.getLogger(__name__)
@@ -81,8 +81,6 @@ def books_managment():
         if isinstance(book, dict):
             activated_ids.add(book.get("ActiveBookID"))
 
-    should_poll = load_config().get("should_poll", False)
-
     total_worth = sum(
         (book.get("TicketPrice", 0) or 0) * (book.get("BookAmount", 0) or 0)
         for book in books
@@ -93,7 +91,6 @@ def books_managment():
         "books_managment.html",
         books=books,
         activated_ids=activated_ids,
-        should_poll=should_poll,
         total_worth=total_worth,
     )
 
