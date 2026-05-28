@@ -65,10 +65,11 @@
     }
 
     window.onload = function () {
+      const scanInput = document.getElementById('scanned_code');
       {% if message %}
-        const scanInput = document.querySelector('[name="scanned_code"]');
         if (scanInput) scanInput.value = "";
       {% endif %}
+      if (scanInput) scanInput.focus();
     };
   </script>
 {% endblock %}

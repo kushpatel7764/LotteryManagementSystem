@@ -93,6 +93,13 @@
         const input = document.getElementById(lastFocusedID);
         if (input) input.focus();
       }
+
+      document.getElementById('add_book_code').addEventListener('focus', () => {
+        sessionStorage.setItem('lastFocusedInput', 'add_book_code');
+      });
+      document.getElementById('activate_book_code').addEventListener('focus', () => {
+        sessionStorage.setItem('lastFocusedInput', 'activate_book_code');
+      });
     });
 
     window.onload = function () {
