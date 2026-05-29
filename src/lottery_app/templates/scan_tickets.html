@@ -8,16 +8,51 @@
 {% block extra_js %}
 {{ super() }}
   <script>
+    function playSuccessBeep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.25);
+      } catch (e) {}
+    }
+
+    function submitScanForm() {
+      const form = document.getElementById('scanForm');
+      form.action = "/scan_tickets";
+      form.submit();
+    }
+
     function checkLengthAndSubmit() {
       const input = document.getElementById('scanned_code');
-      if (/^\d{29}$/.test(input.value)) {
-        const form = document.getElementById('scanForm');
-        form.action = "/scan_tickets";
-        form.submit();
+      const digits = input.value.replace(/\D/g, '');
+      if (digits.length === 29) {
+        input.value = digits;
+        submitScanForm();
       }
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+      // Prevent a stray Enter key (from the Bluetooth bridge) from submitting
+      // an empty or incomplete scan after the page reloads.
+      document.getElementById('scanned_code').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const digits = this.value.replace(/\D/g, '');
+          if (digits.length === 29) {
+            this.value = digits;
+            submitScanForm();
+          }
+        }
+      });
+
       function calculateCashDue() {
         const instantSold  = parseFloat(document.getElementById("instant_sold").value)  || 0;
         const instantCashed = parseFloat(document.getElementById("instant_cashed").value) || 0;
@@ -70,6 +105,10 @@
         if (scanInput) scanInput.value = "";
       {% endif %}
       if (scanInput) scanInput.focus();
+
+      if (document.querySelector('.flash-message.success')) {
+        playSuccessBeep();
+      }
     };
   </script>
 {% endblock %}
