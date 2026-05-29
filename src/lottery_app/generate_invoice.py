@@ -13,6 +13,10 @@ from reportlab.pdfgen import canvas
 
 logger = logging.getLogger(__name__)
 
+_PAGE_WIDTH, _PAGE_HEIGHT = LETTER
+_BOTTOM_MARGIN = 60
+_TOP_Y = _PAGE_HEIGHT - 50
+
 
 def generate_lottery_invoice_pdf(
     filename, store_info, invoice_log, invoice_number, daily_report
@@ -65,9 +69,7 @@ def _draw_invoice_header(c, invoice_number, height, now):
     c.drawString(400, height - 110, f"Time: {now.strftime('%I:%M %p')}")
 
 
-def _draw_ticket_table(c, y, invoice_log):
-    # Table Headers
-    y -= 30
+def _draw_table_headers(c, y):
     c.setFont("Helvetica-Bold", 10)
     c.drawString(50, y, "Ticket Name")
     c.drawString(225, y, "Game No.")
@@ -79,11 +81,21 @@ def _draw_ticket_table(c, y, invoice_log):
     y -= 10
     c.line(50, y, 550, y)
     y -= 15
+    return y
 
-    # Table Rows
+
+def _draw_ticket_table(c, y, invoice_log):
+    y -= 30
+    y = _draw_table_headers(c, y)
+
     c.setFont("Helvetica", 10)
     if invoice_log is not None:
         for log in invoice_log:
+            if y < _BOTTOM_MARGIN:
+                c.showPage()
+                y = _TOP_Y
+                y = _draw_table_headers(c, y)
+                c.setFont("Helvetica", 10)
             c.drawString(50, y, log["TicketName"])
             c.drawString(225, y, log["Ticket_GameNumber"])
             c.drawString(295, y, log["ActiveBookID"])
@@ -99,7 +111,11 @@ def _draw_ticket_table(c, y, invoice_log):
 
 
 def _draw_daily_summary(c, y, daily_report):
-    # daily Summary
+    # The summary block needs ~110 points; start a new page if it won't fit.
+    if y - 110 < _BOTTOM_MARGIN:
+        c.showPage()
+        y = _TOP_Y
+
     y -= 20
     c.setFont("Helvetica-Bold", 10)
     c.drawString(50, y, "Instant Sold:")
@@ -123,7 +139,10 @@ def _draw_daily_summary(c, y, daily_report):
 
 
 def _draw_footer(c, y):
-    # Footer
+    if y - 40 < _BOTTOM_MARGIN:
+        c.showPage()
+        y = _TOP_Y
+
     y -= 40
     c.setFont("Helvetica-Oblique", 9)
     c.drawString(
