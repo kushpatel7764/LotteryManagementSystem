@@ -25,6 +25,7 @@
     }
 
     function submitScanForm() {
+      sessionStorage.setItem('pendingBeep', '1');
       const form = document.getElementById('scanForm');
       form.action = "/scan_tickets";
       form.submit();
@@ -40,6 +41,19 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+      // On any keydown: if a beep is pending and the server confirmed success,
+      // play the beep. This fires on the scanner's stray Enter key, which is a
+      // valid user gesture that unblocks the AudioContext.
+      document.addEventListener('keydown', function handlePendingBeep() {
+        if (sessionStorage.getItem('pendingBeep') === '1') {
+          sessionStorage.removeItem('pendingBeep');
+          if (document.querySelector('.flash-message.success')) {
+            playSuccessBeep();
+          }
+          document.removeEventListener('keydown', handlePendingBeep);
+        }
+      });
+
       // Prevent a stray Enter key (from the Bluetooth bridge) from submitting
       // an empty or incomplete scan after the page reloads.
       document.getElementById('scanned_code').addEventListener('keydown', function (e) {
@@ -105,10 +119,6 @@
         if (scanInput) scanInput.value = "";
       {% endif %}
       if (scanInput) scanInput.focus();
-
-      if (document.querySelector('.flash-message.success')) {
-        playSuccessBeep();
-      }
     };
   </script>
 {% endblock %}

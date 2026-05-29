@@ -28,6 +28,7 @@
       const digits = input.value.replace(/\D/g, '');
       if (digits.length === 29) {
         input.value = digits;
+        sessionStorage.setItem('pendingBeep', '1');
         const form = document.getElementById('AddBookForm');
         form.action = "/books_managment";
         form.submit();
@@ -39,6 +40,7 @@
       const digits = input.value.replace(/\D/g, '');
       if (digits.length === 29) {
         input.value = digits;
+        sessionStorage.setItem('pendingBeep', '1');
         const form = document.getElementById('ActivateBookForm');
         form.action = "/activate_book";
         form.submit();
@@ -121,6 +123,19 @@
         sessionStorage.setItem('lastFocusedInput', 'activate_book_code');
       });
 
+      // On any keydown: if a beep is pending and the server confirmed success,
+      // play the beep. This fires on the scanner's stray Enter key, which is a
+      // valid user gesture that unblocks the AudioContext.
+      document.addEventListener('keydown', function handlePendingBeep() {
+        if (sessionStorage.getItem('pendingBeep') === '1') {
+          sessionStorage.removeItem('pendingBeep');
+          if (document.querySelector('.flash-message.success')) {
+            playSuccessBeep();
+          }
+          document.removeEventListener('keydown', handlePendingBeep);
+        }
+      });
+
       // Prevent a stray Enter key (from the Bluetooth bridge) from submitting
       // an empty or incomplete input after the page reloads.
       document.getElementById('add_book_code').addEventListener('keydown', function (e) {
@@ -129,6 +144,7 @@
           const digits = this.value.replace(/\D/g, '');
           if (digits.length === 29) {
             this.value = digits;
+            sessionStorage.setItem('pendingBeep', '1');
             document.getElementById('AddBookForm').action = "/books_managment";
             document.getElementById('AddBookForm').submit();
           }
@@ -140,15 +156,12 @@
           const digits = this.value.replace(/\D/g, '');
           if (digits.length === 29) {
             this.value = digits;
+            sessionStorage.setItem('pendingBeep', '1');
             document.getElementById('ActivateBookForm').action = "/activate_book";
             document.getElementById('ActivateBookForm').submit();
           }
         }
       });
-
-      if (document.querySelector('.flash-message.success')) {
-        playSuccessBeep();
-      }
     });
 
     window.onload = function () {

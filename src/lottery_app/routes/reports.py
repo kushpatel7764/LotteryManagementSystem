@@ -490,9 +490,7 @@ def download_modified_report(report_id):
     """
     Trigger the download of the daily invoice report for a given report ID.
     """
-    msg_data = {"message": "", "message_type": ""}
-    result = check_error(lambda: create_daily_invoice(report_id), msg_data)
-    if msg_data.get("message"):
-        return msg_data["message"], 500
-
-    return result[0]
+    result, status = create_daily_invoice(report_id)
+    if status != "success":
+        return str(result), 500
+    return result
