@@ -129,6 +129,62 @@
 }
 .btn-disable:hover { background: var(--red); color: white; }
 
+/* ── App update card ── */
+.setting-icon--green {
+  background: var(--green-light);
+  color: var(--green);
+}
+
+.update-control {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.btn-update {
+  padding: 9px 20px;
+  background: var(--green-light);
+  color: var(--green);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+}
+.btn-update:hover { background: var(--green); color: white; }
+
+.update-progress-track {
+  width: 100%;
+  max-width: 400px;
+  height: 8px;
+  background: var(--gray-100);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.update-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--blue);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.update-status-msg {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  margin: 4px 0 0;
+}
+
+.update-status-msg--success { color: var(--green); }
+.update-status-msg--error   { color: var(--red); }
+
 /* ── Password change form ── */
 .password-form {
   display: grid;

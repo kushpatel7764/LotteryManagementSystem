@@ -107,6 +107,9 @@ def notify_if_update_available(app):
     background version check (started by :func:`start_version_check`) has
     completed.
 
+    Also stores update availability in ``app.config`` so the Settings page
+    can show a persistent in-app updater card.
+
     Safe to call on every request — it does nothing once the notification has
     been delivered or if the background check is still in progress.
 
@@ -133,13 +136,15 @@ def notify_if_update_available(app):
             __version__,
             release_url,
         )
+        # Persist for the Settings page update card.
+        app.config["_update_available"] = True
+        app.config["_update_version"] = latest
+
         if is_bundled():
             flash(
-                f"A new version ({latest}) is available! "
-                "Opening the download page in your browser...",
+                f"Version {latest} is available — go to Settings to update.",
                 "warning",
             )
-            open_releases_page()
         else:
             flash(
                 f"A new version ({latest}) is available. "
