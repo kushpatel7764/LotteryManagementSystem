@@ -25,7 +25,6 @@ from lottery_app.routes.reports import report_bp
 from lottery_app.routes.settings import settings_bp
 from lottery_app.routes.tickets import tickets_bp
 from lottery_app.routes.security import security_bp
-from lottery_app.utils.version_check import notify_if_update_available, start_version_check
 from lottery_app.utils.encrypted_db import decrypt_file, encrypt_file
 
 logger = logging.getLogger(__name__)
@@ -101,15 +100,6 @@ def create_app():
     # --- Initialize database inside app context ---
     with app.app_context():
         setup_database.initialize_database(db_path)
-
-    # --- Start background version check; notify on first eligible request ---
-    # flash() requires a request context, so the network fetch runs in a daemon
-    # thread (start_version_check) and the result is applied in before_request.
-    start_version_check(app)
-
-    @app.before_request
-    def check_version_once():
-        notify_if_update_available(app)
 
     # --- Initialize CSRF protection ---
     app.config["WTF_CSRF_TIME_LIMIT"] = 3600  # token expires after 1 hour

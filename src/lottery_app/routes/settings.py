@@ -4,10 +4,9 @@ Settings routes for Lottery Management System.
 
 from pathlib import Path
 
-from flask import Blueprint, current_app, render_template, request, flash, redirect, url_for, jsonify
+from flask import Blueprint, jsonify, render_template, request, flash, redirect, url_for
 from flask_login import login_required
 
-from lottery_app.utils.auto_updater import apply_update, get_state, start_download
 from lottery_app.utils.config import (
     DEFAULT_DOWNLOADS_PATH,
     load_config,
@@ -15,7 +14,6 @@ from lottery_app.utils.config import (
     update_ticket_order,
 )
 from lottery_app.utils.bluetooth_bridge import bluetooth_bridge
-from lottery_app.utils.version_check import is_bundled
 
 settings_bp = Blueprint("settings", __name__)
 
@@ -33,40 +31,12 @@ def settings():
         update_invoice_output_path(valid_output)
 
     config = load_config()
-    update_available = current_app.config.get("_update_available", False) and is_bundled()
     return render_template(
         "settings.html",
         counting_order=config["ticket_order"],
         invoice_output_path=config["invoice_output_path"],
         bt_running=bluetooth_bridge.is_running,
-        update_available=update_available,
-        update_version=current_app.config.get("_update_version", ""),
     )
-
-
-@settings_bp.route("/update/start", methods=["POST"])
-@login_required
-def update_start():
-    if not is_bundled():
-        return jsonify({"error": "Auto-update only works in the installed app."}), 400
-    start_download()
-    return jsonify({"status": "started"})
-
-
-@settings_bp.route("/update/status")
-@login_required
-def update_status():
-    return jsonify(get_state())
-
-
-@settings_bp.route("/update/apply", methods=["POST"])
-@login_required
-def update_apply():
-    try:
-        apply_update()
-        return jsonify({"status": "applying"})
-    except RuntimeError as exc:
-        return jsonify({"error": str(exc)}), 400
 
 
 @settings_bp.route("/bluetooth", methods=["POST"])

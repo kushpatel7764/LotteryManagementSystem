@@ -123,16 +123,26 @@
         sessionStorage.setItem('lastFocusedInput', 'activate_book_code');
       });
 
-      // On any keydown: if a beep is pending and the server confirmed success,
-      // play the beep. This fires on the scanner's stray Enter key, which is a
-      // valid user gesture that unblocks the AudioContext.
+      // Immediate attempt: the books page responds slower than scan_tickets, so the
+      // scanner's stray Enter often fires before this page finishes loading and the
+      // keydown handler below never sees it. Try playing right away — user activation
+      // from the scan keystrokes carries over through the form-submit navigation.
+      if (sessionStorage.getItem('pendingBeep') === '1' && document.querySelector('.flash-message.success')) {
+        sessionStorage.removeItem('pendingBeep');
+        playSuccessBeep();
+      }
+
+      // Keydown fallback: if the immediate attempt above didn't fire (e.g. stray Enter
+      // arrives after this page loads), use it as the user gesture to unblock audio.
+      // Only consume pendingBeep when a flash message is actually present so it
+      // survives to the new page when the stray Enter fires on the old page first.
       document.addEventListener('keydown', function handlePendingBeep() {
         if (sessionStorage.getItem('pendingBeep') === '1') {
-          sessionStorage.removeItem('pendingBeep');
           if (document.querySelector('.flash-message.success')) {
+            sessionStorage.removeItem('pendingBeep');
             playSuccessBeep();
+            document.removeEventListener('keydown', handlePendingBeep);
           }
-          document.removeEventListener('keydown', handlePendingBeep);
         }
       });
 

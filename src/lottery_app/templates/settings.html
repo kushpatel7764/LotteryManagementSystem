@@ -50,73 +50,6 @@
       document.getElementById("btForm").submit();
     });
 
-    // ── Auto-update ───────────────────────────────────────────────────────────
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    let pollInterval = null;
-
-    function formatMB(bytes) {
-      return (bytes / 1048576).toFixed(1) + ' MB';
-    }
-
-    function setUpdateView(id) {
-      ['updateIdle', 'updateProgress', 'updateReady', 'updateError'].forEach(v => {
-        const el = document.getElementById(v);
-        if (el) el.style.display = (v === id) ? '' : 'none';
-      });
-    }
-
-    function pollUpdateStatus() {
-      pollInterval = setInterval(async () => {
-        try {
-          const resp = await fetch('/update/status');
-          const data = await resp.json();
-          if (data.status === 'downloading') {
-            if (data.total > 0) {
-              const pct = Math.round(data.downloaded / data.total * 100);
-              document.getElementById('updateProgressFill').style.width = pct + '%';
-              document.getElementById('updateProgressLabel').textContent =
-                `Downloading… ${pct}%  (${formatMB(data.downloaded)} / ${formatMB(data.total)})`;
-            }
-          } else if (data.status === 'ready') {
-            clearInterval(pollInterval);
-            setUpdateView('updateReady');
-          } else if (data.status === 'error') {
-            clearInterval(pollInterval);
-            document.getElementById('updateErrorMsg').textContent = 'Error: ' + data.error;
-            setUpdateView('updateError');
-          }
-        } catch (_) { /* network hiccup — retry next tick */ }
-      }, 600);
-    }
-
-    async function startDownload() {
-      setUpdateView('updateProgress');
-      document.getElementById('updateProgressFill').style.width = '0%';
-      document.getElementById('updateProgressLabel').textContent = 'Starting download…';
-      await fetch('/update/start', { method: 'POST', headers: { 'X-CSRFToken': csrfToken } });
-      pollUpdateStatus();
-    }
-
-    async function applyUpdate() {
-      document.getElementById('updateReady').innerHTML =
-        '<p class="update-status-msg">Applying update… The app will restart shortly.</p>';
-      await fetch('/update/apply', { method: 'POST', headers: { 'X-CSRFToken': csrfToken } });
-    }
-
-    // Resume polling if a download was already in progress (e.g. user navigated away)
-    (async () => {
-      try {
-        const resp = await fetch('/update/status');
-        const data = await resp.json();
-        if (data.status === 'downloading') {
-          setUpdateView('updateProgress');
-          pollUpdateStatus();
-        } else if (data.status === 'ready') {
-          setUpdateView('updateReady');
-        }
-      } catch (_) {}
-    })();
-
     // ── Password visibility toggles ───────────────────────────────────────────
     document.querySelectorAll(".toggle-password").forEach(button => {
       button.addEventListener("click", (e) => {
@@ -206,55 +139,7 @@
     </div>
   </div>
 
-  <!-- 4. App Update (only shown when a newer version has been detected) -->
-  {% if update_available %}
-  <div class="setting-card setting-card--column" id="updateCard">
-    <div class="setting-card-info">
-      <div class="setting-icon setting-icon--green"><i class="fas fa-download"></i></div>
-      <div>
-        <h3>Update Available — v{{ update_version }}</h3>
-        <p>A new version is ready. Download it here and the app will restart automatically.</p>
-      </div>
-    </div>
-
-    <div class="setting-control update-control">
-      <!-- idle -->
-      <div id="updateIdle">
-        <button class="btn-update" onclick="startDownload()">
-          <i class="fas fa-download"></i> Download Update
-        </button>
-      </div>
-
-      <!-- downloading -->
-      <div id="updateProgress" style="display:none;">
-        <div class="update-progress-track">
-          <div id="updateProgressFill" class="update-progress-fill"></div>
-        </div>
-        <p id="updateProgressLabel" class="update-status-msg">Starting download…</p>
-      </div>
-
-      <!-- ready to apply -->
-      <div id="updateReady" style="display:none;">
-        <p class="update-status-msg update-status-msg--success">
-          <i class="fas fa-check-circle"></i> Download complete!
-        </p>
-        <button class="btn-update" onclick="applyUpdate()">
-          <i class="fas fa-sync-alt"></i> Apply Update &amp; Restart
-        </button>
-      </div>
-
-      <!-- error -->
-      <div id="updateError" style="display:none;">
-        <p id="updateErrorMsg" class="update-status-msg update-status-msg--error">An error occurred.</p>
-        <button class="btn-update" onclick="startDownload()">
-          <i class="fas fa-redo"></i> Retry
-        </button>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- 5. Change Password -->
+  <!-- 4. Change Password -->
   <div class="setting-card setting-card--column">
     <div class="setting-card-info">
       <div class="setting-icon"><i class="fas fa-key"></i></div>
