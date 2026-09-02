@@ -1,3 +1,123 @@
+
+
+
+
+
+
+
+
+
+/* ── Box grid (Activated Books) ── */
+.box-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 14px;
+  padding: 20px;
+}
+
+.box-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 12px;
+  min-height: 110px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+
+.box-card:hover {
+  border-color: var(--blue);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.box-card--closed {
+  background: #f0fdf4;
+  border-color: #a7f3d0;
+}
+
+.box-card--closed:hover {
+  border-color: var(--green);
+}
+
+.box-card-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  min-height: 1.2em;
+}
+
+.box-card-number {
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.box-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+}
+
+/* ── Book details modal ── */
+.box-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.book-details-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  min-width: 280px;
+}
+
+.book-details-modal h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.book-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.book-details-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bd-label {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.book-details-actions {
+  display: flex;
+  gap: 8px;
+}
+
 /* ── Scan card ── */
 .scan-card {
   background: #ffffff;
@@ -55,34 +175,11 @@
   border-radius: 999px;
 }
 
-/* Scanned rows */
-tbody tr.row-scanned td {
-  background: #f0fdf4;
-}
-
-tbody tr.row-scanned:hover td {
-  background: #dcfce7;
-}
-
 .mono {
   font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
   font-size: 0.8125rem;
   color: var(--gray-500);
 }
-
-.na-text {
-  color: var(--gray-400);
-  font-size: 0.8125rem;
-}
-
-/* ── Options column ── */
-.col-action {
-  width: 48px;
-  padding: 8px;
-  text-align: center;
-}
-
-th.col-action { background: var(--gray-50); }
 
 /* Inline form (soldout/undo) */
 .inline-form {
@@ -97,61 +194,69 @@ th.col-action { background: var(--gray-50); }
 .soldout-btn {
   display: flex;
   align-items: center;
-  gap: 0;
-  background: var(--blue);
-  color: white;
+  gap: 7px;
+  background: var(--red);
+  color: #ffffff;
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.875rem;
-  padding: 5px 10px;
+  padding: 8px 14px;
   white-space: nowrap;
-  overflow: hidden;
-  max-width: 36px;
-  transition: max-width 0.3s ease, background-color 0.15s;
 }
 
 .soldout-btn:hover {
-  background: var(--blue-hover);
-  max-width: 160px;
-  gap: 7px;
+  background: var(--red-hover);
 }
 
 .soldout-text {
   font-size: 0.8125rem;
   font-weight: 500;
-  opacity: 0;
-  max-width: 0;
-  overflow: hidden;
-  transition: opacity 0.2s ease 0.1s, max-width 0.3s ease;
+}
+
+/* Extra book button */
+.extra-book-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--blue);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 8px 14px;
   white-space: nowrap;
 }
 
-.soldout-btn:hover .soldout-text {
-  opacity: 1;
-  max-width: 120px;
+.extra-book-btn:hover {
+  background: var(--blue-hover);
+}
+
+.extrabook-text {
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
 /* Undo button */
 .undo-btn {
-  width: 28px;
-  height: 28px;
-  padding: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 7px;
   background: #fee2e2;
   color: var(--red);
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
+  padding: 8px 14px;
+  white-space: nowrap;
   transition: background-color 0.15s, color 0.15s;
 }
 
 .undo-btn:hover {
   background: var(--red);
-  color: white;
+  color: #ffffff;
 }
 
 /* ── Totals section ── */

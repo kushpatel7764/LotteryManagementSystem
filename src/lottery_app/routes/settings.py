@@ -9,6 +9,9 @@ from flask_login import login_required
 
 from lottery_app.utils.config import (
     DEFAULT_DOWNLOADS_PATH,
+    add_box_range,
+    delete_box,
+    get_boxes,
     load_config,
     update_invoice_output_path,
     update_ticket_order,
@@ -36,7 +39,25 @@ def settings():
         counting_order=config["ticket_order"],
         invoice_output_path=config["invoice_output_path"],
         bt_running=bluetooth_bridge.is_running,
+        boxes=get_boxes(),
     )
+
+
+@settings_bp.route("/settings/add_box_range", methods=["POST"])
+@login_required
+def add_box_range_route():
+    add_box_range(
+        request.form.get("box_range_start", ""),
+        request.form.get("box_range_end", ""),
+    )
+    return redirect(url_for("settings.settings"))
+
+
+@settings_bp.route("/settings/delete_box", methods=["POST"])
+@login_required
+def delete_box_route():
+    delete_box(request.form.get("box_number", ""))
+    return redirect(url_for("settings.settings"))
 
 
 @settings_bp.route("/bluetooth", methods=["POST"])

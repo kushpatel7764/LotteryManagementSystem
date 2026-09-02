@@ -216,7 +216,8 @@ Write-Host "  Executable:" -ForegroundColor White
 Write-Host "    $PROJECT_DIR\dist\lottery_app\lottery_app.exe" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  To run the app:" -ForegroundColor White
-Write-Host "    .\dist\lottery_app\lottery_app.exe" -ForegroundColor Cyan
+Write-Host "    Double-click lottery_app.exe (no console window opens)." -ForegroundColor Cyan
+Write-Host "    Crashes and errors are written to error_log.txt next to the app's database." -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  This computer's IP address:" -ForegroundColor White
 Write-Host "    $LOCAL_IP" -ForegroundColor Cyan
@@ -225,7 +226,7 @@ Write-Host "  App URL (accessible from other devices on the same network):" -For
 Write-Host "    http://${LOCAL_IP}:7777" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  First login credentials:" -ForegroundColor White
-Write-Host "    Username: admin    Password: admin" -ForegroundColor Cyan
+Write-Host "    Username: admin    Password: adminpass" -ForegroundColor Cyan
 Write-Host "  ⚠  Change the default password immediately after first login!" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "  Bluetooth Scanner Bridge:" -ForegroundColor White

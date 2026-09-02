@@ -19,16 +19,18 @@ def add_activate_book_info_to_activated_book(cursor, activated_book_info):
             - ActiveBookID
             - Is_Sold
             - isAtTicketNumber
+            - BoxNumber (optional)
     """
     cursor.execute(
         """
-        INSERT INTO ActivatedBooks (ActivationID, ActiveBookID, isAtTicketNumber)
-        VALUES (?, ?, ?)
+        INSERT INTO ActivatedBooks (ActivationID, ActiveBookID, isAtTicketNumber, BoxNumber)
+        VALUES (?, ?, ?, ?)
     """,
         (
             activated_book_info["ActivationID"],
             activated_book_info["ActiveBookID"],
             activated_book_info["isAtTicketNumber"],
+            activated_book_info.get("BoxNumber"),
         ),
     )
 

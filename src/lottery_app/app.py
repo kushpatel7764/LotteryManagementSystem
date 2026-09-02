@@ -5,10 +5,12 @@ Pyinstaller Command:
 pyinstaller lottery_app.spec
 """
 
+import datetime
 import multiprocessing
 import os
 import sys
 import threading
+import traceback
 import webbrowser
 from pathlib import Path
 
@@ -27,6 +29,41 @@ def _ensure_project_on_path() -> None:
     project_root = str(Path(__file__).resolve().parent.parent)
     if project_root not in sys.path:
         sys.path.insert(0, project_root)
+
+
+def _setup_crash_logging() -> None:
+    """
+    Redirect stdout/stderr and any uncaught exception to a log file.
+
+    Only takes effect in a PyInstaller-frozen build (``sys.frozen``). The
+    packaged app is built with ``console=False``, so there is no terminal to
+    show output or a crash traceback on — without this, both would simply be
+    lost. Running from source (``python app.py``) is unaffected; output still
+    goes to the terminal as normal.
+    """
+    if not getattr(sys, "frozen", False):
+        return
+
+    from lottery_app.utils.config import instance_path  # pylint: disable=import-outside-toplevel
+
+    log_path = os.path.join(instance_path, "error_log.txt")
+    log_file = open(  # pylint: disable=consider-using-with
+        log_path, "a", encoding="utf-8", buffering=1
+    )
+
+    sys.stdout = log_file
+    sys.stderr = log_file
+
+    def log_uncaught_exception(exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_file.write(f"\n[{timestamp}] Uncaught exception:\n")
+        traceback.print_exception(exc_type, exc_value, exc_traceback, file=log_file)
+        log_file.flush()
+
+    sys.excepthook = log_uncaught_exception
 
 
 def open_browser():
@@ -60,6 +97,7 @@ if __name__ == "__main__":
     # entirely when the frozen binary is re-invoked as a multiprocessing
     # worker (freeze_support() returns early in that case).
     _ensure_project_on_path()
+    _setup_crash_logging()
 
     from lottery_app import create_app  # pylint: disable=wrong-import-position
 

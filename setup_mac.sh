@@ -140,19 +140,28 @@ info "Running PyInstaller…"
 PYTHONPATH="${PROJECT_DIR}/src" \
     "$VENV_PYINSTALLER" lottery_app.spec --noconfirm
 
-ok "Build complete → dist/lottery_app/lottery_app"
+ok "Build complete → dist/lottery_app.app"
 
-# ── Step 8 — Write dist/lottery_app/.env ─────────────────────────────────────
-step "Writing dist/lottery_app/.env"
+# ── Step 8 — Write .env ───────────────────────────────────────────────────────
+# The app reads .env from the directory containing sys.executable. That's a
+# different folder depending on how it's launched — the raw onedir binary
+# (dist/lottery_app/lottery_app) vs. the double-clickable bundle
+# (dist/lottery_app.app/Contents/MacOS/lottery_app) — so write it to both
+# locations.
+step "Writing .env"
 
 mkdir -p dist/lottery_app
+mkdir -p dist/lottery_app.app/Contents/MacOS
 
-printf 'FERNET_KEY=%s\nFLASK_SECRET_KEY=%s\nFLASK_DEBUG=0\nSCANNER_API_KEY=%s\nGMAIL_SENDER=%s\nGMAIL_APP_PASSWORD=%s\n' \
+ENV_CONTENTS=$(printf 'FERNET_KEY=%s\nFLASK_SECRET_KEY=%s\nFLASK_DEBUG=0\nSCANNER_API_KEY=%s\nGMAIL_SENDER=%s\nGMAIL_APP_PASSWORD=%s\n' \
     "$FERNET_KEY" "$FLASK_SECRET_KEY" "$SCANNER_API_KEY" \
-    "$GMAIL_SENDER" "$GMAIL_APP_PASSWORD" \
-    > dist/lottery_app/.env
+    "$GMAIL_SENDER" "$GMAIL_APP_PASSWORD")
+
+echo "$ENV_CONTENTS" > dist/lottery_app/.env
+echo "$ENV_CONTENTS" > dist/lottery_app.app/Contents/MacOS/.env
 
 ok "dist/lottery_app/.env written."
+ok "dist/lottery_app.app/Contents/MacOS/.env written."
 
 # ── Step 9 — Detect local IP ──────────────────────────────────────────────────
 step "Detecting local IP address"
@@ -176,11 +185,12 @@ echo -e "${GREEN}${BOLD}╔═════════════════�
 echo -e "${GREEN}${BOLD}║              Setup Complete!                         ║${NC}"
 echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "  ${BOLD}Executable:${NC}"
-echo -e "    ${CYAN}${PROJECT_DIR}/dist/lottery_app/lottery_app${NC}"
+echo -e "  ${BOLD}App bundle:${NC}"
+echo -e "    ${CYAN}${PROJECT_DIR}/dist/lottery_app.app${NC}"
 echo ""
 echo -e "  ${BOLD}To run the app:${NC}"
-echo -e "    ${CYAN}./dist/lottery_app/lottery_app${NC}"
+echo -e "    Double-click ${CYAN}lottery_app.app${NC} in Finder (no terminal window opens)."
+echo -e "    Crashes and errors are written to ${CYAN}error_log.txt${NC} next to the app's database."
 echo ""
 echo -e "  ${BOLD}This computer's IP address:${NC}"
 echo -e "    ${CYAN}${LOCAL_IP}${NC}"
@@ -189,7 +199,7 @@ echo -e "  ${BOLD}App URL (accessible from other devices on the same network):${
 echo -e "    ${CYAN}http://${LOCAL_IP}:7777${NC}"
 echo ""
 echo -e "  ${BOLD}First login credentials:${NC}"
-echo -e "    Username: ${CYAN}admin${NC}    Password: ${CYAN}admin${NC}"
+echo -e "    Username: ${CYAN}admin${NC}    Password: ${CYAN}adminpass${NC}"
 echo -e "  ${YELLOW}  ⚠  Change the default password immediately after first login!${NC}"
 echo ""
 echo -e "  ${BOLD}Bluetooth Scanner Bridge:${NC}"

@@ -102,6 +102,77 @@ def update_business_info(name, value):
         flash(f"{name} is updated to {value} successfully.", "business-profile_success")
 
 
+def get_boxes():
+    """
+    Returns the configured list of box numbers/labels.
+
+    Falls back to an empty list if the config file predates this setting.
+    """
+    return load_config().get("boxes", [])
+
+
+MAX_BOX_RANGE_SIZE = 500
+
+
+def add_box_range(start, end):
+    """
+    Adds a numbered range of boxes (inclusive) to the configured list of boxes,
+    e.g. start=1, end=20 adds boxes "1" through "20".
+
+    Args:
+        start (int): First box number in the range.
+        end (int): Last box number in the range.
+    """
+    try:
+        start = int(start)
+        end = int(end)
+    except (TypeError, ValueError):
+        flash("Box range must be numbers.", "settings_warning")
+        return
+
+    if start < 1 or end < start:
+        flash("Box range must count up from 1 or higher.", "settings_warning")
+        return
+
+    if end - start + 1 > MAX_BOX_RANGE_SIZE:
+        flash(f"Box range can't be more than {MAX_BOX_RANGE_SIZE} boxes at once.", "settings_warning")
+        return
+
+    config = load_config()
+    boxes = config.get("boxes", [])
+    added = 0
+    for number in range(start, end + 1):
+        label = str(number)
+        if label not in boxes:
+            boxes.append(label)
+            added += 1
+
+    if added:
+        config["boxes"] = boxes
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=4)
+        flash(f"Added {added} box{'es' if added != 1 else ''}.", "settings_success")
+    else:
+        flash("Those boxes already exist.", "settings_warning")
+
+
+def delete_box(box_number):
+    """
+    Removes a box number/label from the configured list of boxes.
+
+    Args:
+        box_number (str): The box number/label to remove.
+    """
+    config = load_config()
+    boxes = config.get("boxes", [])
+    if box_number in boxes:
+        boxes.remove(box_number)
+        config["boxes"] = boxes
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=4)
+        flash(f"Box {box_number} removed.", "settings_success")
+
+
 _DEFAULT_TIMEZONE = "America/New_York"
 
 

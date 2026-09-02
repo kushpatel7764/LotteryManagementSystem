@@ -54,6 +54,18 @@ def create_default_user(cursor):
         INSERT INTO Users (username, password_hash, role) VALUES (?, ?, ?)
         """, ("admin", hashed, "default_admin"))
 
+def add_missing_columns(cursor):
+    """
+    Adds columns that were introduced after a database may have already been
+    created. CREATE TABLE IF NOT EXISTS in the schema file only applies to
+    brand new databases, so existing databases need these added in place.
+    """
+    cursor.execute("PRAGMA table_info(ActivatedBooks)")
+    existing_columns = {row[1] for row in cursor.fetchall()}
+    if "BoxNumber" not in existing_columns:
+        cursor.execute("ALTER TABLE ActivatedBooks ADD COLUMN BoxNumber TEXT DEFAULT NULL")
+
+
 def initialize_database(db_path):
     """
     Initializes a new or existing SQLite database by setting up its schema.
@@ -69,8 +81,11 @@ def initialize_database(db_path):
             # Database file not found
             return
 
-        if not cursor.fetchall():
+        tables = cursor.fetchall()
+        if not tables:
             logger.debug("Creating new database and schema...")
             # Pass the path through
             setup_database_schema_with_sql_file(cursor)
             create_default_user(cursor)
+        else:
+            add_missing_columns(cursor)

@@ -71,13 +71,14 @@ def _draw_invoice_header(c, invoice_number, height, now):
 
 def _draw_table_headers(c, y):
     c.setFont("Helvetica-Bold", 10)
-    c.drawString(50, y, "Ticket Name")
-    c.drawString(225, y, "Game No.")
-    c.drawString(295, y, "Book ID")
+    c.drawString(50, y, "No.")
+    c.drawString(85, y, "Ticket Name")
+    c.drawString(260, y, "Game No.")
+    c.drawString(315, y, "Book ID")
     c.drawString(365, y, "Price")
-    c.drawString(420, y, "Open")
-    c.drawString(470, y, "Close")
-    c.drawString(520, y, "Sold")
+    c.drawString(410, y, "Open")
+    c.drawString(450, y, "Close")
+    c.drawString(490, y, "Sold")
     y -= 10
     c.line(50, y, 550, y)
     y -= 15
@@ -90,19 +91,20 @@ def _draw_ticket_table(c, y, invoice_log):
 
     c.setFont("Helvetica", 10)
     if invoice_log is not None:
-        for log in invoice_log:
+        for row_number, log in enumerate(invoice_log, start=1):
             if y < _BOTTOM_MARGIN:
                 c.showPage()
                 y = _TOP_Y
                 y = _draw_table_headers(c, y)
                 c.setFont("Helvetica", 10)
-            c.drawString(50, y, log["TicketName"])
-            c.drawString(225, y, log["Ticket_GameNumber"])
-            c.drawString(295, y, log["ActiveBookID"])
+            c.drawString(50, y, str(row_number))
+            c.drawString(85, y, log["TicketName"])
+            c.drawString(260, y, log["Ticket_GameNumber"])
+            c.drawString(315, y, log["ActiveBookID"])
             c.drawString(365, y, f"${log['TicketPrice']:.2f}")
-            c.drawString(420, y, str(log["Open"]))
-            c.drawString(470, y, str(log["Close"]))
-            c.drawString(520, y, str(log["Sold"]))
+            c.drawString(410, y, str(log["Open"]))
+            c.drawString(450, y, str(log["Close"]))
+            c.drawString(490, y, str(log["Sold"]))
             y -= 18
     else:
         logger.error("Invoice log is None; skipping PDF generation")

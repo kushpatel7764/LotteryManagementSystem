@@ -120,7 +120,48 @@
     </form>
   </div>
 
-  <!-- 3. Bluetooth Scanner -->
+  <!-- 3. Boxes -->
+  <div class="setting-card setting-card--column">
+    <div class="setting-card-info">
+      <div class="setting-icon"><i class="fas fa-box"></i></div>
+      <div>
+        <h3>Boxes</h3>
+        <p>Manage the physical boxes books get activated into. These appear as options when activating a book.</p>
+      </div>
+    </div>
+
+    <div class="box-list">
+      {% for box in boxes %}
+        <div class="box-chip">
+          <span>{{ box }}</span>
+          <form method="post" action="/settings/delete_box">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="box_number" value="{{ box }}">
+            <button type="submit" class="box-chip-remove" title="Remove box">
+              <i class="fas fa-times"></i>
+            </button>
+          </form>
+        </div>
+      {% else %}
+        <p class="na-text">No boxes added yet.</p>
+      {% endfor %}
+    </div>
+
+    <form method="post" action="/settings/add_box_range" class="setting-control setting-control--row box-range-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label class="box-range-label">
+        Box
+        <input type="number" name="box_range_start" min="1" placeholder="1" required>
+      </label>
+      <label class="box-range-label">
+        to
+        <input type="number" name="box_range_end" min="1" placeholder="20" required>
+      </label>
+      <button type="submit" class="btn-setting-save">Add Boxes</button>
+    </form>
+  </div>
+
+  <!-- 4. Bluetooth Scanner -->
   <div class="setting-card">
     <div class="setting-card-info">
       <div class="setting-icon"><i class="fas fa-bluetooth-b"></i></div>
@@ -139,7 +180,7 @@
     </div>
   </div>
 
-  <!-- 4. Change Password -->
+  <!-- 5. Change Password -->
   <div class="setting-card setting-card--column">
     <div class="setting-card-info">
       <div class="setting-icon"><i class="fas fa-key"></i></div>

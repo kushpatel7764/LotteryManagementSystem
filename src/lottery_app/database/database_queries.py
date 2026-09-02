@@ -106,10 +106,11 @@ def get_activated_books(db):
             for book in activated_books:
                 activated_books_list.append(
                     {
-                        "ActivationID": book[0],
-                        "ActiveBookID": book[1],
-                        "isAtTicketNumber": book[3],
-                        "countingTicketNumber": book[4],
+                        "ActivationID": book["ActivationID"],
+                        "ActiveBookID": book["ActiveBookID"],
+                        "isAtTicketNumber": book["isAtTicketNumber"],
+                        "countingTicketNumber": book["countingTicketNumber"],
+                        "BoxNumber": book["BoxNumber"],
                     }
                 )
 
@@ -172,6 +173,31 @@ def is_activated_book(db, activated_book_id):
             return False
     except (ValueError, TypeError) as e:
         return f"ERROR CHECKING ACTIVATED BOOK EXISTENCE: {e}", "error"
+
+
+def is_book_sold(db, book_id):
+    """
+    Checks whether a book has been marked sold out (Books.Is_Sold).
+
+    Parameters:
+        db (str): Path to the SQLite database.
+        book_id (str or int): The BookID to check.
+
+    Returns:
+        bool: True if the book is marked sold, False otherwise (including if
+            the book doesn't exist).
+        tuple: ("ERROR CHECKING BOOK SOLD STATUS: <error>", "error") on failure.
+    """
+    try:
+        setup_database.initialize_database(db)
+        with get_db_cursor(db) as cursor:
+            cursor.execute(
+                "SELECT Is_Sold FROM Books WHERE BookID = ? LIMIT 1;", (book_id,)
+            )
+            row = cursor.fetchone()
+            return bool(row["Is_Sold"]) if row else False
+    except (ValueError, TypeError) as e:
+        return f"ERROR CHECKING BOOK SOLD STATUS: {e}", "error"
 
 
 def get_activated_book_is_at_ticketnumber(db, activated_book_id):
@@ -307,7 +333,8 @@ def get_all_active_book_ids(db):
 
 def get_scan_ticket_page_table(db):
     """
-    Returns a list of active books along with their ticket info, sorted by ticket price (desc).
+    Returns a list of active books along with their ticket info, sorted by box
+    number (ascending, unboxed books last), then by ticket price (desc).
     """
     setup_database.initialize_database(db)
     try:
@@ -315,11 +342,14 @@ def get_scan_ticket_page_table(db):
             cursor.execute("""
                 SELECT TicketNameLookup.TicketName, ActivatedBooks.ActiveBookID, Books.TicketPrice,
                 Books.GameNumber, Books.Is_Sold, ActivatedBooks.isAtTicketNumber,
-                ActivatedBooks.countingTicketNumber, Books.BookAmount
+                ActivatedBooks.countingTicketNumber, Books.BookAmount, ActivatedBooks.BoxNumber
                 FROM ActivatedBooks
                 Join Books ON ActiveBookID = BookID
                 Left Join TicketNameLookup ON Books.GameNumber = TicketNameLookup.GameNumber
-                ORDER BY Books.TicketPrice DESC;
+                ORDER BY
+                    CASE WHEN ActivatedBooks.BoxNumber IS NULL THEN 1 ELSE 0 END,
+                    CAST(ActivatedBooks.BoxNumber AS INTEGER),
+                    Books.TicketPrice DESC;
                 """)
             rows = cursor.fetchall()
             return [
@@ -332,11 +362,38 @@ def get_scan_ticket_page_table(db):
                     "isAtTicketNumber": row[5],
                     "countingTicketNumber": row[6],
                     "BookAmount": row[7],
+                    "BoxNumber": row[8],
                 }
                 for row in rows
             ]
     except sqlite3.Error as e:
         return f"DATABASE ERROR IN get_scan_ticket_page_table: {e}", "error"
+
+
+def get_occupied_box_numbers(db):
+    """
+    Returns the set of box numbers currently holding at least one open
+    (not yet closed out) activated book.
+
+    Parameters:
+        db (str): Path to the SQLite database.
+
+    Returns:
+        set: Box numbers currently in use.
+        tuple: ("ERROR FETCHING OCCUPIED BOXES: <error>", "error") on failure.
+    """
+    try:
+        setup_database.initialize_database(db)
+        with get_db_cursor(db) as cursor:
+            cursor.execute(
+                """
+                SELECT DISTINCT BoxNumber FROM ActivatedBooks
+                WHERE BoxNumber IS NOT NULL AND countingTicketNumber IS NULL;
+                """
+            )
+            return {row[0] for row in cursor.fetchall()}
+    except sqlite3.Error as e:
+        return f"ERROR FETCHING OCCUPIED BOXES: {e}", "error"
 
 
 def is_counting_ticket_number_set(db, activated_book_id):
@@ -437,7 +494,8 @@ def is_sold(db, book_id):
 
 def get_table_for_invoice(db, report_id):
     """
-    Returns ticket details needed for invoice generation for a report.
+    Returns ticket details needed for invoice generation for a report, sorted
+    by box number (ascending, unboxed books last), then by ticket price (desc).
     """
 
     setup_database.initialize_database(db)
@@ -446,11 +504,15 @@ def get_table_for_invoice(db, report_id):
             query = """
                 SELECT SalesLog.Ticket_Name, SalesLog.Ticket_GameNumber, SalesLog.ActiveBookID,
                 Books.TicketPrice, SalesLog.prev_TicketNum, SalesLog.current_TicketNum,
-                SalesLog.Ticket_Sold_Quantity
+                SalesLog.Ticket_Sold_Quantity, ActivatedBooks.BoxNumber
                 FROM SalesLog
-                Join Books ON ActiveBookID = BookID
+                Join Books ON SalesLog.ActiveBookID = Books.BookID
+                Left Join ActivatedBooks ON SalesLog.ActiveBookID = ActivatedBooks.ActiveBookID
                 Where ReportID = ?
-                ORDER BY Books.TicketPrice DESC;
+                ORDER BY
+                    CASE WHEN ActivatedBooks.BoxNumber IS NULL THEN 1 ELSE 0 END,
+                    CAST(ActivatedBooks.BoxNumber AS INTEGER),
+                    Books.TicketPrice DESC;
             """
             cursor.execute(query, (report_id,))
             rows = cursor.fetchall()
@@ -463,6 +525,7 @@ def get_table_for_invoice(db, report_id):
                     "Open": row[4],
                     "Close": row[5],
                     "Sold": row[6],
+                    "BoxNumber": row[7],
                 }
                 for row in rows
             ]

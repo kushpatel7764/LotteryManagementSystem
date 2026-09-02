@@ -104,6 +104,69 @@
 
 .btn-setting-save:hover { background: var(--blue-hover); }
 
+.na-text { color: var(--gray-400); font-size: 0.8125rem; }
+
+/* ── Box list ── */
+.box-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.box-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border-radius: 999px;
+  padding: 5px 6px 5px 12px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.box-chip form {
+  display: flex;
+}
+
+.box-chip-remove {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: var(--gray-500);
+  font-size: 0.625rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.box-chip-remove:hover {
+  background: var(--red);
+  color: #ffffff;
+  transform: none;
+}
+
+.box-range-form {
+  align-items: center;
+}
+
+.box-range-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+}
+
+.box-range-label input[type="number"] {
+  width: 72px;
+}
+
 /* Polling toggle button */
 .btn-toggle {
   padding: 9px 20px;

@@ -67,6 +67,42 @@
 
     document.addEventListener("click", () => closeAllDropdowns());
 
+    let pendingActivateBookID = null;
+    const suggestedBoxNumber = {{ suggested_box | tojson }};
+
+    function openActivateBoxModal(bookID) {
+      pendingActivateBookID = bookID;
+      const select = document.getElementById('activateBoxSelect');
+      if (select) select.value = suggestedBoxNumber || "";
+      document.getElementById('activateBoxModal').style.display = 'flex';
+    }
+
+    function closeActivateBoxModal() {
+      document.getElementById('activateBoxModal').style.display = 'none';
+      pendingActivateBookID = null;
+    }
+
+    function confirmActivate() {
+      const select = document.getElementById('activateBoxSelect');
+      const boxNumber = select ? select.value : "";
+      const bookID = pendingActivateBookID;
+      closeActivateBoxModal();
+      handleActivate(bookID, boxNumber);
+    }
+
+    function handleActivate(bookID, boxNumber) {
+      fetch('/activate_book_by_id', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ bookID, box_number: boxNumber })
+      })
+      .then(r => r.json())
+      .then(data => { if (data.redirect_url) window.location.href = data.redirect_url; });
+    }
+
     function handleDeactivate(bookID) {
       fetch('/deactivate_book', {
         method: 'POST',
@@ -231,6 +267,12 @@
         <i class="fas fa-info"></i>
       </button>
     </div>
+    <select name="box_number" id="activate_box_number" class="box-select">
+      <option value="">No Box</option>
+      {% for box in boxes %}
+        <option value="{{ box }}" {% if box == suggested_box %}selected{% endif %}>Box {{ box }}</option>
+      {% endfor %}
+    </select>
     <button type="submit" style="display:none;">Submit</button>
   </form>
 
@@ -259,6 +301,7 @@
           <th>Ticket Price</th>
           <th>Tickets</th>
           <th>Sold</th>
+          <th>Box #</th>
           <th class="col-options"></th>
         </tr>
       </thead>
@@ -271,6 +314,7 @@
           <td>${{ book['TicketPrice'] }}</td>
           <td>{{ book['BookAmount'] }}</td>
           <td>{{ book['Is_Sold'] }}</td>
+          <td>{{ box_numbers.get(book['BookID']) or '—' }}</td>
           <td class="col-options">
             <div class="dropdown-container">
               <button class="dropbtn {% if book['BookID'] in activated_ids %}dropbtn-active{% endif %}" onclick="toggleDropdown(event)" title="Options">
@@ -285,6 +329,10 @@
                   <button onclick="handleDeactivate('{{ book['BookID'] }}')">
                     <i class="fas fa-pause-circle"></i> Deactivate
                   </button>
+                {% elif not book['Is_Sold'] %}
+                  <button class="btn-activate" onclick="openActivateBoxModal('{{ book['BookID'] }}')">
+                    <i class="fas fa-play-circle"></i> Activate
+                  </button>
                 {% endif %}
                 <button class="btn-delete" onclick="handleDelete('{{ book['BookID'] }}')">
                   <i class="fas fa-trash-alt"></i> Delete
@@ -296,11 +344,11 @@
         {% endfor %}
         {% if not books %}
         <tr>
-          <td colspan="7" class="empty-state">No books added yet. Scan a barcode above to get started.</td>
+          <td colspan="8" class="empty-state">No books added yet. Scan a barcode above to get started.</td>
         </tr>
         {% endif %}
         <tr class="no-results-row" style="display:none;">
-          <td colspan="7" class="empty-state">No books match your search.</td>
+          <td colspan="8" class="empty-state">No books match your search.</td>
         </tr>
       </tbody>
     </table>
@@ -316,6 +364,25 @@
     <img
       src="{{ url_for('static', filename='BookManagementInfoImg.JPG') }}"
       alt="Barcode scan instructions">
+  </div>
+</div>
+
+<!-- Activate Box Picker Modal -->
+<div id="activateBoxModal" class="box-modal">
+  <div class="modal-inner box-modal-inner">
+    <button onclick="closeActivateBoxModal()" class="modal-close" title="Close">
+      <i class="fas fa-times"></i>
+    </button>
+    <h3>Which box is this book going in?</h3>
+    <select id="activateBoxSelect">
+      <option value="">No Box</option>
+      {% for box in boxes %}
+        <option value="{{ box }}">Box {{ box }}</option>
+      {% endfor %}
+    </select>
+    <div class="box-modal-actions">
+      <button type="button" class="box-modal-confirm" onclick="confirmActivate()">Activate</button>
+    </div>
   </div>
 </div>
 

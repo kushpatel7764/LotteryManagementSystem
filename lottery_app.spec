@@ -26,7 +26,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
@@ -41,4 +41,14 @@ coll = COLLECT(
     upx=True,
     upx_exclude=[],
     name='lottery_app',
+)
+
+# macOS only: wraps the onedir build into a proper double-clickable .app so
+# Finder launches it directly instead of opening Terminal to run the raw
+# executable. No-op on Windows/Linux.
+app = BUNDLE(
+    coll,
+    name='lottery_app.app',
+    icon=None,
+    bundle_identifier='com.lotterymanagementsystem.app',
 )

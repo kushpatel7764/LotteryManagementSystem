@@ -40,6 +40,59 @@
       }
     }
 
+    const activatedBooksData = {{ activated_books | tojson }};
+    const countingOrder = {{ counting_order | tojson }};
+
+    function computeSold(book) {
+      if (book.countingTicketNumber === null || book.isAtTicketNumber === null) return null;
+      return countingOrder === "descending"
+        ? book.isAtTicketNumber - book.countingTicketNumber
+        : book.countingTicketNumber - book.isAtTicketNumber;
+    }
+
+    function openBookModal(index) {
+      const book = activatedBooksData[index];
+      const isClosed = book.countingTicketNumber !== null;
+      const sold = computeSold(book);
+
+      document.getElementById('bdGameName').textContent = book.TicketName;
+      document.getElementById('bdBookId').textContent = book.ActiveBookID;
+      document.getElementById('bdGameNumber').textContent = book.GameNumber;
+      document.getElementById('bdBoxNumber').textContent = book.BoxNumber || '—';
+      document.getElementById('bdPrice').textContent = '$' + book.ticketPrice;
+      document.getElementById('bdOpen').textContent = book.isAtTicketNumber;
+      document.getElementById('bdClose').textContent = isClosed ? book.countingTicketNumber : '—';
+      document.getElementById('bdSold').textContent = sold !== null ? sold : 'N/A';
+
+      document.getElementById('soldOutBookId').value = book.ActiveBookID;
+      document.getElementById('extraBookBookId').value = book.ActiveBookID;
+      document.getElementById('undoBookId').value = book.ActiveBookID;
+
+      document.getElementById('bdOpenActions').style.display = isClosed ? 'none' : 'flex';
+      document.getElementById('bdClosedActions').style.display = isClosed ? 'flex' : 'none';
+
+      document.getElementById('bookDetailsModal').style.display = 'flex';
+    }
+
+    function closeBookModal() {
+      document.getElementById('bookDetailsModal').style.display = 'none';
+    }
+
+    function filterBoxGrid() {
+      const query = document.getElementById('scanSearch').value.toLowerCase().trim();
+      const cards = document.querySelectorAll('#boxGrid .box-card');
+      let visibleCount = 0;
+      cards.forEach(card => {
+        const matches = !query || card.dataset.search.includes(query);
+        card.style.display = matches ? '' : 'none';
+        if (matches) visibleCount++;
+      });
+      const noResults = document.getElementById('boxGridNoResults');
+      if (noResults) {
+        noResults.style.display = (visibleCount === 0 && cards.length > 0) ? '' : 'none';
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
       // On any keydown: if a beep is pending and the server confirmed success,
       // play the beep. This fires on the scanner's stray Enter key, which is a
@@ -53,6 +106,27 @@
           document.removeEventListener('keydown', handlePendingBeep);
         }
       });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       // Prevent a stray Enter key (from the Bluetooth bridge) from submitting
       // an empty or incomplete scan after the page reloads.
@@ -152,7 +226,7 @@
   <button type="submit" style="display:none;">Submit</button>
 </form>
 
-<!-- Activated books table -->
+<!-- Activated books -->
 <div class="table-section">
   <div class="table-header">
     <h3 class="section-title">Activated Books</h3>
@@ -160,82 +234,90 @@
       <i class="fas fa-search table-search-icon"></i>
       <input type="text" class="table-search" id="scanSearch"
              placeholder="Search name, game #, book ID…"
-             oninput="filterTable('scanSearch', 'scannedTicketsTable')">
+             oninput="filterBoxGrid()">
     </div>
     <span class="book-count">{{ activated_book_count }} active</span>
     <span class="book-count">${{ "%.2f"|format(total_worth) }}</span>
   </div>
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Game Name</th>
-          <th>Game #</th>
-          <th>Book ID</th>
-          <th>Price</th>
-          <th>Open</th>
-          <th>Close</th>
-          <th>Sold</th>
-          <th class="col-action"></th>
-        </tr>
-      </thead>
-      <tbody id="scannedTicketsTable">
-        {% if activated_books %}
-          {% for book in activated_books %}
-          <tr class="data-row {% if book['countingTicketNumber'] is not none %}row-scanned{% endif %}">
-            <td>{{ book["TicketName"] }}</td>
-            <td>{{ book['GameNumber'] }}</td>
-            <td class="mono">{{ book['ActiveBookID'] }}</td>
-            <td>${{ book['ticketPrice'] }}</td>
-            <td>{{ book['isAtTicketNumber'] }}</td>
-            <td>
-              {% if book['countingTicketNumber'] is not none %}
-                {{ book['countingTicketNumber'] }}
+
+  {% if activated_books %}
+    <div class="box-grid" id="boxGrid">
+      {% for book in activated_books %}
+      <div class="box-card {% if book['countingTicketNumber'] is not none %}box-card--closed{% endif %}"
+           data-search="{{ (book['TicketName'] ~ ' ' ~ book['GameNumber'] ~ ' ' ~ book['ActiveBookID'])|lower }}"
+           onclick="openBookModal({{ loop.index0 }})">
+        <div class="box-card-top">
+          <span>{{ book['isAtTicketNumber'] }}</span>
+          <span>
+            {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
+              {% if counting_order == "descending" %}
+                {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
               {% else %}
-                <form method="POST" action="/book_sold_out" class="inline-form">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
-                  <button type="submit" class="soldout-btn" title="Mark book as sold out">
-                    <i class="fa-solid fa-book-bookmark"></i>
-                    <span class="soldout-text">Book Sold Out</span>
-                  </button>
-                </form>
+                {{ (book['countingTicketNumber'] - book['isAtTicketNumber']) }}
               {% endif %}
-            </td>
-            <td>
-              {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
-                {% if counting_order == "descending" %}
-                  {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
-                {% else %}
-                  {{ (book['countingTicketNumber'] - book['isAtTicketNumber']) }}
-                {% endif %}
-              {% else %}
-                <span class="na-text">N/A</span>
-              {% endif %}
-            </td>
-            <td class="col-action">
-              {% if book['countingTicketNumber'] is not none %}
-                <form method="POST" action="/undo_scan" class="inline-form">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <input type="hidden" name="book_id" value="{{ book['ActiveBookID'] }}">
-                  <button type="submit" class="undo-btn" title="Undo scan">
-                    <i class="fa-solid fa-xmark"></i>
-                  </button>
-                </form>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        {% else %}
-          <tr>
-            <td colspan="8" class="empty-state">No activated books. Go to Books Management to activate a book.</td>
-          </tr>
-        {% endif %}
-        <tr class="no-results-row" style="display:none;">
-          <td colspan="8" class="empty-state">No books match your search.</td>
-        </tr>
-      </tbody>
-    </table>
+            {% endif %}
+          </span>
+        </div>
+        <div class="box-card-number">{{ book['BoxNumber'] or '—' }}</div>
+        <div class="box-card-bottom">
+          <span>{{ book['GameNumber'] }}</span>
+          <span>${{ book['ticketPrice'] }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="empty-state" id="boxGridNoResults" style="display:none;">No books match your search.</p>
+  {% else %}
+    <p class="empty-state">No activated books. Go to Books Management to activate a book.</p>
+  {% endif %}
+</div>
+
+<!-- Book Details Modal -->
+<div id="bookDetailsModal" class="box-modal">
+  <div class="modal-inner book-details-modal">
+    <button onclick="closeBookModal()" class="modal-close" title="Close">
+      <i class="fas fa-times"></i>
+    </button>
+    <h3 id="bdGameName"></h3>
+    <div class="book-details-grid">
+      <div><span class="bd-label">Book ID</span><span id="bdBookId" class="mono"></span></div>
+      <div><span class="bd-label">Game #</span><span id="bdGameNumber"></span></div>
+      <div><span class="bd-label">Box #</span><span id="bdBoxNumber"></span></div>
+      <div><span class="bd-label">Price</span><span id="bdPrice"></span></div>
+      <div><span class="bd-label">Open</span><span id="bdOpen"></span></div>
+      <div><span class="bd-label">Close</span><span id="bdClose"></span></div>
+      <div><span class="bd-label">Sold</span><span id="bdSold"></span></div>
+    </div>
+
+    <div id="bdOpenActions" class="book-details-actions">
+      <form method="POST" action="/book_sold_out" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="book_id" id="soldOutBookId">
+        <button type="submit" class="soldout-btn" title="Mark book as sold out">
+          <i class="fa-solid fa-book-bookmark"></i>
+          <span class="soldout-text">Book Sold Out</span>
+        </button>
+      </form>
+      <form method="POST" action="/extra_book" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="book_id" id="extraBookBookId">
+        <button type="submit" class="extra-book-btn" title="Mark book as extra">
+          <i class="fa-solid fa-book-bookmark"></i>
+          <span class="extrabook-text">Extra Book</span>
+        </button>
+      </form>
+    </div>
+
+    <div id="bdClosedActions" class="book-details-actions">
+      <form method="POST" action="/undo_scan" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="book_id" id="undoBookId">
+        <button type="submit" class="undo-btn" title="Undo scan">
+          <i class="fa-solid fa-xmark"></i>
+          <span>Undo Scan</span>
+        </button>
+      </form>
+    </div>
   </div>
 </div>
 

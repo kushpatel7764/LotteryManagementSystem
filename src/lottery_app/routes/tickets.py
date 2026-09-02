@@ -291,6 +291,79 @@ def book_sold_out():
     )
 
 
+@tickets_bp.route("/extra_book", methods=["POST", "GET"])
+@login_required
+def extra_book():
+    """
+    Marks a book as extra (activated but not currently in use) and closes it
+    at the same ticket number it was opened at, so it logs zero tickets sold.
+    """
+    msg_data = {"message": "", "message_type": ""}
+    try:
+        book_id = request.form.get("book_id")
+        if not book_id:
+            raise ValueError("No Book ID provided.")
+
+        # Step 1: Get book info
+        book = check_error(
+            database_queries.get_book(db_path, book_id), message_holder=msg_data
+        )
+        game_number = book[1]
+        ticket_price = book[4]
+
+        # Step 2: Extra books close at the same number they were opened at,
+        # so no tickets are counted as sold.
+        is_at_ticket_number = check_error(
+            database_queries.get_activated_book_is_at_ticketnumber(db_path, book_id),
+            message_holder=msg_data,
+        )
+
+        # Step 3: Update counting ticket number
+        check_error(
+            update_activated_books.update_counting_ticket_number(
+                db_path, book_id, is_at_ticket_number
+            ),
+            message_holder=msg_data,
+        )
+
+        # Step 4: Add ticket timeline entry
+        ticket_name = check_error(
+            database_queries.get_ticket_name(db_path, game_number),
+            message_holder=msg_data,
+        )
+        # -----TicketNumber 997 in scannID means ExtraBook.
+        scan_id = f"{game_number}{book_id}997{ticket_price}{is_at_ticket_number}"
+        # An Integrety error from insert_ticket implies duplicate insertion which
+        # is ok here because of the undo button.
+        check_error(
+            insert_ticket(scan_id, book_id, -1, ticket_name, ticket_price),
+            message_holder=msg_data,
+        )
+
+        # Step 5: Add sales log
+        # current_TicketNum equals prev_TicketNum, so 0 tickets are logged as sold
+        check_error(
+            add_sales_log(book_id, is_at_ticket_number, game_number),
+            message_holder=msg_data,
+        )
+
+        msg_data["message"] = "BOOK MARKED AS EXTRA"
+        msg_data["message_type"] = "success"
+    except ValueError as ve:
+        msg_data["message"] = str(ve)
+        msg_data["message_type"] = "error"
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        msg_data["message"] = "Unexpected Error: ".upper() + f"{str(e)}"
+        msg_data["message_type"] = "error"
+    return redirect(
+        url_for(
+            "tickets.scan_tickets",
+            message=msg_data.get("message", ""),
+            message_type=msg_data.get("message_type", ""),
+        )
+    )
+
+
 @tickets_bp.route("/submit", methods=["GET", "POST"])
 @login_required
 def submit():

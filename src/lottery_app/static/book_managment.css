@@ -95,6 +95,18 @@
   box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
 }
 
+.box-select {
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--gray-900);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+}
+
 .scan-input-row input[type="text"]::placeholder {
   color: #9ca3af;
   font-size: 0.85rem;
@@ -333,6 +345,19 @@ th.col-options {
   color: var(--red-hover);
 }
 
+.dropdown-content button.btn-activate {
+  color: var(--green);
+}
+
+.dropdown-content button.btn-activate i {
+  color: var(--green);
+}
+
+.dropdown-content button.btn-activate:hover {
+  background: var(--green-light);
+  color: var(--green-hover);
+}
+
 /* ── Info Modal ── */
 #infoModal {
   display: none;
@@ -396,6 +421,65 @@ th.col-options {
 .modal-close:hover {
   background: var(--red);
   transform: none;
+}
+
+/* ── Box picker modal ── */
+.box-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.box-modal-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  min-width: 260px;
+}
+
+.box-modal-inner h3 {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.box-modal-inner select {
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--gray-900);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+}
+
+.box-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.box-modal-confirm {
+  padding: 9px 16px;
+  background: var(--green);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.box-modal-confirm:hover {
+  background: var(--green-hover);
 }
 
 /* ── Barcode highlight (scanner feedback) ── */
