@@ -27,12 +27,21 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Write Google Drive OAuth credentials
+        env:
+          GDRIVE_CREDENTIALS_JSON: ${{ secrets.GDRIVE_CREDENTIALS_JSON }}
+        if: ${{ env.GDRIVE_CREDENTIALS_JSON != '' }}
+        shell: bash
+        run: printf '%s' "$GDRIVE_CREDENTIALS_JSON" > src/lottery_app/credentials.json
+
       - name: Build with PyInstaller
         run: pyinstaller lottery_app.spec
 
       - name: Zip artifact (macOS)
+        # Ship the .app bundle, not the raw onedir folder — only the bundle
+        # launches without Finder opening Terminal to run it.
         if: runner.os == 'macOS'
-        run: cd dist && zip -r ../${{ matrix.artifact }} lottery_app/
+        run: cd dist && zip -r ../${{ matrix.artifact }} lottery_app.app/
 
       - name: Zip artifact (Windows)
         if: runner.os == 'Windows'
