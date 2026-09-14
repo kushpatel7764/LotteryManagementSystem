@@ -1,0 +1,424 @@
+<title>Lottery Management System Privacy Policy</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --paper: #f5f6f9;
+    --paper-raised: #ffffff;
+    --ink: #1a2233;
+    --muted: #59637a;
+    --rule: #dadfe8;
+    --accent: #2454a3;
+    --accent-ink: #17376f;
+    --accent-soft: #e7edf8;
+    --good-soft: #e5f3ea;
+    --good-ink: #1f6b3d;
+    font-size: 17px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #10131a;
+      --paper-raised: #171b25;
+      --ink: #e7ebf3;
+      --muted: #9aa4ba;
+      --rule: #2b3142;
+      --accent: #7fa8e0;
+      --accent-ink: #bcd3f2;
+      --accent-soft: #1d2740;
+      --good-soft: #16281f;
+      --good-ink: #7fd19c;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #10131a;
+    --paper-raised: #171b25;
+    --ink: #e7ebf3;
+    --muted: #9aa4ba;
+    --rule: #2b3142;
+    --accent: #7fa8e0;
+    --accent-ink: #bcd3f2;
+    --accent-soft: #1d2740;
+    --good-soft: #16281f;
+    --good-ink: #7fd19c;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    line-height: 1.6;
+    padding-inline: 20px;
+    padding-block: 56px;
+  }
+
+  .page {
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  .kicker {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 2.6rem);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+
+  .dek {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 46ch;
+    margin: 0 0 22px;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 32px;
+  }
+
+  .meta-row strong { color: var(--ink); font-weight: 500; }
+
+  .callout {
+    background: var(--good-soft);
+    border: 1px solid color-mix(in srgb, var(--good-ink) 25%, transparent);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 40px;
+  }
+
+  .callout p {
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .callout .callout-label {
+    display: block;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--good-ink);
+    margin-bottom: 8px;
+  }
+
+  nav.toc {
+    margin-bottom: 48px;
+  }
+
+  nav.toc .toc-label {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+
+  nav.toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    columns: 2;
+    column-gap: 24px;
+    font-size: 0.92rem;
+  }
+
+  nav.toc li { break-inside: avoid; margin-bottom: 8px; }
+
+  nav.toc a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  nav.toc a:hover { border-color: var(--accent); color: var(--accent-ink); }
+
+  section {
+    padding-block: 30px;
+    border-bottom: 1px solid var(--rule);
+    scroll-margin-top: 20px;
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  section .eyebrow {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+
+  h2 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+
+  section p { margin: 0 0 14px; max-width: 66ch; }
+  section p:last-child { margin-bottom: 0; }
+  section ul { margin: 0 0 14px; padding-left: 22px; max-width: 62ch; }
+  section li { margin-bottom: 6px; }
+
+  code {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.86em;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+  }
+
+  .scope-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px 0 18px;
+    font-size: 0.92rem;
+  }
+
+  .scope-table th {
+    text-align: left;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    padding: 0 12px 10px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .scope-table td {
+    padding: 12px 12px 12px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+
+  .scope-table tr:last-child td { border-bottom: none; }
+
+  .scope-table .scope-name {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.82rem;
+    color: var(--accent-ink);
+    white-space: nowrap;
+  }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  footer a { color: var(--accent-ink); }
+
+  @media (max-width: 520px) {
+    nav.toc ol { columns: 1; }
+    body { padding-block: 40px; }
+  }
+</style>
+
+<div class="page">
+
+  <p class="kicker">Privacy Policy</p>
+  <h1>Lottery Management System</h1>
+  <p class="dek">
+    What this software stores, what it sends to Google Drive when you choose to connect it,
+    and how to take that access back.
+  </p>
+  <div class="meta-row">
+    <span>Effective <strong>September 13, 2026</strong></span>
+    <span>Applies to <strong>Lottery Management System</strong> desktop app</span>
+    <span>Contact <strong>kushpatelrp1234@gmail.com</strong></span>
+  </div>
+
+  <div class="callout">
+    <span class="callout-label">In short</span>
+    <p>
+      Your lottery sales data is stored in a database file on your own computer, not on a
+      server we run. If you turn on Google Drive backup in Settings, this app can only create,
+      read, and delete the backup files it makes itself, inside a folder named
+      <code>Lottery Management Backups</code> — it cannot see, open, or change anything else
+      already in your Drive.
+    </p>
+  </div>
+
+  <nav class="toc">
+    <p class="toc-label">Contents</p>
+    <ol>
+      <li><a href="#local-data">1. Data stored on your computer</a></li>
+      <li><a href="#drive-backup">2. Google Drive backup</a></li>
+      <li><a href="#scopes">3. Permissions requested</a></li>
+      <li><a href="#not-done">4. What this app does not do</a></li>
+      <li><a href="#retention">5. Retention and your control</a></li>
+      <li><a href="#revoking">6. Revoking access</a></li>
+      <li><a href="#third-party">7. Google's role</a></li>
+      <li><a href="#security">8. Security</a></li>
+      <li><a href="#children">9. Children's privacy</a></li>
+      <li><a href="#changes">10. Changes to this policy</a></li>
+    </ol>
+  </nav>
+
+  <section id="local-data">
+    <p class="eyebrow">Where your data lives</p>
+    <h2>1. Data stored on your computer</h2>
+    <p>
+      Lottery Management System keeps a local SQLite database on the computer it's installed
+      on — book activations, ticket scans, daily sales reports, and your business profile.
+      Between sessions, that database is encrypted at rest with a key that is generated on
+      your own machine and never leaves it. We do not operate a server that this data is sent
+      to, and we cannot see it.
+    </p>
+  </section>
+
+  <section id="drive-backup">
+    <p class="eyebrow">Optional, off by default</p>
+    <h2>2. Google Drive backup</h2>
+    <p>
+      From Settings, you can connect your own Google account so the app can back up your
+      database file to your own Google Drive. This is opt-in: nothing is sent anywhere until
+      you click <strong>Connect Google Drive</strong> and complete Google's sign-in screen.
+    </p>
+    <p>Once connected, a backup runs in two situations:</p>
+    <ul>
+      <li>Automatically, right after you submit a day's sales report.</li>
+      <li>Manually, whenever you click <strong>Back Up Now</strong> in Settings.</li>
+    </ul>
+    <p>
+      Each backup uploads a timestamped copy of your database directly from your computer to
+      your Drive, into a folder the app creates called <code>Lottery Management Backups</code>.
+    </p>
+  </section>
+
+  <section id="scopes">
+    <p class="eyebrow">Exactly what we ask Google for</p>
+    <h2>3. Permissions requested</h2>
+    <p>When you connect Google Drive, Google's consent screen grants us three narrow permissions:</p>
+    <table class="scope-table">
+      <thead>
+        <tr><th>Scope</th><th>What it lets us do</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="scope-name">drive.file</td>
+          <td>See, create, and delete only the specific files this app creates in your Drive — never your existing files or folders.</td>
+        </tr>
+        <tr>
+          <td class="scope-name">userinfo.email</td>
+          <td>Read the email address of the connected account, so Settings can show you which account is linked.</td>
+        </tr>
+        <tr>
+          <td class="scope-name">openid</td>
+          <td>Confirm your identity as part of Google's standard sign-in process.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="not-done">
+    <p class="eyebrow">Limits on what we can touch</p>
+    <h2>4. What this app does not do</h2>
+    <ul>
+      <li>It cannot read, list, or modify any file in your Drive that it didn't create.</li>
+      <li>It does not read your email, contacts, calendar, or any other Google service.</li>
+      <li>It does not include analytics, ad tracking, or any third-party tracking scripts.</li>
+      <li>It does not sell, rent, or share your data with anyone.</li>
+      <li>Your email address is used only to display which account is connected — it is never transmitted to us or anyone else.</li>
+    </ul>
+  </section>
+
+  <section id="retention">
+    <p class="eyebrow">Who's holding it, and for how long</p>
+    <h2>5. Retention and your control</h2>
+    <p>
+      Backup files live in your own Google Drive, under your account's storage and your
+      account's control — the same as any file you upload yourself. We keep no copy. You can
+      open the <code>Lottery Management Backups</code> folder in Drive at any time to review,
+      download, or delete individual backups.
+    </p>
+  </section>
+
+  <section id="revoking">
+    <p class="eyebrow">Two ways to disconnect</p>
+    <h2>6. Revoking access</h2>
+    <ul>
+      <li>In the app: open <strong>Settings → Google Drive Backup</strong> and click <strong>Disconnect</strong>.</li>
+      <li>In Google: visit your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account's third-party access page</a> and remove Lottery Management System.</li>
+    </ul>
+    <p>Either method immediately stops future backups. Files already uploaded to your Drive are unaffected — delete them from Drive directly if you want them gone too.</p>
+  </section>
+
+  <section id="third-party">
+    <p class="eyebrow">Who else is involved</p>
+    <h2>7. Google's role</h2>
+    <p>
+      Connecting Google Drive means Google processes the sign-in and the file storage on its
+      own infrastructure, governed by
+      <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.
+      Our use of the data we receive through Google APIs adheres to the
+      <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>,
+      including its Limited Use requirements.
+    </p>
+  </section>
+
+  <section id="security">
+    <p class="eyebrow">How access is protected</p>
+    <h2>8. Security</h2>
+    <p>
+      Connecting your account uses Google's standard OAuth 2.0 flow — your Google password is
+      never entered into or seen by this app. The resulting access token is stored only in a
+      local file on your computer, alongside your database, and is never transmitted to us.
+    </p>
+  </section>
+
+  <section id="children">
+    <p class="eyebrow">Age scope</p>
+    <h2>9. Children's privacy</h2>
+    <p>
+      This software is a point-of-sale tool for lottery retailers and is not directed at, or
+      knowingly used by, children.
+    </p>
+  </section>
+
+  <section id="changes">
+    <p class="eyebrow">Staying current</p>
+    <h2>10. Changes to this policy</h2>
+    <p>
+      If this policy changes, the effective date at the top of this page will be updated.
+      Material changes to how Google Drive data is used will be reflected here before they
+      take effect.
+    </p>
+  </section>
+
+  <footer>
+    Questions about this policy or your data? Contact
+    <a href="mailto:kushpatelrp1234@gmail.com">kushpatelrp1234@gmail.com</a>.
+  </footer>
+
+</div>
