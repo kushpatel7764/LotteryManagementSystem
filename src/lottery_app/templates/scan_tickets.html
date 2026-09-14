@@ -247,18 +247,18 @@
            data-search="{{ (book['TicketName'] ~ ' ' ~ book['GameNumber'] ~ ' ' ~ book['ActiveBookID'])|lower }}"
            onclick="openBookModal({{ loop.index0 }})">
         <div class="box-card-top">
-          <span>{{ book['isAtTicketNumber'] }}</span>
-          <span>
-            {% if book['countingTicketNumber'] is not none and book['isAtTicketNumber'] is not none %}
-              {% if counting_order == "descending" %}
-                {{ (book['isAtTicketNumber'] - book['countingTicketNumber']) }}
-              {% else %}
-                {{ (book['countingTicketNumber'] - book['isAtTicketNumber']) }}
-              {% endif %}
-            {% endif %}
+          <span class="box-card-open">
+            {% if book['countingTicketNumber'] is not none %}{{ book['isAtTicketNumber'] }}{% endif %}
           </span>
+          <span class="box-card-boxnum">{{ book['BoxNumber'] or '—' }}</span>
         </div>
-        <div class="box-card-number">{{ book['BoxNumber'] or '—' }}</div>
+        <div class="box-card-number">
+          {% if book['countingTicketNumber'] is not none %}
+            {{ book['countingTicketNumber'] }}
+          {% else %}
+            {{ book['isAtTicketNumber'] }}
+          {% endif %}
+        </div>
         <div class="box-card-bottom">
           <span>{{ book['GameNumber'] }}</span>
           <span>${{ book['ticketPrice'] }}</span>

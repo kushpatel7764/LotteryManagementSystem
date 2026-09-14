@@ -7,6 +7,9 @@ Flask-Login==0.6.3
 Flask-SocketIO==5.5.1
 Flask-WTF==1.2.2
 cryptography==46.0.7
+google-api-python-client==2.200.0
+google-auth-httplib2==0.4.2
+google-auth-oauthlib==1.4.1
 pandas==2.2.3
 pyinstaller==6.19.0
 pytest==8.4.2

@@ -50,6 +50,29 @@
       document.getElementById("btForm").submit();
     });
 
+    // ── Google Drive connect polling ────────────────────────────────────────
+    {% if gdrive_has_credentials and not gdrive_connected %}
+      let gdrivePolling = false;
+      async function pollGDriveStatus() {
+        try {
+          const r = await fetch("/settings/google_drive/status");
+          if (!r.ok) return;
+          const data = await r.json();
+          const badge = document.getElementById("gdriveStatusBadge");
+          if (data.status === "connecting") {
+            gdrivePolling = true;
+            if (badge) {
+              badge.textContent = "Connecting… check your browser";
+              badge.className = "bt-badge bt-scanning";
+            }
+          } else if (gdrivePolling && (data.status === "connected" || data.status === "error")) {
+            location.reload();
+          }
+        } catch {}
+      }
+      setInterval(pollGDriveStatus, 2000);
+    {% endif %}
+
     // ── Password visibility toggles ───────────────────────────────────────────
     document.querySelectorAll(".toggle-password").forEach(button => {
       button.addEventListener("click", (e) => {
@@ -180,7 +203,48 @@
     </div>
   </div>
 
-  <!-- 5. Change Password -->
+  <!-- 5. Google Drive Backup -->
+  <div class="setting-card setting-card--column">
+    <div class="setting-card-info">
+      <div class="setting-icon"><i class="fab fa-google-drive"></i></div>
+      <div>
+        <h3>Google Drive Backup</h3>
+        <p>Automatically back up the database to your Google Drive every time a report is submitted.</p>
+      </div>
+    </div>
+
+    {% if not gdrive_has_credentials %}
+      <p class="na-text">
+        Not set up yet — add a Google OAuth Desktop app client (credentials.json) to enable this.
+      </p>
+    {% elif gdrive_connected %}
+      <div class="setting-control">
+        <span id="gdriveStatusBadge" class="bt-badge bt-connected">
+          Connected{% if gdrive_email %} as {{ gdrive_email }}{% endif %}
+        </span>
+      </div>
+      <div class="setting-control">
+        <form method="post" action="/settings/google_drive/backup_now">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn-setting-save">Back Up Now</button>
+        </form>
+        <form method="post" action="/settings/google_drive/disconnect">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn-toggle btn-disable">Disconnect</button>
+        </form>
+      </div>
+    {% else %}
+      <div class="setting-control">
+        <span id="gdriveStatusBadge" class="bt-badge bt-off">Not connected</span>
+        <form method="post" action="/settings/google_drive/connect">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn-toggle btn-enable">Connect Google Drive</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- 6. Change Password -->
   <div class="setting-card setting-card--column">
     <div class="setting-card-info">
       <div class="setting-icon"><i class="fas fa-key"></i></div>

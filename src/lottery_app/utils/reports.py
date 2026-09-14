@@ -16,6 +16,7 @@ from lottery_app import generate_invoice
 from lottery_app.database import database_queries
 from lottery_app.database import update_sale_log, update_sale_report
 from lottery_app.email_invoice import email_invoice
+from lottery_app.utils import google_drive
 from lottery_app.utils.config import db_path, load_config
 from lottery_app.utils.error_hanlder import check_error
 
@@ -281,6 +282,16 @@ def do_submit_procedure():
                 email_invoice(filename=file_name)
             except Exception as e:  # pylint: disable=broad-exception-caught
                 logger.warning("Failed to email invoice: %s", e)
+
+            # Also best-effort: a Drive hiccup must not surface as a failed
+            # submission when all the database work already committed successfully.
+            if google_drive.is_connected():
+                backup_message, backup_status = google_drive.backup_database(
+                    label=next_report_id
+                )
+                if backup_status == "error":
+                    logger.warning("Post-submit Google Drive backup failed: %s", backup_message)
+
             message, status = "SCANS SUBMITTED SUCCESSFULLY", "success"
 
         return message, status

@@ -47,10 +47,24 @@
 .box-card-top {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--gray-500);
   min-height: 1.2em;
+}
+
+.box-card-boxnum {
+  background: var(--gray-200);
+  color: var(--gray-700);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 0.75rem;
+}
+
+.box-card--closed .box-card-boxnum {
+  background: #a7f3d0;
+  color: #065f46;
 }
 
 .box-card-number {

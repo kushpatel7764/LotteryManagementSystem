@@ -257,7 +257,9 @@ def activate_book_by_id():
 
         message, message_type = activate_book_by_id_procedure(book_id, box_number)
         suggested_box = (
-            suggest_next_empty_box() if message_type == "success" and box_number else None
+            suggest_next_empty_box(box_number)
+            if message_type == "success" and box_number
+            else None
         )
 
         if message_type == "error":
@@ -329,7 +331,7 @@ def activate_book():
         box_number = request.form.get("box_number")
         message, message_type = activate_book_procedure(scanned_code, box_number)
         if message_type == "success" and box_number:
-            suggested_box = suggest_next_empty_box()
+            suggested_box = suggest_next_empty_box(box_number)
 
     return redirect(
         url_for(

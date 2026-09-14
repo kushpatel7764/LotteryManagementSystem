@@ -1,6 +1,8 @@
 # ── Secrets & environment ──────────────────────────────────────────────────────
 .env
 *.env
+credentials.json
+google_drive_token.json
 
 # ── Python ─────────────────────────────────────────────────────────────────────
 __pycache__/

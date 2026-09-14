@@ -204,10 +204,17 @@ def add_book_procedure(scanned_code):
     return book_insert_msg, book_insert_type
 
 
-def suggest_next_empty_box():
+def suggest_next_empty_box(after_box_number):
     """
-    Returns the lowest-numbered configured box that currently has no open
-    books in it, or None if every box is occupied (or none are configured).
+    Returns the lowest-numbered configured box, strictly greater than
+    after_box_number, that currently has no open books in it. Only looks
+    forward — a lower-numbered empty box is never suggested, even if
+    after_box_number is the highest configured box. Returns None if there
+    is no empty box further up the range (or none are configured).
+
+    Args:
+        after_box_number (str): The box number just used; the search starts
+            after it.
     """
     boxes = get_boxes()
     if not boxes:
@@ -216,7 +223,8 @@ def suggest_next_empty_box():
     occupied = check_error(
         database_queries.get_occupied_box_numbers(db_path), fallback=set()
     )
+    after = int(after_box_number)
     for box in sorted(boxes, key=int):
-        if box not in occupied:
+        if int(box) > after and box not in occupied:
             return box
     return None

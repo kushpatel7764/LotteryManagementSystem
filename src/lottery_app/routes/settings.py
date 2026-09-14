@@ -7,6 +7,7 @@ from pathlib import Path
 from flask import Blueprint, jsonify, render_template, request, flash, redirect, url_for
 from flask_login import login_required
 
+from lottery_app.utils import google_drive
 from lottery_app.utils.config import (
     DEFAULT_DOWNLOADS_PATH,
     add_box_range,
@@ -34,12 +35,17 @@ def settings():
         update_invoice_output_path(valid_output)
 
     config = load_config()
+
+    gdrive_connected = google_drive.is_connected()
     return render_template(
         "settings.html",
         counting_order=config["ticket_order"],
         invoice_output_path=config["invoice_output_path"],
         bt_running=bluetooth_bridge.is_running,
         boxes=get_boxes(),
+        gdrive_has_credentials=google_drive.has_credentials_file(),
+        gdrive_connected=gdrive_connected,
+        gdrive_email=google_drive.get_connected_email() if gdrive_connected else None,
     )
 
 
@@ -75,6 +81,49 @@ def toggle_bluetooth():
 @login_required
 def bluetooth_status():
     return jsonify({"status": bluetooth_bridge.status})
+
+
+@settings_bp.route("/settings/google_drive/connect", methods=["POST"])
+@login_required
+def google_drive_connect():
+    if not google_drive.has_credentials_file():
+        flash(
+            "credentials.json is missing — add a Google OAuth Desktop app "
+            "client before connecting.",
+            "settings_error",
+        )
+        return redirect(url_for("settings.settings"))
+
+    google_drive.start_connect_flow()
+    flash(
+        "Check your browser to finish connecting Google Drive.",
+        "settings_success",
+    )
+    return redirect(url_for("settings.settings"))
+
+
+@settings_bp.route("/settings/google_drive/status", methods=["GET"])
+@login_required
+def google_drive_status():
+    status = google_drive.get_connect_status()
+    status["connected"] = google_drive.is_connected()
+    return jsonify(status)
+
+
+@settings_bp.route("/settings/google_drive/disconnect", methods=["POST"])
+@login_required
+def google_drive_disconnect():
+    google_drive.disconnect()
+    flash("Google Drive disconnected.", "settings_success")
+    return redirect(url_for("settings.settings"))
+
+
+@settings_bp.route("/settings/google_drive/backup_now", methods=["POST"])
+@login_required
+def google_drive_backup_now():
+    message, message_type = google_drive.backup_database()
+    flash(message, f"settings_{message_type}")
+    return redirect(url_for("settings.settings"))
 
 
 def extract_setting_form_data(config):
