@@ -93,5 +93,33 @@
   {% block content %}{% endblock %}
 </div>
 
+<script>
+  // Keep the scroll position across the full-page reloads that happen after a
+  // scan or book action, instead of jumping back to the top. The position is
+  // only restored when coming back to the same page it was saved on.
+  (function () {
+    const KEY = 'scrollPosition';
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+    window.addEventListener('pagehide', () => {
+      try {
+        sessionStorage.setItem(KEY, JSON.stringify({ path: location.pathname, y: window.scrollY }));
+      } catch (e) {}
+    });
+
+    let saved = null;
+    try {
+      saved = JSON.parse(sessionStorage.getItem(KEY));
+      sessionStorage.removeItem(KEY);
+    } catch (e) {}
+    if (!saved || saved.path !== location.pathname) return;
+
+    const restore = () => window.scrollTo(0, saved.y);
+    restore();
+    document.addEventListener('DOMContentLoaded', restore);
+    window.addEventListener('load', restore);
+  })();
+</script>
+
 </body>
 </html>

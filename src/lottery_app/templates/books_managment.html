@@ -149,7 +149,7 @@
       const lastFocusedID = sessionStorage.getItem("lastFocusedInput");
       if (lastFocusedID) {
         const input = document.getElementById(lastFocusedID);
-        if (input) input.focus();
+        if (input) input.focus({ preventScroll: true });
       }
 
       document.getElementById('add_book_code').addEventListener('focus', () => {

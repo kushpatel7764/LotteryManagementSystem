@@ -192,7 +192,7 @@
       {% if message %}
         if (scanInput) scanInput.value = "";
       {% endif %}
-      if (scanInput) scanInput.focus();
+      if (scanInput) scanInput.focus({ preventScroll: true });
     };
   </script>
 {% endblock %}
@@ -216,7 +216,6 @@
       name="scanned_code"
       id="scanned_code"
       placeholder="Scan ticket barcode…"
-      autofocus
       required
       oninput="checkLengthAndSubmit()">
     <button type="button" class="info-btn" onclick="showInfoImage()" title="View barcode info">
