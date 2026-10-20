@@ -75,6 +75,14 @@ def launch_app(flask_app):
     """Launch the Flask server and open the browser after a short delay."""
     threading.Timer(1.5, open_browser).start()
 
+    # There is no terminal to stop the packaged app from, so stop it
+    # automatically once every browser tab using it has been closed.
+    from lottery_app.utils.auto_shutdown import (  # pylint: disable=import-outside-toplevel
+        start_watchdog,
+    )
+
+    start_watchdog()
+
     # Debug mode must be explicitly opted into via environment variable.
     # Never rely on the frozen-bundle check — that would silently enable the
     # Werkzeug interactive debugger (a Python shell in the browser) whenever

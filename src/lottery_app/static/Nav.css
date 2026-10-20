@@ -130,6 +130,58 @@ body {
   background: #fecaca;
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.quit-btn:hover {
+  background: var(--gray-200);
+}
+
+.quit-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 100vh;
+  padding: 16px;
+  text-align: center;
+  color: var(--gray-700);
+}
+
+.quit-screen i {
+  font-size: 2rem;
+  color: var(--gray-500);
+}
+
+.quit-screen h2 {
+  margin: 0;
+  color: var(--gray-900);
+}
+
+.quit-screen p {
+  margin: 0;
+}
+
 .logout-text { display: none; }
 .navbar:hover .logout-text { display: inline; }
 

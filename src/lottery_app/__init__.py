@@ -12,12 +12,13 @@ import sys
 
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
-from flask import Flask
-from flask_login import LoginManager
+from flask import Flask, request
+from flask_login import LoginManager, login_required
 
 from lottery_app.database import setup_database
 from lottery_app.database.user_model import User
 from lottery_app.extensions import csrf, limiter  # pylint: disable=import-self
+from lottery_app.utils import auto_shutdown
 from lottery_app.utils.config import db_path
 from lottery_app.routes.books import books_bp
 from lottery_app.routes.business_profile import business_profile_bp
@@ -124,6 +125,28 @@ def create_app():
     app.register_blueprint(books_bp)
     app.register_blueprint(settings_bp)
     app.register_blueprint(business_profile_bp)
+
+    # --- Browser heartbeat (lets the app exit once every tab is closed) ---
+    @app.get("/heartbeat")
+    def heartbeat():
+        auto_shutdown.record_heartbeat(request.args.get("tab"))
+        return "", 204
+
+    @app.post("/heartbeat/closed")
+    @csrf.exempt
+    def heartbeat_closed():
+        auto_shutdown.record_tab_closed(request.args.get("tab"))
+        return "", 204
+
+    @app.post("/quit")
+    @login_required
+    def quit_app():
+        auto_shutdown.shut_down_soon()
+        return "", 204
+
+    @app.before_request
+    def note_activity():
+        auto_shutdown.record_heartbeat()
 
     # Register the encrypt function to be called at exit
     atexit.register(encrypt_db_at_exit)
