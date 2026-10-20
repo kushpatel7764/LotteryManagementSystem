@@ -5,6 +5,7 @@ Handles:
 - Scanning tickets for active books.
 - Undoing ticket scans.
 - Marking books as sold out.
+- Reassigning a book to a different box.
 - Submitting the day's sales.
 """
 
@@ -17,7 +18,7 @@ from lottery_app.database import database_queries
 from lottery_app.database import update_activated_books, update_sale_log
 from lottery_app.database import update_ticket_timeline, update_books
 from lottery_app.scanned_code_information_management import ScannedCodeManagement
-from lottery_app.utils.config import db_path, load_config
+from lottery_app.utils.config import db_path, get_boxes, load_config
 from lottery_app.utils.error_hanlder import check_error
 from lottery_app.utils.reports import (
     add_sales_log,
@@ -149,6 +150,7 @@ def _render_scan_tickets():
         counting_order=load_config()["ticket_order"],
         activated_book_count=len(activated_books),
         total_worth=total_worth,
+        boxes=get_boxes(),
     )
 
 
@@ -354,6 +356,44 @@ def extra_book():
         msg_data["message_type"] = "error"
     except Exception as e:  # pylint: disable=broad-exception-caught
         msg_data["message"] = "Unexpected Error: ".upper() + f"{str(e)}"
+        msg_data["message_type"] = "error"
+    return redirect(
+        url_for(
+            "tickets.scan_tickets",
+            message=msg_data.get("message", ""),
+            message_type=msg_data.get("message_type", ""),
+        )
+    )
+
+
+@tickets_bp.route("/reassign_box", methods=["POST"])
+@login_required
+def reassign_box():
+    """
+    Moves an activated book to a different box from the configured box list.
+    An empty box number removes the book from its box.
+    """
+    msg_data = {"message": "", "message_type": ""}
+    try:
+        book_id = request.form.get("book_id")
+        if not book_id:
+            raise ValueError("No Book ID provided.")
+
+        box_number = request.form.get("box_number") or None
+        if box_number is not None and box_number not in get_boxes():
+            raise ValueError(f"Box {box_number} is not in the box list.")
+
+        check_error(
+            update_activated_books.update_box_number(db_path, book_id, box_number),
+            message_holder=msg_data,
+        )
+        if msg_data["message_type"] != "error":
+            msg_data["message"] = (
+                f"BOOK MOVED TO BOX {box_number}" if box_number else "BOOK REMOVED FROM BOX"
+            )
+            msg_data["message_type"] = "success"
+    except ValueError as ve:
+        msg_data["message"] = str(ve)
         msg_data["message_type"] = "error"
     return redirect(
         url_for(

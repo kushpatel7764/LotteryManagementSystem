@@ -230,6 +230,61 @@ def test_book_sold_out_no_book_id(client, auth):
 
 
 # -----------------------------
+# /reassign_box
+# -----------------------------
+
+
+@patch("lottery_app.routes.tickets.get_boxes", return_value=["1", "2"])
+@patch("lottery_app.routes.tickets.update_activated_books.update_box_number")
+def test_reassign_box_success(mock_update_box, _mock_boxes, client, auth):
+    """POST /reassign_box moves the book to the selected box."""
+    auth.login()
+    mock_update_box.return_value = ("SUCCESSFULLY UPDATED", "success")
+
+    resp = client.post(
+        "/reassign_box",
+        data={"book_id": "B1", "box_number": "2"},
+        follow_redirects=True,
+    )
+
+    assert b"BOOK MOVED TO BOX 2" in resp.data
+    mock_update_box.assert_called_once()
+    assert mock_update_box.call_args.args[1:] == ("B1", "2")
+
+
+@patch("lottery_app.routes.tickets.get_boxes", return_value=["1", "2"])
+@patch("lottery_app.routes.tickets.update_activated_books.update_box_number")
+def test_reassign_box_unknown_box(mock_update_box, _mock_boxes, client, auth):
+    """POST /reassign_box rejects a box that is not in the box list."""
+    auth.login()
+
+    resp = client.post(
+        "/reassign_box",
+        data={"book_id": "B1", "box_number": "99"},
+        follow_redirects=True,
+    )
+
+    assert b"Box 99 is not in the box list" in resp.data
+    mock_update_box.assert_not_called()
+
+
+@patch("lottery_app.routes.tickets.update_activated_books.update_box_number")
+def test_reassign_box_no_box(mock_update_box, client, auth):
+    """POST /reassign_box with an empty box number removes the book from its box."""
+    auth.login()
+    mock_update_box.return_value = ("SUCCESSFULLY UPDATED", "success")
+
+    resp = client.post(
+        "/reassign_box",
+        data={"book_id": "B1", "box_number": ""},
+        follow_redirects=True,
+    )
+
+    assert b"BOOK REMOVED FROM BOX" in resp.data
+    assert mock_update_box.call_args.args[1:] == ("B1", None)
+
+
+# -----------------------------
 # /submit
 # -----------------------------
 

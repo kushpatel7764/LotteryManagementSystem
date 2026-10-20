@@ -273,6 +273,52 @@
   color: #ffffff;
 }
 
+/* Reassign box */
+.reassign-box-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gray-200);
+}
+
+.reassign-box-row {
+  display: flex;
+  gap: 8px;
+}
+
+.reassign-box-row select {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: var(--gray-900);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+}
+
+.reassign-box-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--gray-700);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 8px 14px;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.reassign-box-btn:hover {
+  background: var(--gray-900);
+}
+
 /* ── Totals section ── */
 .totals-section {
   background: #ffffff;

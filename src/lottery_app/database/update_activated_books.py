@@ -284,3 +284,36 @@ def clear_counting_ticket_number(database_path, book_id):
         )
 
     return "SUCCESSFULLY UPDATED ACTIVATED BOOK TABLE", "success"
+
+
+def update_box_number(database_path, book_id, box_number):
+    """
+    Moves an activated book to a different box.
+
+    Parameters:
+        database_path (str): Path to the SQLite database.
+        book_id (str): The ActiveBookID whose box is being changed.
+        box_number (str or None): The new box number, or None to unassign the box.
+
+    Returns:
+        tuple:
+            - ("Unable to reassign box for bookID(<book_id>): <error>", "error")
+            on failure.
+            - ("BOOK IS NOT ACTIVATED!", "error") if no activated book matched.
+    """
+
+    try:
+        with get_db_cursor(database_path) as cursor:
+            cursor.execute(
+                "UPDATE ActivatedBooks SET BoxNumber = ? WHERE ActiveBookID = ?",
+                (box_number, book_id),
+            )
+            if cursor.rowcount == 0:
+                return "BOOK IS NOT ACTIVATED!", "error"
+    except sqlite3.Error as e:
+        return (
+            f"Unable to reassign box for bookID({book_id}): ".upper() + f"{e}",
+            "error",
+        )
+
+    return "SUCCESSFULLY UPDATED ACTIVATED BOOK TABLE", "success"

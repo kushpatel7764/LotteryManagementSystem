@@ -67,6 +67,8 @@
       document.getElementById('soldOutBookId').value = book.ActiveBookID;
       document.getElementById('extraBookBookId').value = book.ActiveBookID;
       document.getElementById('undoBookId').value = book.ActiveBookID;
+      document.getElementById('reassignBookId').value = book.ActiveBookID;
+      document.getElementById('reassignBoxSelect').value = book.BoxNumber || '';
 
       document.getElementById('bdOpenActions').style.display = isClosed ? 'none' : 'flex';
       document.getElementById('bdClosedActions').style.display = isClosed ? 'flex' : 'none';
@@ -317,6 +319,24 @@
         </button>
       </form>
     </div>
+
+    <form method="POST" action="/reassign_box" class="reassign-box-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="book_id" id="reassignBookId">
+      <label for="reassignBoxSelect" class="bd-label">Reassign Box</label>
+      <div class="reassign-box-row">
+        <select name="box_number" id="reassignBoxSelect">
+          <option value="">No Box</option>
+          {% for box in boxes %}
+            <option value="{{ box }}">Box {{ box }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="reassign-box-btn" title="Move book to the selected box">
+          <i class="fa-solid fa-right-left"></i>
+          <span>Reassign</span>
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 
