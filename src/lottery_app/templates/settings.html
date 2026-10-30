@@ -143,6 +143,26 @@
     </form>
   </div>
 
+  <!-- 2b. Invoice Format -->
+  <div class="setting-card">
+    <div class="setting-card-info">
+      <div class="setting-icon"><i class="fas fa-file-invoice"></i></div>
+      <div>
+        <h3>Invoice Format</h3>
+        <p>Choose which PDF is generated and emailed when you submit a report: the standard invoice, the store sheet, or both.</p>
+      </div>
+    </div>
+    <form method="post" action="/settings" class="setting-control">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="setting_type" value="invoice_format">
+      <select name="invoice_format" onchange="this.form.submit();">
+        {% for value, label in invoice_format_labels.items() %}
+          <option value="{{ value }}" {% if invoice_format == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+
   <!-- 3. Boxes -->
   <div class="setting-card setting-card--column">
     <div class="setting-card-info">

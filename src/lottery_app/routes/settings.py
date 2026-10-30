@@ -10,10 +10,12 @@ from flask_login import login_required
 from lottery_app.utils import google_drive
 from lottery_app.utils.config import (
     DEFAULT_DOWNLOADS_PATH,
+    INVOICE_FORMAT_LABELS,
     add_box_range,
     delete_box,
     get_boxes,
     load_config,
+    update_invoice_format,
     update_invoice_output_path,
     update_ticket_order,
 )
@@ -33,6 +35,8 @@ def settings():
         if warning_message:
             flash(warning_message, "settings_warning")
         update_invoice_output_path(valid_output)
+        if form_data["invoice_format"] in INVOICE_FORMAT_LABELS:
+            update_invoice_format(form_data["invoice_format"])
 
     config = load_config()
 
@@ -41,6 +45,8 @@ def settings():
         "settings.html",
         counting_order=config["ticket_order"],
         invoice_output_path=config["invoice_output_path"],
+        invoice_format=config.get("invoice_format", "standard"),
+        invoice_format_labels=INVOICE_FORMAT_LABELS,
         bt_running=bluetooth_bridge.is_running,
         boxes=get_boxes(),
         gdrive_has_credentials=google_drive.has_credentials_file(),
@@ -130,6 +136,8 @@ def extract_setting_form_data(config):
     return {
         "ticket_order": request.form.get("ticket_order") or config["ticket_order"],
         "output_path":  request.form.get("outputPath")   or config["invoice_output_path"],
+        "invoice_format": request.form.get("invoice_format")
+                          or config.get("invoice_format", "standard"),
     }
 
 

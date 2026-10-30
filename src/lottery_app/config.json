@@ -1,6 +1,7 @@
 {
     "ticket_order": "ascending",
     "invoice_output_path": "",
+    "invoice_format": "standard",
     "timezone": "America/New_York",
     "business_name": "",
     "business_address": "",

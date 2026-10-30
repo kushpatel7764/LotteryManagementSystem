@@ -12,7 +12,7 @@ from pathlib import Path
 
 from flask import request, send_file
 
-from lottery_app import generate_invoice
+from lottery_app import generate_invoice, generate_store_sheet
 from lottery_app.database import database_queries
 from lottery_app.database import update_sale_log, update_sale_report
 from lottery_app.email_invoice import email_invoice
@@ -60,13 +60,39 @@ def calculate_instant_tickets_sold(report_id):
     return result
 
 
-def create_daily_invoice(report_id, return_path_only=False):
+INVOICE_FORMAT_STANDARD = "standard"
+INVOICE_FORMAT_STORE_SHEET = "store_sheet"
+INVOICE_FORMAT_BOTH = "both"
+INVOICE_FORMATS = (INVOICE_FORMAT_STANDARD, INVOICE_FORMAT_STORE_SHEET, INVOICE_FORMAT_BOTH)
+
+
+def invoice_file_name(report_id, now, invoice_format=INVOICE_FORMAT_STANDARD):
+    """Returns the PDF file name for a report in the given format."""
+    prefix = "StoreSheet" if invoice_format == INVOICE_FORMAT_STORE_SHEET else "Invoice"
+    return f"{prefix}#{report_id}-{now.strftime('%m-%d-%Y')}.pdf"
+
+
+def configured_invoice_formats(config):
+    """Returns the list of single PDF formats to generate on submit."""
+    invoice_format = config.get("invoice_format", INVOICE_FORMAT_STANDARD)
+    if invoice_format == INVOICE_FORMAT_BOTH:
+        return [INVOICE_FORMAT_STANDARD, INVOICE_FORMAT_STORE_SHEET]
+    if invoice_format == INVOICE_FORMAT_STORE_SHEET:
+        return [INVOICE_FORMAT_STORE_SHEET]
+    return [INVOICE_FORMAT_STANDARD]
+
+
+def create_daily_invoice(
+    report_id, return_path_only=False, invoice_format=INVOICE_FORMAT_STANDARD
+):
     """
     Creates a daily invoice PDF for a given report.
 
     Parameters:
         report_id (str): The report ID to generate the invoice for.
         return_path_only (bool): If True, returns only the file path instead of sending.
+        invoice_format (str): "standard" for the itemized invoice, or
+            "store_sheet" for the store's paper sheet layout.
 
     Returns:
         tuple: (file_path or send_file response, "success") on success,
@@ -100,12 +126,17 @@ def create_daily_invoice(report_id, return_path_only=False):
         save_dir = str(Path.home() / "Downloads")
     now = datetime.now()
     invoice_number = f"{report_id}"
-    file_name = f"Invoice#{report_id}-{now.strftime('%m-%d-%Y')}.pdf"
+    file_name = invoice_file_name(report_id, now, invoice_format)
     full_path = os.path.join(save_dir, file_name)
     try:
-        generate_invoice.generate_lottery_invoice_pdf(
-            full_path, store_info, invoice_log, invoice_number, daily_report
-        )
+        if invoice_format == INVOICE_FORMAT_STORE_SHEET:
+            generate_store_sheet.generate_store_sheet_pdf(
+                full_path, store_info, invoice_log, daily_report
+            )
+        else:
+            generate_invoice.generate_lottery_invoice_pdf(
+                full_path, store_info, invoice_log, invoice_number, daily_report
+            )
 
         if return_path_only:
             return full_path, "success"
@@ -270,16 +301,24 @@ def do_submit_procedure():
 
         # --- Phase 3: post-commit side effects ---
         # Invoice generation reads committed data so it must happen after commit.
-        invoice_result = create_daily_invoice(next_report_id)
-        if isinstance(invoice_result, tuple) and invoice_result[1] == "error":
-            message, status = invoice_result[0], invoice_result[1]
+        invoice_paths = []
+        invoice_error = None
+        for invoice_format in configured_invoice_formats(load_config()):
+            invoice_result = create_daily_invoice(
+                next_report_id, return_path_only=True, invoice_format=invoice_format
+            )
+            if not isinstance(invoice_result, tuple) or invoice_result[1] != "success":
+                invoice_error = invoice_result
+                break
+            invoice_paths.append(invoice_result[0])
+
+        if invoice_error is not None:
+            message, status = invoice_error[0], "error"
         else:
             # Email is best-effort: a network failure must not surface as a failed
             # submission when all the database work already committed successfully.
-            now = datetime.now()
-            file_name = f"Invoice#{next_report_id}-{now.strftime('%m-%d-%Y')}.pdf"
             try:
-                email_invoice(filename=file_name)
+                email_invoice(invoice_paths)
             except Exception as e:  # pylint: disable=broad-exception-caught
                 logger.warning("Failed to email invoice: %s", e)
 

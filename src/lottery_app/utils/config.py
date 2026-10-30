@@ -78,6 +78,34 @@ def update_invoice_output_path(invoice_output_path):
         )
 
 
+INVOICE_FORMAT_LABELS = {
+    "standard": "Standard Invoice",
+    "store_sheet": "Store Sheet",
+    "both": "Both",
+}
+
+
+def update_invoice_format(invoice_format):
+    """
+    Updates which PDF format(s) are generated when a report is submitted.
+
+    Args:
+        invoice_format (str): "standard", "store_sheet" or "both".
+    """
+    if invoice_format not in INVOICE_FORMAT_LABELS:
+        raise ValueError(f"Unknown invoice format: {invoice_format}")
+    config = load_config()
+    updated = config.get("invoice_format", "standard") != invoice_format
+    config["invoice_format"] = invoice_format
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=4)
+    if updated:
+        flash(
+            f"Invoice format updated to {INVOICE_FORMAT_LABELS[invoice_format]}.",
+            "settings_success",
+        )
+
+
 def update_business_info(name, value):
     """
     Updates a specific business information field in the configuration file.

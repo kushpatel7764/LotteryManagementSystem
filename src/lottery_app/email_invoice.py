@@ -17,12 +17,13 @@ from lottery_app.utils.config import load_config
 logger = logging.getLogger(__name__)
 
 
-def email_invoice(filename):
+def email_invoice(filenames):
     """
-    Sends a lottery report invoice PDF via email.
+    Sends lottery report invoice PDFs via email, all attached to one message.
 
     Args:
-        filename (str): Name of the PDF file to send.
+        filenames (str | list[str]): PDF file name(s) to send. Relative names are
+            looked up in the configured invoice output folder.
 
     Returns:
         None
@@ -44,12 +45,18 @@ def email_invoice(filename):
     msg.set_content(f"Attached is the Lottery Report PDF from {today_str}.")
 
     # Find and attach matching PDFs
-    filepath = os.path.join(folder_path, filename)
-    with open(filepath, "rb") as f:
-        file_data = f.read()
-        msg.add_attachment(
-            file_data, maintype="application", subtype="pdf", filename=filename
-        )
+    if isinstance(filenames, str):
+        filenames = [filenames]
+    for filename in filenames:
+        filepath = os.path.join(folder_path, filename)
+        with open(filepath, "rb") as f:
+            file_data = f.read()
+            msg.add_attachment(
+                file_data,
+                maintype="application",
+                subtype="pdf",
+                filename=os.path.basename(filename),
+            )
 
     # Send the email
     context = ssl.create_default_context()

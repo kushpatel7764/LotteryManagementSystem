@@ -22,6 +22,8 @@ from lottery_app.utils.config import get_timezone
 from lottery_app.utils.config import db_path, load_config
 from lottery_app.utils.error_hanlder import check_error
 from lottery_app.utils.reports import (
+    INVOICE_FORMAT_STANDARD,
+    INVOICE_FORMAT_STORE_SHEET,
     calculate_instant_tickets_sold,
     create_daily_invoice,
 )
@@ -489,8 +491,12 @@ def update_sale_reports(report_id):
 def download_modified_report(report_id):
     """
     Trigger the download of the daily invoice report for a given report ID.
+    Pass ?format=store_sheet to download the store sheet layout instead.
     """
-    result, status = create_daily_invoice(report_id)
+    invoice_format = request.args.get("format", INVOICE_FORMAT_STANDARD)
+    if invoice_format not in (INVOICE_FORMAT_STANDARD, INVOICE_FORMAT_STORE_SHEET):
+        return "Invalid invoice format", 400
+    result, status = create_daily_invoice(report_id, invoice_format=invoice_format)
     if status != "success":
         return str(result), 500
     return result

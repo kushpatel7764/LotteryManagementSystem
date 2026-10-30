@@ -340,6 +340,47 @@ def test_create_daily_invoice_fallback_directory(
     assert str(tmp_path / "Downloads") in path
 
 
+def test_create_daily_invoice_store_sheet(
+    monkeypatch, fake_config, mock_pdf, fixed_datetime  # pylint: disable=unused-argument
+):
+    """invoice_format="store_sheet" uses the store sheet generator and file name."""
+    monkeypatch.setattr(
+        reports_utils.database_queries, "get_table_for_invoice", lambda *_: []
+    )
+    monkeypatch.setattr(
+        reports_utils.database_queries, "get_daily_report", lambda *_: {}
+    )
+    monkeypatch.setattr(reports_utils, "check_error", lambda result, msg_data: result)
+    mock_sheet = Mock()
+    monkeypatch.setattr(
+        reports_utils.generate_store_sheet, "generate_store_sheet_pdf", mock_sheet
+    )
+
+    path, status = reports_utils.create_daily_invoice(
+        "R1", return_path_only=True, invoice_format="store_sheet"
+    )
+
+    assert status == "success"
+    assert path.endswith("StoreSheet#R1-01-01-2025.pdf")
+    mock_sheet.assert_called_once()
+    mock_pdf.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "configured, expected",
+    [
+        (None, ["standard"]),
+        ("standard", ["standard"]),
+        ("store_sheet", ["store_sheet"]),
+        ("both", ["standard", "store_sheet"]),
+    ],
+)
+def test_configured_invoice_formats(configured, expected):
+    """The invoice_format setting maps to the PDFs generated on submit."""
+    config = {} if configured is None else {"invoice_format": configured}
+    assert reports_utils.configured_invoice_formats(config) == expected
+
+
 def test_create_daily_invoice_generation_failure(monkeypatch, fake_config):  # pylint: disable=unused-argument
     """An OSError during PDF generation returns a 500 error tuple."""
     monkeypatch.setattr(
@@ -583,6 +624,33 @@ def test_do_submit_procedure_success(mocker, form_context):  # pylint: disable=u
     assert message_type == "success"
     mock_conn.commit.assert_called_once()
     mock_update_sale_report.add_daily_totals.assert_called_once()
+
+
+def test_do_submit_procedure_both_formats(mocker, form_context):  # pylint: disable=unused-argument
+    """With invoice_format "both", both PDFs are generated and emailed together."""
+    mock_db_queries = mocker.patch("lottery_app.utils.reports.database_queries")
+    mock_db_queries.next_report_id.return_value = 10
+    mocker.patch("lottery_app.utils.reports.update_sale_report")
+    mock_conn = mocker.MagicMock()
+    mock_conn.cursor.return_value.fetchall.return_value = []
+    mocker.patch("lottery_app.utils.reports.sqlite3.connect", return_value=mock_conn)
+    mocker.patch(
+        "lottery_app.utils.reports.load_config",
+        return_value={"invoice_format": "both"},
+    )
+    mock_create = mocker.patch(
+        "lottery_app.utils.reports.create_daily_invoice",
+        side_effect=[("/out/Invoice.pdf", "success"), ("/out/StoreSheet.pdf", "success")],
+    )
+    mock_email = mocker.patch("lottery_app.utils.reports.email_invoice")
+    mocker.patch("lottery_app.utils.reports.google_drive.is_connected", return_value=False)
+
+    message, _ = do_submit_procedure()
+
+    assert message == "SCANS SUBMITTED SUCCESSFULLY"
+    formats = [call.kwargs["invoice_format"] for call in mock_create.call_args_list]
+    assert formats == ["standard", "store_sheet"]
+    mock_email.assert_called_once_with(["/out/Invoice.pdf", "/out/StoreSheet.pdf"])
 
 
 def test_do_submit_procedure_next_report_id_error(mocker, form_context):  # pylint: disable=unused-argument

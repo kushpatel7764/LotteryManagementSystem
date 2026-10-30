@@ -345,3 +345,28 @@ def test_download_report_error(  # pylint: disable=redefined-outer-name
     resp = client.get("/download/1")
     assert resp.status_code == 500
     assert b"fail" in resp.data
+
+
+def test_download_store_sheet(  # pylint: disable=redefined-outer-name
+    client, login_admin, mocker  # pylint: disable=unused-argument
+):
+    """GET /download/<id>?format=store_sheet requests the store sheet format."""
+    mock_create = mocker.patch(
+        "lottery_app.routes.reports.create_daily_invoice",
+        return_value=("PDF_BYTES", "success"),
+    )
+
+    resp = client.get("/download/1?format=store_sheet")
+    assert resp.status_code == 200
+    mock_create.assert_called_once_with(1, invoice_format="store_sheet")
+
+
+def test_download_invalid_format(  # pylint: disable=redefined-outer-name
+    client, login_admin, mocker  # pylint: disable=unused-argument
+):
+    """GET /download/<id> with an unknown format is rejected."""
+    mock_create = mocker.patch("lottery_app.routes.reports.create_daily_invoice")
+
+    resp = client.get("/download/1?format=bogus")
+    assert resp.status_code == 400
+    mock_create.assert_not_called()

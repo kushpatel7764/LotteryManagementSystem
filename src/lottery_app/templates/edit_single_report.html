@@ -100,8 +100,8 @@
       document.getElementById("online_cashed").addEventListener("input", calculateCashDue);
     });
 
-    function downloadInvoice(report_id) {
-      window.open(`/download/${report_id}`, '_blank');
+    function downloadInvoice(report_id, format = "standard") {
+      window.open(`/download/${report_id}?format=${format}`, '_blank');
     }
   </script>
 {% endblock %}
@@ -260,6 +260,9 @@
       </button>
       <button type="button" class="btn-download" onclick="downloadInvoice({{ report_id }})">
         <i class="fas fa-download"></i> Download Invoice
+      </button>
+      <button type="button" class="btn-download" onclick="downloadInvoice({{ report_id }}, 'store_sheet')">
+        <i class="fas fa-file-alt"></i> Download Store Sheet
       </button>
     </div>
 
